@@ -37,7 +37,7 @@ MAIN.pokemon=require('./static/pokemon.json');
 
 // DATABASE CONNECTION
 const dbconfig=require('./config/pokebot_config.json');
-MAIN.database = mysql.createConnection({ host: MAIN.config.DB.host, user: MAIN.config.DB.username, password: MAIN.config.DB.password, });
+MAIN.database = mysql.createConnection({ host: MAIN.config.DB.host, user: MAIN.config.DB.username, password: MAIN.config.DB.password, port: MAIN.config.DB.port });
 
 // DEFINE LOGGING & DEBUGGING
 MAIN.logging=MAIN.config.CONSOLE_LOGS;
