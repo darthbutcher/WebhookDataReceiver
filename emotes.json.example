@@ -1,0 +1,16 @@
+{
+  "weather":{
+    "clear":"<:weather_clear:409041567534415873>",
+    "rain": "<:weather_rain:418570342391480320>",
+    "partly_cloudy": "<:weather_partly_cloudy:418570238368546837>",
+    "mostly_cloudy": "<:weather_cloudy:418570003193921536>",
+    "windy": "<:weather_windy:409041567593136128>",
+    "snow": "<:weather_snow:409041567551062016>",
+    "fog": "<:weather_foggy:418570089084747807>"
+  },
+  "teams": {
+    "instinct": "<:instinct:499334776189091871>",
+    "mystic": "<:mystic:499334764323536907>",
+    "valor": "<:valor:499334750704500737>"
+  }
+}
