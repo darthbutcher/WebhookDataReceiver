@@ -1,6 +1,6 @@
 # Pokebot
 
-Installation:
+## Installation:
 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
 2: cd to the folder
 3: Type `node -v` in your terminal to determine if node is installed on your machine.
