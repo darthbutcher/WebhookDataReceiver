@@ -60,14 +60,14 @@ fs.readdir('./modules', (error,files) => {
 });
 
 // DEFINE AND LOAD ALL COMMANDS
-MAIN.commands=new Discord.Collection();
-fs.readdir('./commands', (err,commands) => {
-  let commandFiles=commands.filter(f => f.split('.').pop()==='js'), cCount=0;
-  commandFiles.forEach((f,i) => {
-    delete require.cache[require.resolve('./commands/'+f)]; cCount++;
-    let command=require('./commands/'+f); MAIN.commands.set(command.info.cmd, command);
-  }); console.log('[Pokébot] Loaded '+cCount+' Commands.');
-});
+//MAIN.commands=new Discord.Collection();
+//fs.readdir('./commands', (err,commands) => {
+//  let commandFiles=commands.filter(f => f.split('.').pop()==='js'), cCount=0;
+//  commandFiles.forEach((f,i) => {
+//    delete require.cache[require.resolve('./commands/'+f)]; cCount++;
+//    let command=require('./commands/'+f); MAIN.commands.set(command.info.cmd, command);
+//  }); console.log('[Pokébot] Loaded '+cCount+' Commands.');
+//});
 
 // CREATE SERVER
 const app=express().use(bodyParser.json());
