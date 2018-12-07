@@ -34,10 +34,11 @@ MAIN.qConfig=require('./config/quest_config.json');
 MAIN.rConfig=require('./config/raid_config.json');
 MAIN.pConfig=require('./config/pokemon_config.json');
 MAIN.pokemon=require('./static/pokemon.json');
+MAIN.proto=require('./static/en.json');
 
 // DATABASE CONNECTION
 const dbconfig=require('./config/pokebot_config.json');
-MAIN.database = mysql.createConnection({ host: MAIN.config.DB.host, user: MAIN.config.DB.username, password: MAIN.config.DB.password, port: MAIN.config.DB.port });
+MAIN.database = mysql.createConnection({ host: MAIN.config.DB.host, user: MAIN.config.DB.username, password: MAIN.config.DB.password, });
 
 // DEFINE LOGGING & DEBUGGING
 MAIN.logging=MAIN.config.CONSOLE_LOGS;
@@ -77,6 +78,7 @@ app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] Now listeni
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
 app.post('/', (webhook, resolve) => {
   let PAYLOAD=webhook.body;
+  if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] Received a Payload of '+PAYLOAD.length+' objects.'); }
 	PAYLOAD.forEach((data,index) => {
 		switch(data.type){
 			case 'pokemon':
@@ -230,8 +232,8 @@ setInterval(function() {
           });
         }, 2000*index);
       });
-      MAIN.database.query("TRUNCATE TABLE pokebot.quest_alerts", function (error, alerts, fields) {
-        if(error){ console.error(error); }
+      MAIN.database.query("DELETE FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) {
+        if(error){ console.error; } console.log('[Pokébot] Sent '+alerts.length+' Quest Alerts.');
       });
     }
   });
@@ -250,6 +252,7 @@ HOTEL.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] H
 INDIA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] INDIA is Standing By.');}, 2250); INDIA.user.setPresence({ status: 'invisible'}); });
 JULIET.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] JULIET is Standing By.'); }, 2500); JULIET.user.setPresence({ status: 'invisible'}); });
 
+console.log(MAIN.proto.values['item_708']);
 // LOG IN BOTS AND ADD TO BOT ARRAY
 MAIN.login(MAIN.config.MAIN_BOT_TOKEN);
 if(MAIN.config.BOT_TOKENS[0]){ MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
