@@ -2,7 +2,7 @@
 	"CONSOLE_LOGS": "ENABLED",
 	"LISTENING_PORT": 3000,
 	"PREFIX": ".",
-	"Sub_Channel": "492517376177471488",
+	"Sub_Channels": [ "492517376177471488" ],
 	"Donor_Role_ID": "",
 	"DB": {
 		"host": "",
