@@ -1,6 +1,6 @@
 # Pokebot
 
-## Join my discord server: https://discord.gg/6DYkjtj
+## Join my discord server: https://discord.gg/BthYK68
 
 ## Installation:
 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
