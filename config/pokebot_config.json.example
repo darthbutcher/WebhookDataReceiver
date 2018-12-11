@@ -1,16 +1,16 @@
 {
 	"CONSOLE_LOGS": "ENABLED",
-	"LISTENING_PORT": 3000,
+	"LISTENING_PORT": 3333,
 	"PREFIX": ".",
-	"Sub_Channels": [ "492517376177471488" ],
+	"Sub_Channels": [ "" ],
 	"Donor_Role_ID": "",
 	"DB": {
-		"host": "",
-		"username": "",
-		"password": "",
-		"port'; ""
+		"host": "IPADDRESS",
+		"username": "USERNAME",
+		"password": "PASSWORD",
+		"port": "3306"
 	},
-	"MAIN_BOT_TOKEN": "",
+	"MAIN_BOT_TOKEN": "NDAzMzc5MDg0NDg4MzQzNTYz.DujhIg.Q65qiGjk5gU65euqO16otJhWJhU",
 	"BOT_TOKENS": [
 		"1",
 		"2",
@@ -22,5 +22,17 @@
 		"8",
 		"9",
 		"10"
+	],
+	"Cities": [{
+			"name": "TLH",
+			"discord_id": "266738315380785152",
+			"sub_channel": "492517376177471488",
+			"coords": [
+				[ 30.6602342907156, -84.4900058930563 ],
+				[ 30.6555089203099, -84.025833529775 ],
+				[ 30.2197893566858, -84.0313266938375 ],
+				[ 30.2292821958155, -84.5202182954 ]
+			]
+		}
 	]
 }
