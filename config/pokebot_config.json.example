@@ -10,7 +10,7 @@
 		"password": "PASSWORD",
 		"port": "3306"
 	},
-	"MAIN_BOT_TOKEN": "NDAzMzc5MDg0NDg4MzQzNTYz.DujhIg.Q65qiGjk5gU65euqO16otJhWJhU",
+	"MAIN_BOT_TOKEN": "",
 	"BOT_TOKENS": [
 		"1",
 		"2",
