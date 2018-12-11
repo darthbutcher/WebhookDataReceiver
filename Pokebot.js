@@ -29,7 +29,6 @@ var urlString;
 // CACHE DATA FROM JSONS
 MAIN.config=require('./config/pokebot_config.json');
 MAIN.geofence=require('./config/geofences.json');
-MAIN.feed=require('./config/feeds.json');
 MAIN.qConfig=require('./config/quest_config.json');
 MAIN.rConfig=require('./config/raid_config.json');
 MAIN.pConfig=require('./config/pokemon_config.json');
@@ -37,6 +36,7 @@ MAIN.pokemon=require('./static/pokemon.json');
 MAIN.proto=require('./static/en.json');
 MAIN.emotes=require('./config/emotes.json');
 MAIN.rewards=require('./static/rewards.json');
+MAIN.feeds=require('./config/feeds.json');
 
 // DATABASE CONNECTION
 const dbconfig=require('./config/pokebot_config.json');
