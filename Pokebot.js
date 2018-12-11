@@ -36,7 +36,7 @@ MAIN.pokemon=require('./static/pokemon.json');
 MAIN.proto=require('./static/en.json');
 MAIN.emotes=require('./config/emotes.json');
 MAIN.rewards=require('./static/rewards.json');
-MAIN.feeds=require('./config/feeds.json');
+MAIN.feed=require('./config/feeds.json');
 
 // DATABASE CONNECTION
 const dbconfig=require('./config/pokebot_config.json');
