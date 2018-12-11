@@ -1,6 +1,7 @@
 const Discord=require('discord.js');
 const proto=require('../static/en.json');
 const moment=require('moment');
+const config=require('../config/pokebot_config.json');
 
 //###########################################################################################//
 //###########################################################################################//
@@ -14,7 +15,12 @@ const moment=require('moment');
 //###########################################################################################//
 //###########################################################################################//
 
-module.exports.run = async (MAIN, type, object, embed, area) => {
+var subChannels=[];
+config.Cities.forEach((channel,index) => {
+  subChannels.push(config.Cities[index].sub_channel);
+});
+
+module.exports.run = async (MAIN, type, object, embed, area, city) => {
   let subs='', alertedUsers=[], alert='';
   switch(type){
     // case 'raid':
@@ -46,10 +52,18 @@ module.exports.run = async (MAIN, type, object, embed, area) => {
       MAIN.database.query("SELECT * FROM pokebot.users", function (error, users, fields){
         if(users[0]){
           users.forEach((user,index) => {
-            let userAreas=user.geofence.split(',');
-            if(user.paused!='YES' && user.quests){
+
+            // DEFINE VARIABLES
+            let userAreas=user.geofence.split(','), userID=user.user_id;
+
+            // CHEK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR CITY
+            if(user.paused!='YES' && user.quests && city.name==user.city){
+
+              // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
               if(user.geofence=='ALL' || userAreas.indexOf(area.name)>=0){
-                let subs=user.quests.split(','), subUser=user.user_id;
+
+                let subs=user.quests.split(',');
+
                 // CHECK FOR SUBSCRIBED GYMS OR RAID BOSSES
                 switch(object.rewards[0].type){
                   case 1: break;
@@ -60,6 +74,8 @@ module.exports.run = async (MAIN, type, object, embed, area) => {
                   case 6: break;
                   case 7: reward=MAIN.pokemon[object.rewards[0].info.pokemon_id]+' Encounter'; break;
                 }
+
+                // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
                 if(subs.indexOf(reward)>=0){
                   let quest=JSON.stringify(object), questEmbed=JSON.stringify(embed);
                   let timeNow=new Date().getTime(); let todaysDate=moment(timeNow).format('MM/DD/YYYY');
@@ -67,7 +83,7 @@ module.exports.run = async (MAIN, type, object, embed, area) => {
                   if(dbDate<timeNow){ dbDate=dbDate+86400000; }
                   MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else{ console.info('[Pokébot] Stored a '+reward+' Quest alert for '+subUser+'.'); }
+                    else{ console.info('[Pokébot] Stored a '+reward+' Quest alert for '+userID+'.'); }
                   });
                 }
               }
