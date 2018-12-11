@@ -28,6 +28,8 @@
       > Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
   - pokebot_config.json
       > Contains the meat and potato configs. 
+      > Main token will be the main bot to respond in the subscription channel.
+      > the array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 10 bot tokens can be used at this time. If you have less than 10, delete the other example numbers or you will get invalid credential errors when starting the script. 
 
 
 
