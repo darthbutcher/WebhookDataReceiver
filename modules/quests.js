@@ -43,7 +43,6 @@ module.exports.run = async (MAIN, quest, city) => {
   // GET REWARD ICON
   if(questReward.indexOf('Encounter')>=0){ questUrl=MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id); }
   else{ questUrl = MAIN.Get_Icon(quest, questReward); }
-  console.log(questUrl);
 
   // DETERMINE THE QUEST TASK
   switch(true){

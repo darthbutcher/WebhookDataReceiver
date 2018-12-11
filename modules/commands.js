@@ -51,7 +51,7 @@ module.exports.run = async (MAIN, message) => {
             // FIND THE COMMAND AND SEND TO THE MODULE
             let command=message.content.toLowerCase().split(' ')[0].slice(prefix.length);
             let cmd=MAIN.commands.get(command);
-            if(cmd){ return cmd.run(BOT, message, config); }
+            if(cmd){ return cmd.run(MAIN, message, args, prefix); }
           }
         });
       } return;

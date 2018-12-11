@@ -8,24 +8,25 @@
       "url": "https://i.imgur.com/TnALZ7D.png"
     },
     {
-      "name": "Golden Razz",
-      "url": "https://i.imgur.com/VMK1l2M.png"
-    },
-    {
       "name": "Razz",
       "url": "https://i.imgur.com/uHpw0Vp.png"
+    },
+    {
+      "name": "Golden Razz",
+      "url": "https://i.imgur.com/VMK1l2M.png"
     },
     {
       "name": "Nanab",
       "url": "https://i.imgur.com/lKlDhNV.png"
     },
-    {
-      "name": "Silver Pinap",
-      "url": "https://imgur.com/XegTf2v.png"
-    },
+
     {
       "name": "Pinap",
       "url": "https://i.imgur.com/QxqLk4v.png"
+    },
+    {
+      "name": "Silver Pinap",
+      "url": "https://imgur.com/XegTf2v.png"
     },
     {
       "name": "Ultra Ball",
@@ -36,12 +37,17 @@
       "url": "https://i.imgur.com/K5BVzrb.png"
     },
     {
+      "name": "Revive",
+      "url": "https://i.imgur.com/XrdRq32.png"
+    },
+    {
       "name": "Max Revive",
       "url": "https://i.imgur.com/b0MVEZR.png"
     },
+
     {
-      "name": "Revive",
-      "url": "https://i.imgur.com/XrdRq32.png"
+      "name": "Potion",
+      "url": "https://i.imgur.com/rkS66uc.png"
     },
     {
       "name": "Max Potion",
@@ -54,10 +60,6 @@
     {
       "name": "Super Potion",
       "url": "https://i.imgur.com/G189hze.png"
-    },
-    {
-      "name": "Potion",
-      "url": "https://i.imgur.com/rkS66uc.png"
     },
     {
       "name": "TM",
