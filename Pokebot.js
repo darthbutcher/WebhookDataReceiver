@@ -45,7 +45,7 @@ MAIN.database = mysql.createConnection({ host: MAIN.config.DB.host, user: MAIN.c
 // DEFINE LOGGING & DEBUGGING
 MAIN.logging=MAIN.config.CONSOLE_LOGS;
 MAIN.debug = {
-  "quests": "ENABLED",
+  "quests": "DISABLED",
   "pokemon": "DISABLED",
   "raids": "DISABLED",
   "detailed": "DISABLED"
@@ -182,9 +182,7 @@ MAIN.Get_City = (object) => {
 MAIN.Get_Icon = (object, questReward) => {
   let questUrl='';
   MAIN.rewards.array.forEach((reward,index) => {
-    console.info(questReward+' '+reward.name);
-    console.info(questReward.indexOf(reward.name)>=0);
-    if(questReward.indexOf(reward.name)>=0){ console.log('***** MATCHED REWARD *****'); questUrl=reward.url; }
+    if(questReward.indexOf(reward.name)>=0){ questUrl=reward.url; }
   }); return questUrl;
 }
 
