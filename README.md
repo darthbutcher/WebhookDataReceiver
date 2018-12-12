@@ -4,7 +4,7 @@
 
 (This is a work in progress guide. This bot is still technically in Beta as well)
 
-## Installation:
+# Installation:
 ### 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
 
 ### 2: cd to the new Pokebot folder
@@ -64,6 +64,12 @@
 
 ### This bot requires intermediate knowledge of discord and not for a beginner user. 
 ## Join my discord server: https://discord.gg/BthYK68
+
+# Subscriptions
+
+- Subscription commands can only be used in the command channel set in the pokebot_config.json.
+- Type `.help` (or whatever prefix you set) for command instructions.
+- Rewards that users can subscribe to are set in `quest_config.json` in the configs folder. These are case sensitive and the Encounter rewards must state "Encounter" after the pokemon name just as the example shows. 
 
 
 
