@@ -69,7 +69,7 @@
 # Subscriptions
 
 - Subscription commands can only be used in the command channel set in the pokebot_config.json.
-- Type `.help` (or whatever prefix you set) for command instructions.
+- Type `.subhelp` (or whatever prefix you set) for command instructions.
 - Rewards that users can subscribe to are set in `quest_config.json` in the configs folder. These are case sensitive and the Encounter rewards must state "Encounter" after the pokemon name just as the example shows. 
 
 
