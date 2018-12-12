@@ -1,11 +1,4 @@
 const Discord=require('discord.js');
-const moves=require('../static/moves.json');
-const feeds=[];
-
-for(let f=1; f<7; f++){
-  let feed=require('../config/feed_'+f+'.json');
-  feeds.push(feed);
-}
 
 //#############################################################//
 //#############################################################//
@@ -27,33 +20,38 @@ module.exports.run = async (MAIN, sighting, city) => {
   internalValue=Math.floor(internalValue*1000)/10;
 
   // CHECK ALL FILTERS
-  feeds.forEach((feed,index) => {
-    if(!feed[pName]) console.error('[Pokébot] NO POKEMON FOUND WITHIN filter_'+(index+1)+'. '+pName+sighting.gender);
-    if(feed.Channel_ID && feed[pName]!='False'){
+  MAIN.feeds.forEach((feed,index) => {
+    if(feed.Type=='pokemon' && city.name==feed.City){
+      if(feed.Channel_ID && feed[pName]!='False'){
 
-      // CHECK IF POKEMON IS ENABLED OR SET TO A SPECIFIC IV
-      if(feed[pName]=='True'){
+        // CHECK IF POKEMON IS ENABLED OR SET TO A SPECIFIC IV
+        if(feed[pName]=='True'){
 
-        // CHECK IF THE POKEMON HAS BEEN IV SCANNED
-        if(sighting.cp>0){
+          // CHECK IF THE POKEMON HAS BEEN IV SCANNED
+          if(sighting.cp>0){
 
-          // CHECK THE MIN AND MAX IV SET FOR THE ENTIRE FEED
-          if(feed.min_iv<=internalValue && feed.max_iv>=internalValue){
-            parse_Pokemon(MAIN, internalValue ,sighting, feed.Channel_ID, timeNow, city);
+            // CHECK THE MIN AND MAX IV SET FOR THE ENTIRE FEED
+            if(feed.min_iv<=internalValue && feed.max_iv>=internalValue){
+              parse_Pokemon(MAIN, internalValue ,sighting, feed.Channel_ID, timeNow, city);
+            }
+          }
+          else if(feed.Post_Without_IV==true){
+
+            // POST WITHOUT IVS IF OVERRIDDEN BY THE USER
+            send_Without_IV(MAIN, sighting, feed.Channel_ID, time, city);
           }
         }
-        else if(feed.Post_Without_IV==true){
-          send_Without_IV(MAIN, sighting, feed.Channel_ID, time, city);
-        }
-      }
-      else if(feed[pName].min_iv<=internalValue && feed.max_iv>=internalValue){
+        else if(feed[pName].min_iv<=internalValue && feed.max_iv>=internalValue){
 
-        // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
-        if(sighting.cp>0){
-          parse_Pokemon(MAIN, internalValue, sighting, feed.Channel_ID, timeNow, city);
-        }
-        else if(feed.Post_Without_IV==true){
-          sendWithoutIV(MAIN, sighting, feed.Channel_ID, time, city);
+          // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
+          if(sighting.cp>0){
+            parse_Pokemon(MAIN, internalValue, sighting, feed.Channel_ID, timeNow, city);
+          }
+          else if(feed.Post_Without_IV==true){
+
+            // POST WITHOUT IVS IF OVERRIDDEN BY THE USER
+            sendWithoutIV(MAIN, sighting, feed.Channel_ID, time, city);
+          }
         }
       }
     }
@@ -61,6 +59,7 @@ module.exports.run = async (MAIN, sighting, city) => {
 }
 
 function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
+
   // SEND LOGS
   if(MAIN.debug.pokemon=='ENABLED'){ if(MAIN.debug.detailed=='ENABLED'){ console.info(sighting); } else{ console.info(sighting.encounter_id); } }
 
@@ -91,7 +90,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 
   // CREATE AND SEND THE EMBED
   let pokemonEmbed=new Discord.RichEmbed().setColor('00ccff').setThumbnail(pokemonUrl)
-    .addField(MAIN.pokemon[sighting.pokemon_id]+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)', 'Level '+sighting.pokemon_level+weather+'\nCP '+sighting.cp+gender+'\n'+moves[sighting.move_1].name+'/'+moves[sighting.move_2].name, false)
+    .addField(MAIN.pokemon[sighting.pokemon_id]+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)', 'Level '+sighting.pokemon_level+weather+'\nCP '+sighting.cp+gender+'\n'+MAIN.moves[sighting.move_1].name+'/'+MAIN.moves[sighting.move_2].name, false)
     .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', pokemonArea.name, false)
     .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
     .setImage('https://maps.googleapis.com/maps/api/staticmap?center='+sighting.latitude+','+sighting.longitude+'&markers='+sighting.latitude+','+sighting.longitude+'&size=450x220&zoom=16');

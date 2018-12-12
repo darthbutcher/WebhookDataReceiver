@@ -36,7 +36,7 @@ MAIN.pokemon=require('./static/pokemon.json');
 MAIN.proto=require('./static/en.json');
 MAIN.emotes=require('./config/emotes.json');
 MAIN.rewards=require('./static/rewards.json');
-MAIN.feed=require('./config/feeds.json');
+MAIN.moves=require('./static/moves.json');
 
 // DATABASE CONNECTION
 const dbconfig=require('./config/pokebot_config.json');
@@ -63,19 +63,29 @@ fs.readdir('./modules', (error,files) => {
 
 // DEFINE AND LOAD ALL COMMANDS
 MAIN.commands=new Discord.Collection();
-fs.readdir('./commands', (err,commands) => {
-  let commandFiles=commands.filter(f => f.split('.').pop()==='js'), cCount=0;
+fs.readdir('./commands', (err,files) => {
+  let commandFiles=files.filter(f => f.split('.').pop()==='js'), cCount=0;
   commandFiles.forEach((f,i) => {
     delete require.cache[require.resolve('./commands/'+f)]; cCount++;
     let command=require('./commands/'+f); MAIN.commands.set(f.slice(0,-3), command);
   }); console.log('[Pokébot] Loaded '+cCount+' Commands.');
 });
 
+// DEFINE AND LOAD ALL FEEDS
+MAIN.feeds=[];
+fs.readdir('./feeds', (err,files) => {
+  let feedFiles=files.filter(f => f.split('.').pop()==='json'), fCount=0;
+  feedFiles.forEach((f,i) => {
+    delete require.cache[require.resolve('./feeds/'+f)];
+    let feed=require('./feeds/'+f); MAIN.feeds.push(feed); fCount++
+  }); console.log('[Pokébot] Loaded '+fCount+' Pokémon Feeds.');
+});
+
 // CREATE SERVER
 const app=express().use(bodyParser.json());
 
 // LISTEN FOR PAYLOADS
-app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] Now listening for payloads on port '+MAIN.config.LISTENING_PORT+'.'));
+app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Now listening for payloads on port '+MAIN.config.LISTENING_PORT+'.'));
 
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
 app.post('/', (webhook, resolve) => {
@@ -110,9 +120,9 @@ MAIN.on('message', message => {
 MAIN.Save_Sub = (message,area) => {
   if(MAIN.User_Bot==MAIN.BOTS.length-1){ MAIN.User_Bot=0; } else{ MAIN.User_Bot++; }
   MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, paused, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [message.member.id, message.member.user.tag, 'ALL', , , , 'NO', MAIN.User_Bot, '07:00', area], function (error, user, fields) {
-    if(error){ console.error('[Pokébot] UNABLE TO ADD USER TO pokebot.users',error); }
+    if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']UNABLE TO ADD USER TO pokebot.users',error); }
     else{
-      console.log('[Pokébot] Added '+message.member.user.tag+' to the pokebot.user database.');
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Added '+message.member.user.tag+' to the pokebot.user database.');
       return message.reply('You did not have a subscription record. One has now been created. Please try the command again.').then(m => m.delete(15000)).catch(console.error);
     }
   });
@@ -226,12 +236,12 @@ function pokebotRestart(){ process.exit(1); }
 
 // CREATE DATABASE AND TABLE
 MAIN.database.query("CREATE DATABASE IF NOT EXISTS pokebot", function (error, results, fields) {
-  if(error){ return console.error('[Pokébot] UNABLE TO CREATE THE Pokébot DATABASE.',error); }
+  if(error){ return console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']UNABLE TO CREATE THE Pokébot DATABASE.',error); }
   else{
-    MAIN.database.query("CREATE TABLE IF NOT EXISTS pokebot.users (user_id TEXT, geofence TEXT, pokemon TEXT, quests TEXT, raids TEXT, paused TEXT, bot TEXT, alert_time TEXT)", function (error, results, fields) {
-      if(error){ return console.error('[Pokébot] UNABLE TO CREATE THE pokebot.user TABLE.',error); }
-      MAIN.database.query(`CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint)`, function (error, results, fields) {
-        if(error){ return console.error('[Pokébot] UNABLE TO CREATE THE pokebot.quest_alerts TABLE.',error); }
+    MAIN.database.query("CREATE TABLE IF NOT EXISTS pokebot.users (user_id TEXT, user_name TEXT, geofence TEXT, pokemon TEXT, quests TEXT, raids TEXT, paused TEXT, bot TEXT, alert_time TEXT, city TEXT)", function (error, results, fields) {
+      if(error){ return console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']UNABLE TO CREATE THE pokebot.user TABLE.',error); }
+      MAIN.database.query(`CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint, city text)`, function (error, results, fields) {
+        if(error){ return console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']UNABLE TO CREATE THE pokebot.quest_alerts TABLE.',error); }
       });
     });
   }
@@ -255,29 +265,29 @@ setInterval(function() {
               .setImage(questEmbed.image.url)
               .setFooter(questEmbed.footer.text);
             TARGET.send(alertEmbed).catch( error => {
-              console.error('[Pokébot] '+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.');
+              console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']'+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.');
             });
           });
         }, 2000*index);
       });
-      console.log('[Pokébot] Sent '+alerts.length+' Quest Alerts.');
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Sent '+alerts.length+' Quest Alerts.');
       MAIN.database.query("DELETE FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
 }, 60000);
 
 // BOT READY
-MAIN.on('ready', async () => { MAIN.Next_Bot=0; MAIN.User_Bot=0; console.log('[Pokébot] Logging is set to: '+MAIN.config.CONSOLE_LOGS); console.log('[Pokébot] MAIN is Standing By.'); });
-ALPHA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ALPHA is Standing By.'); }, 250); ALPHA.user.setPresence({ status: 'invisible'}); });
-BRAVO.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] BRAVO is Standing By.'); }, 500); BRAVO.user.setPresence({ status: 'invisible'}); });
-CHARLIE.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] CHARLIE is Standing By.');}, 750); CHARLIE.user.setPresence({ status: 'invisible'}); });
-DELTA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] DELTA is Standing By.'); }, 1000); DELTA.user.setPresence({ status: 'invisible'}); });
-ECHO.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ECHO is Standing By.'); }, 1250); ECHO.user.setPresence({ status: 'invisible'}); });
-FOXTROT.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] FOXTROT is Standing By.'); }, 1500); FOXTROT.user.setPresence({ status: 'invisible'}); });
-GULF.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] GULF is Standing By.'); }, 1750); GULF.user.setPresence({ status: 'invisible'}); });
-HOTEL.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] HOTEL is Standing By.'); },2000); HOTEL.user.setPresence({ status: 'invisible'}); });
-INDIA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] INDIA is Standing By.');}, 2250); INDIA.user.setPresence({ status: 'invisible'}); });
-JULIET.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] JULIET is Standing By.'); }, 2500); JULIET.user.setPresence({ status: 'invisible'}); });
+MAIN.on('ready', async () => { MAIN.Next_Bot=0; MAIN.User_Bot=0; console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] MAIN is Standing By.'); });
+ALPHA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] ALPHA is Standing By.'); }, 250); ALPHA.user.setPresence({ status: 'invisible'}); });
+BRAVO.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] BRAVO is Standing By.'); }, 500); BRAVO.user.setPresence({ status: 'invisible'}); });
+CHARLIE.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] CHARLIE is Standing By.');}, 750); CHARLIE.user.setPresence({ status: 'invisible'}); });
+DELTA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] DELTA is Standing By.'); }, 1000); DELTA.user.setPresence({ status: 'invisible'}); });
+ECHO.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] ECHO is Standing By.'); }, 1250); ECHO.user.setPresence({ status: 'invisible'}); });
+FOXTROT.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] FOXTROT is Standing By.'); }, 1500); FOXTROT.user.setPresence({ status: 'invisible'}); });
+GULF.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] GULF is Standing By.'); }, 1750); GULF.user.setPresence({ status: 'invisible'}); });
+HOTEL.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] HOTEL is Standing By.'); },2000); HOTEL.user.setPresence({ status: 'invisible'}); });
+INDIA.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] INDIA is Standing By.');}, 2250); INDIA.user.setPresence({ status: 'invisible'}); });
+JULIET.on('ready', async () => { setTimeout(function(){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] JULIET is Standing By.'); }, 2500); JULIET.user.setPresence({ status: 'invisible'}); });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
 MAIN.login(MAIN.config.MAIN_BOT_TOKEN);

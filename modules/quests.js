@@ -14,8 +14,8 @@ const Discord=require('discord.js');
 
 module.exports.run = async (MAIN, quest, city) => {
   // DEBUG AND VARIABLES
-  if(MAIN.debug.quests=='ENABLED'){ if(MAIN.debug.detailed=='ENABLED'){ console.info(quest); } else{ console.info(quest.pokestop_id); } }
-  let questTask='', questUrl='', questReward='', channelID='', area='', expireTime=MAIN.Bot_Time(null,'quest');
+  if(MAIN.debug.quests=='ENABLED'){ console.info(quest.pokestop_id); }
+  let questTask='', questUrl='', questReward='', simpleReward='', area='', expireTime=MAIN.Bot_Time(null,'quest');
 
   // GET THE GENERAL AREA
   let questArea=MAIN.Get_Area(quest.latitude,quest.longitude);
@@ -25,19 +25,25 @@ module.exports.run = async (MAIN, quest, city) => {
 
   // DETERMINE THE QUEST REWARD AND CHANNEL
   switch(quest.rewards[0].type){
-    case 1: questTask='NO REWARD SET'; break;
+    case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
     case 2:
-      channelID=MAIN.feed[city.name].research.items;
+      simpleReward=MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
       questReward=quest.rewards[0].info.amount+' '+MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
       if(quest.rewards[0].info.amount>1){
         if(questReward.indexOf('Berry')>=0){ questReward=questReward.toString().slice(0,-1)+'ies'; }
         else{ questReward=questReward+'s'; }
       } break;
-    case 3: channelID=MAIN.feed[city.name].research.items; questReward=quest.rewards[0].info.amount+' Stardust'; break;
-    case 4: channelID=MAIN.feed[city.name].research.items; return console.error('NO REWARD SET',quest);
-    case 5: channelID=MAIN.feed[city.name].research.items; return console.error('NO REWARD SET',quest);
-    case 6: channelID=MAIN.feed[city.name].research.items; return console.error('NO REWARD SET',quest);
-    case 7: channelID=MAIN.feed[city.name].research.encounters; questReward=MAIN.pokemon[quest.rewards[0].info.pokemon_id]+' Encounter'; break;
+    case 3:
+      simpleReward='Stardust'; questReward=quest.rewards[0].info.amount+' Stardust'; break;
+    case 4:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 5:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 6:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 7:
+      simpleReward=MAIN.pokemon[quest.rewards[0].info.pokemon_id];
+      questReward=MAIN.pokemon[quest.rewards[0].info.pokemon_id]+' Encounter'; break;
   }
 
   // GET REWARD ICON
@@ -108,21 +114,27 @@ module.exports.run = async (MAIN, quest, city) => {
     .setImage('https://maps.googleapis.com/maps/api/staticmap?center='+quest.latitude+','+quest.longitude+'&markers='+quest.latitude+','+quest.longitude+'&size=450x220&zoom=16')
     .setFooter('Expires: '+expireTime);
 
-  // LOG AND MORE DETAILED DEBUG
-  if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Quest for '+city.name+'.'); }
-  if(MAIN.debug.quests=='ENABLED' && MAIN.debug.detailed=='ENABLED'){
-    console.info('Task: '+questTask);
-    console.info('Reward: '+questReward);
-  }
 
   // SEND THE EMBED
-  if(MAIN.qConfig.Discord_Feeds=='ENABLED'){ MAIN.Send_Embed(questEmbed, channelID); }
+  if(MAIN.qConfig.Discord_Feeds=='ENABLED'){
+    MAIN.feeds.forEach((feed,index) => {
+      if(feed.Type=='quest' && city.name==feed.City){
+        if(feed.Rewards.indexOf(simpleReward)>=0 || feed.Rewards.indexOf(questReward)>=0){
+          // LOGGING
+          if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Quest for '+city.name+'.'); }
+          MAIN.Send_Embed(questEmbed, feed.Channel_ID);
+        }
+      }
+    });
+  }
+  else{ console.info('[Pokébot] Quest ignored due to Disabled Discord setting.'); }
 
   // SEND TO SUBSCRIPTIONS FUNCTION
   if(MAIN.qConfig.Subscriptions=='ENABLED'){
     let quest_subs=MAIN.modules.get('subscriptions.js');
     if(quest_subs){ quest_subs.run(MAIN, 'quest', quest, questEmbed, questArea, city); }
   }
+  else{ console.info('[Pokébot] Quest ignored due to Disabled Subscription setting.'); }
 
   // END
   return;
