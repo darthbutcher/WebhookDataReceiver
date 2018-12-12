@@ -57,7 +57,7 @@
     - More specific IVs can be set for each pokemon, but that value must be within the min_iv and max_iv you set.
     - You can set the bot to post without IVs using the "Post_Without_IV" field. Set this to `true` or `false`.
 
-7: Start the bot. `pm2 start Pokebot.js`
+## 7: Start the bot. `pm2 start Pokebot.js`
   - If you get errors that are not because of missing configs, Contact me via discord. 
 
 (This is a work in progress guide. This bot is still technically in Beta as well)
