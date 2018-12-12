@@ -32,7 +32,7 @@
   - Geofences.json
       > Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
   - Pokebot_config.json
-      > Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 10 bot tokens can be used at this time. If you have less than 10, delete the other example numbers or you will get invalid credential errors when starting the script.
+      > Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 10 bot tokens can be used at this time. If you have less than 10, delete the other example numbers or you will get invalid credential errors when starting the script. For "Cities", you only need to put one City if you scan only one. If you have multiple cities and want separate feeds, then you would add more cities. 
       - The Main Bot requires at minimum Manage Messages, View Channel, and Manage Channel permissions for the subscription channel.
   
 ## 6: Feeds
