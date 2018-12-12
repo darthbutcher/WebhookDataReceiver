@@ -1,0 +1,8 @@
+{
+  "Type": "raid",
+  "City": "TLH",
+  "Egg_Or_Boss": "egg",
+  "Channel_ID": "458791583291146250",
+  "Raid_Levels": [ 1, 2, 3, 4, 5 ],
+  "Ex_Eligible": true
+}
