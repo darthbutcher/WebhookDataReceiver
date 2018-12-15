@@ -68,29 +68,56 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
 
                 if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED secondary filters.'); }
 
+                // CONVERT REWARD LIST TO AN ARRAY
                 let subs = user.quests.split(',');
 
                 // CHECK FOR SUBSCRIBED GYMS OR RAID BOSSES
+                // DETERMINE THE QUEST REWARD AND CHANNEL
                 switch(object.rewards[0].type){
-                  case 1: break;
-                  case 2: reward = proto.values['item_'+object.rewards[0].info.item_id]; break;
-                  case 3: reward = object.rewards[0].info.amount+' Stardust'; break;
-                  case 4: break;
-                  case 5: break;
-                  case 6: break;
-                  case 7: reward = MAIN.pokemon[object.rewards[0].info.pokemon_id]; break;
+
+                  // PLACEHOLDER
+                  case 1:
+
+                  // ITEM REWARDS (EXCEPT STARDUST)
+                  case 2:
+                    simpleReward=MAIN.proto.values['item_'+object.rewards[0].info.item_id];
+                    questReward=object.rewards[0].info.amount+' '+MAIN.proto.values['item_'+object.rewards[0].info.item_id];
+                    break;
+
+                  // STARDUST REWARD
+                  case 3:
+                    simpleReward = 'Stardust';
+                    questReward = object.rewards[0].info.amount+' Stardust'; break;
+
+                  // PLACEHOLDER
+                  case 4:
+
+                  // PLACEHOLDER
+                  case 5:
+
+                  // PLACEHOLDER
+                  case 6:
+
+                  // ENCOUNTER REWARDS
+                  case 7:
+                    simpleReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name;
+                    questReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name+' Encounter'; break;
                 }
 
                 // USER FILTER
                 // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-                if(subs.indexOf(reward) >= 0){
+                if(subs.indexOf(simpleReward) >= 0 || subs.indexOf(questReward) >= 0){
 
+                  // DEBUG
                   if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED user filters.'); }
 
+                  // DEFINE VARIABLES
                   let quest = JSON.stringify(object), questEmbed = JSON.stringify(embed);
                   let timeNow = new Date().getTime(); let todaysDate = moment(timeNow).format('MM/DD/YYYY');
                   let dbDate = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
                   if(dbDate < timeNow){ dbDate = dbDate + 86400000; }
+
+                  // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
                   MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
                     else{ console.info('[Pokébot] [subscriptions.js] Stored a '+reward+' Quest alert for '+userID+'.'); }
