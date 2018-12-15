@@ -38,7 +38,7 @@ MAIN.proto=require('./static/en.json');
 MAIN.emotes=require('./config/emotes.json');
 MAIN.rewards=require('./static/rewards.json');
 MAIN.moves=require('./static/moves.json');
-MAIN.update=require('./static/database.json')
+MAIN.db=require('./static/database.json')
 
 // DATABASE CONNECTION
 MAIN.database = mysql.createConnection({
@@ -319,12 +319,13 @@ setInterval(function() {
 // }, 86400000);
 
 // DATABASE UPDATE FUNCTION
-function performUpdate(){
+function performUpdate(updateNumber){
   return new Promise(resolve => {
-    MAIN.update[MAIN.update.LATEST].forEach((update) => {
+    let updateTo = parseInt(updateNumber)+1;
+    MAIN.db[updateTo].forEach((update,index) => {
       MAIN.sqlFunction(update.sql, update.data, update.gLog, update.bLog);
-    });
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+MAIN.update.LATEST+'.');
+      MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [updateTo,updateNumber], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.')
+    }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+updateTo+'.');
     resolve('DONE');
   });
 }
@@ -341,22 +342,20 @@ MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
 }
 
 // CREATE DATABASE, TABLES, AND CHECK FOR UPDATES
-function updateDatabase(){
+async function updateDatabase(){
   return new Promise(async function(resolve, reject) {
     await MAIN.sqlFunction('CREATE DATABASE IF NOT EXISTS pokebot', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE Pokébot DATABASE.');
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.users (user_id TEXT, user_name TEXT, geofence TEXT, pokemon TEXT, quests TEXT, raids TEXT, paused TEXT, bot TEXT, alert_time TEXT, city TEXT)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.user TABLE.');
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint, city text)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.quest_alerts TABLE.');
-    await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version TEXT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
+    await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version INT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
       if(!row || !row[0]){
-        await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.');
-        await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
-        await performUpdate().then((location) => { resolve('Done'); });
+        MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,[1], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.')
+        .then((db) => { for(let u=1; u < MAIN.db.LATEST; u++){ performUpdate(u); } resolve('Done'); });
       }
-      else if(row[0].db_version!=MAIN.update.LATEST){
+      else if(row[0].db_version != MAIN.update.LATEST){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database UPDATE found.'); console.info('Updating...');
-        await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
-        await performUpdate().then((location) => { resolve('Done'); });
+        for(let u = row[0].db_version; u < MAIN.db.LATEST; u++){ performUpdate(u); } resolve('Done');
       }
       else{ resolve('Done'); }
     });
