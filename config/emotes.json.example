@@ -13,5 +13,25 @@
     "mystic": "<:mystic:499334764323536907>",
     "valor": "<:valor:499334750704500737>"
   },
-  "ex_pass": "<:expass:402195368894398474>"
+  "ex_pass": "<:expass:402195368894398474>",
+  "types": {
+    "Water": "<:type_water:408293834200449024>",
+    "Steel": "<:type_steel:408293834297180160>",
+    "Rock": "<:type_rock:408293834284335106>",
+    "Psychic": "<:type_psychic:408293833802121220>",
+    "Poison": "<:type_poison:408293833990864898>",
+    "Normal": "<:type_normal:408293834305306624>",
+    "Ice": "<:type_ice:408293833885876235>",
+    "Ground": "<:type_ground:408293834112630784>",
+    "Grass": "<:type_grass:408293834242523136>",
+    "Ghost": "<:type_ghost:408293833663578113>",
+    "Flying": "<:type_flying:408293834024419328>",
+    "Fire": "<:type_fire:408293833680486401>",
+    "Fighting": "<:type_fighting:408293833747595275>",
+    "Fairy": "<:type_fairy:408293834397712384>",
+    "Electric": "<:type_electric:408293833864904704>",
+    "Dragon": "<:type_dragon:408293833512845312>",
+    "Dark": "<:type_dark:408293833055666176>",
+    "Bug": "<:type_bug:408293832451686403>"
+  }
 }

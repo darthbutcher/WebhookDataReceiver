@@ -49,6 +49,8 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
     //     }
     //   });
     case 'quest':
+      if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG] [subscriptions.js] Received Quest Subscription.'); }
+
       MAIN.database.query("SELECT * FROM pokebot.users", function (error, users, fields){
         if(users[0]){
           users.forEach((user,index) => {
@@ -56,38 +58,49 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
             // DEFINE VARIABLES
             let userAreas=user.geofence.split(','), userID=user.user_id;
 
-            // CHEK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR CITY
-            if(user.paused!='YES' && user.quests && city.name==user.city){
+            // LEVEL 1 FILTERS
+            // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR CITY
+            if(user.paused != 'YES' && user.quests && city.name == user.city){
 
+              // LEVEL 2 FILTERS
               // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-              if(user.geofence=='ALL' || userAreas.indexOf(area.name)>=0){
+              if(user.geofence == 'ALL' || userAreas.indexOf(area.name) >= 0){
 
-                let subs=user.quests.split(',');
+                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED secondary filters.'); }
+
+                let subs = user.quests.split(',');
 
                 // CHECK FOR SUBSCRIBED GYMS OR RAID BOSSES
                 switch(object.rewards[0].type){
                   case 1: break;
-                  case 2: reward=proto.values['item_'+object.rewards[0].info.item_id]; break;
-                  case 3: reward=object.rewards[0].info.amount+' Stardust'; break;
+                  case 2: reward = proto.values['item_'+object.rewards[0].info.item_id]; break;
+                  case 3: reward = object.rewards[0].info.amount+' Stardust'; break;
                   case 4: break;
                   case 5: break;
                   case 6: break;
-                  case 7: reward=MAIN.pokemon[object.rewards[0].info.pokemon_id]+' Encounter'; break;
+                  case 7: reward = MAIN.pokemon[object.rewards[0].info.pokemon_id]; break;
                 }
 
+                // USER FILTER
                 // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-                if(subs.indexOf(reward)>=0){
-                  let quest=JSON.stringify(object), questEmbed=JSON.stringify(embed);
-                  let timeNow=new Date().getTime(); let todaysDate=moment(timeNow).format('MM/DD/YYYY');
-                  let dbDate=moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
-                  if(dbDate<timeNow){ dbDate=dbDate+86400000; }
+                if(subs.indexOf(reward) >= 0){
+
+                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED user filters.'); }
+
+                  let quest = JSON.stringify(object), questEmbed = JSON.stringify(embed);
+                  let timeNow = new Date().getTime(); let todaysDate = moment(timeNow).format('MM/DD/YYYY');
+                  let dbDate = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
+                  if(dbDate < timeNow){ dbDate = dbDate + 86400000; }
                   MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else{ console.info('[Pokébot] Stored a '+reward+' Quest alert for '+userID+'.'); }
+                    else{ console.info('[Pokébot] [subscriptions.js] Stored a '+reward+' Quest alert for '+userID+'.'); }
                   });
                 }
+                else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass user filters.'); } }
               }
+              else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass secondary filters.'); } }
             }
+            else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass initial filters.'); } }
           });
         }
       });

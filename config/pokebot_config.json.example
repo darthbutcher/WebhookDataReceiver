@@ -1,27 +1,32 @@
 {
 	"CONSOLE_LOGS": "ENABLED",
+	"DEBUG": {
+		"Quests": "ENABLED",
+		"Pokemon": "ENABLED",
+		"Raids": "DISABLED",
+		"Subscriptions": "DISABLED"
+	},
 	"LISTENING_PORT": 3333,
 	"PREFIX": ".",
-	"Sub_Channels": [ "" ],
-	"Donor_Role_ID": "",
+	"Sub_Channels": [ "520604206206287883" ],
 	"DB": {
-		"host": "IPADDRESS",
-		"username": "USERNAME",
-		"password": "PASSWORD",
+		"host": "",
+		"username": "",
+		"password": "",
 		"port": "3306"
 	},
 	"MAIN_BOT_TOKEN": "",
 	"BOT_TOKENS": [
-		"1",
-		"2",
-		"3",
-		"4",
-		"5",
-		"6",
-		"7",
-		"8",
-		"9",
-		"UPTO10"
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		""
 	],
 	"Cities": [{
 			"name": "TLH",

@@ -10,6 +10,16 @@ module.exports.run = async (MAIN, message, args, prefix) => {
         .addField('Reward Subscription Commands:', '`'+prefix+'quest add [REWARD]`\n`'+prefix+'quest remove [REWARD]`\n(Quest Rewards are NOT case sensitive.)')
         .addField('Available Rewards to Subscribe to:', availableRewards);
       return message.channel.send(questHelp).then(m => m.delete(60000)).catch(console.error);
+    case 'pause':
+      MAIN.database.query("UPDATE pokebot.users SET quests_paused = ? WHERE user_id = ?", ['PAUSED',message.member.id], function (error, user, fields) {
+        if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(15000)).catch(console.error); }
+        else{ return message.reply('Your Quest subscriptions are now `PAUSED`.').then(m => m.delete(15000)).catch(console.error); }
+      }); break;
+    case 'resume':
+      MAIN.database.query("UPDATE pokebot.users SET quests_paused = ? WHERE user_id = ?", ['ACTIVE',message.member.id], function (error, user, fields) {
+        if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(15000)).catch(console.error); }
+        else{ return message.reply('Your Quest subscriptions are now `ACTIVE`.').then(m => m.delete(15000)).catch(console.error); }
+      }); break;
     case 'add':
       if(!args[1]){ message.reply('You didn\'t not specify a reward to subscribe to.').then(m => m.delete(60000)).catch(console.error); }
       else{
@@ -41,7 +51,7 @@ module.exports.run = async (MAIN, message, args, prefix) => {
         if(!args[2]){ rewardSub=args[1]; } else{ for(x=1; x<args.length; x++){ rewardSub+=args[x]+' '; } rewardSub=rewardSub.slice(0,-1); }
         rewardSub=rewardSub.toLowerCase();
         let rewardIndex=MAIN.qConfig.Quest_Rewards.toString().toLowerCase().split(','), qIndex=rewardIndex.indexOf(rewardSub);
-        if(qIndex<0){ return message.reply('You didn\'t provide a valid reward to remove. Type ``'+prefix+'quest help` for available rewards.').then(m => m.delete(60000)).catch(console.error); }
+        if(qIndex<0){ return message.reply('You didn\'t provide a valid reward to remove. Type `'+prefix+'quest help` for available rewards.').then(m => m.delete(60000)).catch(console.error); }
         else{
           MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
             if(!user[0].quests){ return message.reply('You are not currently subscribed to '+MAIN.qConfig.Quest_Rewards[qIndex]+'.').then(m => m.delete(60000)).catch(console.error); }
