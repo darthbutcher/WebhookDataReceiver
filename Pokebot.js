@@ -368,26 +368,25 @@ async function botReady(){
   updateDatabase().then(async function(updated){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
-
-    // SET ALL TO INVISIBLE
-    await MAIN.BOTS.forEach((bot,index) => { if(bot.user){ bot.user.setPresence({ status: 'invisible' }); } });
-    if(ALPHA){ await ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
-    if(BRAVO){ await BRAVO.user.setPresence({ status: 'invisible' }); }
-    if(CHARLIE){ await CHARLIE.setPresence({ status: 'invisible' }); }
-    if(DELTA){ await DELTA.setPresence({ status: 'invisible' }); }
-    if(ECHO){ await ECHO.setPresence({ status: 'invisible' }); }
-    if(FOXTROT){ await FOXTROT.setPresence({ status: 'invisible' }); }
-    if(GULF){ await GULF.setPresence({ status: 'invisible' }); }
-    if(HOTEL){ await HOTEL.setPresence({ status: 'invisible' }); }
-    if(INDIA){ await INDIA.setPresence({ status: 'invisible' }); }
-    if(JULIET){ await JULIET.setPresence({ status: 'invisible' }); }
-    if(KILO){ await KILO.setPresence({ status: 'invisible' }); }
-    if(LIMA){ await LIMA.setPresence({ status: 'invisible' }); }
-    if(MIKE){ await MIKE.setPresence({ status: 'invisible' }); }
-    if(NOVEMBER){ await NOVEMBER.setPresence({ status: 'invisible' }); }
-    if(OSCAR){ await OSCAR.setPresence({ status: 'invisible' }); }
   });
 }
+
+// SET ALL TO INVISIBLE ON READY
+ALPHA.on('ready', () => { ALPHA.user.setPresence({ status: 'invisible' }); });
+BRAVO.on('ready', () => { BRAVO.user.setPresence({ status: 'invisible' }); });
+CHARLIE.on('ready', () => { CHARLIE.user.setPresence({ status: 'invisible' }); });
+DELTA.on('ready', () => { DELTA.user.setPresence({ status: 'invisible' }); });
+ECHO.on('ready', () => { ECHO.user.setPresence({ status: 'invisible' }); });
+FOXTROT.on('ready', () => { FOXTROT.user.setPresence({ status: 'invisible' }); });
+GULF.on('ready', () => { GULF.user.setPresence({ status: 'invisible' }); });
+HOTEL.on('ready', () => { HOTEL.user.setPresence({ status: 'invisible' }); });
+INDIA.on('ready', () => { INDIA.user.setPresence({ status: 'invisible' }); });
+JULIET.on('ready', () => { JULIET.user.setPresence({ status: 'invisible' }); });
+KILO.on('ready', () => { KILO.user.setPresence({ status: 'invisible' }); });
+LIMA.on('ready', () => { LIMA.user.setPresence({ status: 'invisible' }); });
+MIKE.on('ready', () => { MIKE.user.setPresence({ status: 'invisible' }); });
+NOVEMBER.on('ready', () => { NOVEMBER.user.setPresence({ status: 'invisible' }); });
+OSCAR.on('ready', () => { OSCAR.user.setPresence({ status: 'invisible' }); });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
 async function botLogin(){
