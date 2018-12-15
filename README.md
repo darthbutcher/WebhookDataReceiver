@@ -25,6 +25,7 @@
     - point-in-polygon
     - express
     - body-parser
+    - staticmaps
     - pm2 (must be installed with -g flag and sometimes as sudo. `npm install -g pm2`.
     
 ### 5: Edit the Config files and save them without the `.example` on them.
@@ -55,12 +56,14 @@
   #### Pokemon
     - This Pokebot uses PA type filters with some overrides in the config.
     - The "Type" field must be "pokemon".
-    - You must set the min_iv and max_iv for the filter. 
-    - More specific IVs can be set for each pokemon, but that value must be within the min_iv and max_iv you set.
+    - You must set the min_iv and max_iv for the filter. Defaults `0` and `100`. 
+    - You must set the min_level and max_level for the filter. Defaults `0` and `35`. 
+    - More specific IVs can be set for each pokemon (replace `True`/`False` with `{"min_iv":"80"}`, but that value must be within the min_iv and max_iv you set.
     - You can set the bot to post without IVs using the "Post_Without_IV" field. Set this to `true` or `false`.
 
 ## 7: Start the bot. `pm2 start Pokebot.js`
   - If you get errors that are not because of missing configs, Contact me via discord. 
+  - PM2 Docs http://pm2.keymetrics.io/docs/usage/cluster-mode/
 
 (This is a work in progress guide. This bot is still technically in Beta as well)
 
