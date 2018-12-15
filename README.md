@@ -25,6 +25,7 @@
     - point-in-polygon
     - express
     - body-parser
+    - rimraf
     - staticmaps
     - pm2 (must be installed with -g flag and sometimes as sudo. `npm install -g pm2`.
     
