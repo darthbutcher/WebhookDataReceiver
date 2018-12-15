@@ -58,7 +58,7 @@
    - The "Type" field must be "pokemon".
    - You must set the min_iv and max_iv for the filter. Defaults `0` and `100`. 
    - You must set the min_level and max_level for the filter. Defaults `0` and `35`. 
-   - More specific IVs can be set for each pokemon (replace `True`/`False` with `{"min_iv":"80"}`, but that value must be within the min_iv and max_iv you set.
+   - More specific IVs can be set for each pokemon (replace `True`/`False` with `{"min_iv":"80"}`), but that value must be within the min_iv and max_iv you set.
    - You can set the bot to post without IVs using the "Post_Without_IV" field. Set this to `true` or `false`.
 
 ## 7: Start the bot. `pm2 start Pokebot.js`
