@@ -66,8 +66,8 @@ module.exports.run = async (MAIN, quest, city) => {
 
       // ENCOUNTER REWARDS
       case 7:
-        simpleReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id];
-        questReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id]+' Encounter'; break;
+        simpleReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
+        questReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
     }
 
     // GET REWARD ICON
