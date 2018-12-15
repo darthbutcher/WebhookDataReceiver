@@ -288,22 +288,6 @@ function questStatus(message){
   setTimeout(function() { message.channel.send('Quest Scanning Progress: ```'+scanned+'/'+total+'```'); }, 5000);
 }
 
-// SEND STATUS
-function sendStatus(bot, delay, message, THEBOT){
-	setTimeout(function() {
-		if(bot=='ALL SYSTEMS ARE GO'){
-			let botStatus=new Discord.RichEmbed().setColor('00ff00')
-				.setAuthor(bot);
-			message.channel.send(botStatus).catch( error => { console.error('[LINE575]',error); });
-		}
-		else{
-			let botStatus=new Discord.RichEmbed().setColor('00ccff')
-				.setAuthor('Pokébot '+bot+', Standing By.')
-			message.channel.send(botStatus).catch( error => { console.error('[LINE580]',error); });
-		}
-	}, delay);
-}
-
 // RESTART FUNCTION
 function pokebotRestart(){ process.exit(1); }
 
@@ -316,6 +300,7 @@ setInterval(function() {
         setTimeout(function() {
           MAIN.BOTS[alert.bot].guilds.get('266738315380785152').fetchMember(alert.user_id).then( TARGET => {
             let questEmbed=JSON.parse(alert.embed);
+            let attachment = new Discord.Attachment(questEmbed.file.attachment, questEmbed.file.name);
             let alertEmbed=new Discord.RichEmbed()
               .setColor(questEmbed.color)
               .setThumbnail(questEmbed.thumbnail.url)
@@ -323,6 +308,8 @@ setInterval(function() {
               .addField(questEmbed.fields[1].name, questEmbed.fields[1].value, false)
               .addField(questEmbed.fields[2].name, questEmbed.fields[2].value, false)
               .setImage(questEmbed.image.url)
+              .attachFile(attachment)
+              .setImage('attachment://'+questEmbed.file.name)
               .setFooter(questEmbed.footer.text);
             TARGET.send(alertEmbed).catch( error => {
               console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']'+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.');
@@ -330,7 +317,7 @@ setInterval(function() {
           });
         }, 2000*index);
       });
-      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Sent '+alerts.length+' Quest Alerts.');
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts.');
       MAIN.database.query("DELETE FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
