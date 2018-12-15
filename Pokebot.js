@@ -1,5 +1,7 @@
 // MODULE REQUIREMENTS
 const fs=require('fs');
+const rimraf = require('rimraf');
+const schedule = require('node-schedule');
 const mysql = require('mysql');
 const moment=require('moment');
 const Discord=require('discord.js');
@@ -210,8 +212,8 @@ MAIN.Get_Icon = (object, questReward) => {
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS
 MAIN.Static_Map_Tile = (lat,lon,object_id) => {
   return new Promise(function(resolve, reject) {
-    let path='.static/files/'+lat+','+lon+'.png';
-    if(fs.existsSync(path)){ resolve(path); console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] USED AN EXISTING MAP TILE FOR '+lat+','+lon+'.'); }
+    let path='./static/files/'+lat+','+lon+'.png';
+    if(fs.existsSync(path)){ resolve(path); /*console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] USED AN EXISTING MAP TILE FOR '+lat+','+lon+'.');*/ }
     else{ MAIN.Render_Map_Tile(lat,lon,object_id).then((location) => { resolve(location); }); }
   });
 }
@@ -236,13 +238,13 @@ MAIN.Get_Weather = (weather) => {
   return new Promise(resolve => {
     let weatherBoost = '';
     switch(weather){
-      case 1: weatherBoost = ' | '+MAIN.emotes.weather.clear+' *Boosted*'; break;
-      case 2: weatherBoost = ' | '+MAIN.emotes.weather.rain+' *Boosted*'; break;
-      case 3: weatherBoost = ' | '+MAIN.emotes.weather.partly_cloudy+' *Boosted*'; break;
-      case 4: weatherBoost = ' | '+MAIN.emotes.weather.mostly_cloudy+' *Boosted*'; break;
-      case 5: weatherBoost = ' | '+MAIN.emotes.weather.windy+' *Boosted*'; break;
-      case 6: weatherBoost = ' | '+MAIN.emotes.weather.snow+' *Boosted*'; break;
-      case 7: weatherBoost = ' | '+MAIN.emotes.weather.fog+' *Boosted*'; break;
+      case 1: weatherBoost = ' '+MAIN.emotes.weather.clear+' *Boosted*'; break;
+      case 2: weatherBoost = ' '+MAIN.emotes.weather.rain+' *Boosted*'; break;
+      case 3: weatherBoost = ' '+MAIN.emotes.weather.partly_cloudy+' *Boosted*'; break;
+      case 4: weatherBoost = ' '+MAIN.emotes.weather.mostly_cloudy+' *Boosted*'; break;
+      case 5: weatherBoost = ' '+MAIN.emotes.weather.windy+' *Boosted*'; break;
+      case 6: weatherBoost = ' '+MAIN.emotes.weather.snow+' *Boosted*'; break;
+      case 7: weatherBoost = ' '+MAIN.emotes.weather.fog+' *Boosted*'; break;
     }
     resolve(weatherBoost);
   });
@@ -276,21 +278,6 @@ MAIN.Get_Move_Type = (moveNum) => {
   });
 }
 
-// GET QUEST SCANNING STATUS
-function questStatus(message){
-  let scanned, total;
-  MAIN.database.query(`SELECT * from rdmdb.pokestop WHERE quest_type IS NOT NULL`, function (error, result, fields) {
-    console.log(result.length); scanned=result.length;
-  });
-  MAIN.database.query(`SELECT * FROM rdmdb.pokestop`, function (error, result, fields) {
-    console.log(result.length); total=result.length;
-  });
-  setTimeout(function() { message.channel.send('Quest Scanning Progress: ```'+scanned+'/'+total+'```'); }, 5000);
-}
-
-// RESTART FUNCTION
-function pokebotRestart(){ process.exit(1); }
-
 // INTERVAL FUNCTION TO SEND QUEST SUBSCRIPTION DMS
 setInterval(function() {
   let timeNow=new Date().getTime();
@@ -323,6 +310,15 @@ setInterval(function() {
   });
 }, 60000);
 
+// INTERVAL TO CLEAR MAP TILES TO SAVE DISK SPACE
+// schedule.scheduleJob('* * 1 * * *', function(){
+//   console.log('Today is recognized by Rebecca Black!');
+// });
+// setInterval(function() {
+//   rimraf('./static/files/*', function () { console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Map Tiles Directory Has Been Cleared.'); });
+// }, 86400000);
+
+// DATABASE UPDATE FUNCTION
 function performUpdate(){
   return new Promise(resolve => {
     MAIN.update[MAIN.update.LATEST].forEach((update) => {
@@ -333,7 +329,7 @@ function performUpdate(){
   });
 }
 
-// SQL FUNCTION
+// SQL QUERY FUNCTION
 MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
   return new Promise(resolve => {
   	MAIN.database.query(sql, data, function (error, result, fields) {
@@ -352,22 +348,18 @@ function updateDatabase(){
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint, city text)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.quest_alerts TABLE.');
     await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version TEXT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
-      if(!row || !row[0]){ await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.'); }
-      if(row[0].db_version!=MAIN.update.LATEST){
+      if(!row || !row[0]){
+        await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.');
+        await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
+        await performUpdate().then((location) => { resolve('Done'); });
+      }
+      else if(row[0].db_version!=MAIN.update.LATEST){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database UPDATE found.'); console.info('Updating...');
         await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
         await performUpdate().then((location) => { resolve('Done'); });
       }
       else{ resolve('Done'); }
     });
-  });
-}
-
-async function botReady(){
-  MAIN.Next_Bot=0; MAIN.User_Bot=0;
-  updateDatabase().then(async function(updated){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
   });
 }
 
@@ -408,5 +400,29 @@ async function botLogin(){
   if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
   await botReady();
 }
+
+// BOT READY FUNCTION
+async function botReady(){
+  MAIN.Next_Bot=0; MAIN.User_Bot=0;
+  updateDatabase().then(async function(updated){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
+  });
+}
+
+// GET QUEST SCANNING STATUS
+function questStatus(message){
+  let scanned, total;
+  MAIN.database.query(`SELECT * from rdmdb.pokestop WHERE quest_type IS NOT NULL`, function (error, result, fields) {
+    console.log(result.length); scanned=result.length;
+  });
+  MAIN.database.query(`SELECT * FROM rdmdb.pokestop`, function (error, result, fields) {
+    console.log(result.length); total=result.length;
+  });
+  setTimeout(function() { message.channel.send('Quest Scanning Progress: ```'+scanned+'/'+total+'```'); }, 5000);
+}
+
+// RESTART FUNCTION
+function pokebotRestart(){ process.exit(1); }
 
 botLogin();
