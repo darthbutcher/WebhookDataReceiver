@@ -365,7 +365,7 @@ function updateDatabase(){
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint, city text)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.quest_alerts TABLE.');
     await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version TEXT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
-      if(!row.db_version || !row[0].db_version){ await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.'); }
+      if(!row || !row[0].db_version){ await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.'); }
       if(row[0].db_version!=MAIN.update.LATEST){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database UPDATE found.'); console.info('Updating...');
         await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
