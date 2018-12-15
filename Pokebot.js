@@ -61,7 +61,7 @@ fs.readdir('./modules', (error,files) => {
 	moduleFiles.forEach((script,index) => {
 		delete require.cache[require.resolve('./modules/'+script)]; mCount++
 		let module=require('./modules/'+script); MAIN.modules.set(script, module);
-	}); console.info('[Pokébot] Loaded '+mCount+' Modules.');
+	}); console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+mCount+' Modules.');
 });
 
 // DEFINE AND LOAD ALL COMMANDS
@@ -71,7 +71,7 @@ fs.readdir('./commands', (err,files) => {
   commandFiles.forEach((f,i) => {
     delete require.cache[require.resolve('./commands/'+f)]; cCount++;
     let command=require('./commands/'+f); MAIN.commands.set(f.slice(0,-3), command);
-  }); console.log('[Pokébot] Loaded '+cCount+' Commands.');
+  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+cCount+' Commands.');
 });
 
 // DEFINE AND LOAD ALL FEEDS
@@ -81,7 +81,7 @@ fs.readdir('./feeds', (err,files) => {
   feedFiles.forEach((f,i) => {
     delete require.cache[require.resolve('./feeds/'+f)];
     let feed=require('./feeds/'+f); MAIN.feeds.push(feed); fCount++
-  }); console.log('[Pokébot] Loaded '+fCount+' Pokémon Feeds.');
+  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+fCount+' Pokémon Feeds.');
 });
 
 // CREATE SERVER
@@ -365,7 +365,7 @@ function updateDatabase(){
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.quest_alerts (user_id TEXT, quest TEXT, embed TEXT, area TEXT, bot TEXT, alert_time bigint, city text)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.quest_alerts TABLE.');
     await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version TEXT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
-      if(!row || !row[0].db_version){ await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.'); }
+      if(!row || !row[0]){ await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,['1'], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.'); }
       if(row[0].db_version!=MAIN.update.LATEST){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database UPDATE found.'); console.info('Updating...');
         await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [MAIN.update.LATEST,row[0].db_version], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.');
