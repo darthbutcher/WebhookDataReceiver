@@ -384,6 +384,21 @@ async function botReady(){
 
     // SET ALL TO INVISIBLE
     await MAIN.BOTS.forEach((bot,index) => { if(bot.user){ bot.user.setPresence({ status: 'invisible' }); } });
+    if(ALPHA){ await ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
+    if(BRAVO){ await BRAVO.user.setPresence({ status: 'invisible' }); }
+    if(CHARLIE){ await CHARLIE.setPresence({ status: 'invisible' }); }
+    if(DELTA){ await DELTA.setPresence({ status: 'invisible' }); }
+    if(ECHO){ await ECHO.setPresence({ status: 'invisible' }); }
+    if(FOXTROT){ await FOXTROT.setPresence({ status: 'invisible' }); }
+    if(GULF){ await GULF.setPresence({ status: 'invisible' }); }
+    if(HOTEL){ await HOTEL.setPresence({ status: 'invisible' }); }
+    if(INDIA){ await INDIA.setPresence({ status: 'invisible' }); }
+    if(JULIET){ await JULIET.setPresence({ status: 'invisible' }); }
+    if(KILO){ await KILO.setPresence({ status: 'invisible' }); }
+    if(LIMA){ await LIMA.setPresence({ status: 'invisible' }); }
+    if(MIKE){ await MIKE.setPresence({ status: 'invisible' }); }
+    if(NOVEMBER){ await NOVEMBER.setPresence({ status: 'invisible' }); }
+    if(OSCAR){ await OSCAR.setPresence({ status: 'invisible' }); }
   });
 }
 
