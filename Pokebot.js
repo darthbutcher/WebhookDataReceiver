@@ -383,7 +383,7 @@ async function botReady(){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 
     // SET ALL TO INVISIBLE
-    await MAIN.BOTS.forEach((bot,index) => { bot.user.setPresence({ status: 'invisible' }); });
+    await MAIN.BOTS.forEach((bot,index) => { if(bot.user){ bot.user.setPresence({ status: 'invisible' }); } });
   });
 }
 
