@@ -244,7 +244,7 @@ MAIN.Get_Weather = (weather) => {
       case 6: weatherBoost = ' | '+MAIN.emotes.weather.snow+' *Boosted*'; break;
       case 7: weatherBoost = ' | '+MAIN.emotes.weather.fog+' *Boosted*'; break;
     }
-    resolve(weather);
+    resolve(weatherBoost);
   });
 }
 
@@ -383,7 +383,7 @@ async function botReady(){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 
     // SET ALL TO INVISIBLE
-    MAIN.BOTS.forEach((bot,index) => { bot.user.setPresence({ status: 'invisible' }); });
+    await MAIN.BOTS.forEach((bot,index) => { bot.user.setPresence({ status: 'invisible' }); });
   });
 }
 
@@ -405,7 +405,7 @@ async function botLogin(){
   if(MAIN.config.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
   if(MAIN.config.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
   if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
-  botReady();
+  await botReady();
 }
 
 botLogin();
