@@ -30,18 +30,6 @@ module.exports.run = async (MAIN, raid, city) => {
     // DETERMINE THE GEOFENCE AREA
     let raidArea = await MAIN.Get_Area(raid.latitude,raid.longitude);
 
-    // DETERMINE MOVE NAMES AND TYPES
-    let moveName1 = MAIN.moves[raid.move_1].name;
-    let moveType1 = MAIN.Get_Move_Type(raid.move_1);
-    let moveName2 = MAIN.moves[raid.move_2].name;
-    let moveType2 = await MAIN.Get_Move_Type(raid.move_2);
-
-    // DETERMINE POKEMON NAME AND TYPE
-    let pokemonType = '';
-    let pokemonName = MAIN.pokemon[raid.pokemon_id].name;
-    MAIN.pokemon[raid.pokemon_id].types.forEach((type) => { pokemonType += type+'/'; });
-    pokemonType = pokemonType.slice(0,-1);
-
     // DETERMINE GYM CONTROL
     switch(raid.team_id){
       case 1: defendingTeam = MAIN.emotes.teams.mystic+' Gym'; break;
@@ -86,6 +74,18 @@ module.exports.run = async (MAIN, raid, city) => {
       // RAID IS A BOSS
       default:
         raidType = 'Boss';
+
+        // DETERMINE POKEMON NAME AND TYPE
+        let pokemonType = '';
+        let pokemonName = MAIN.pokemon[raid.pokemon_id].name;
+        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' /'; });
+        pokemonType = pokemonType.slice(0,-2);
+
+        // DETERMINE MOVE NAMES AND TYPES
+        let moveName1 = MAIN.moves[raid.move_1].name;
+        let moveType1 = await MAIN.Get_Move_Type(raid.move_1);
+        let moveName2 = MAIN.moves[raid.move_2].name;
+        let moveType2 = await MAIN.Get_Move_Type(raid.move_2);
 
         // GET THE RAID BOSS SPRITE
         let raidUrl = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);
