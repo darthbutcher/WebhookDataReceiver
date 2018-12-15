@@ -8,7 +8,6 @@
 	},
 	"LISTENING_PORT": 3333,
 	"PREFIX": ".",
-	"Sub_Channels": [ "520604206206287883" ],
 	"DB": {
 		"host": "",
 		"username": "",
