@@ -1,8 +1,0 @@
-{
-  "Type": "raid",
-  "City": "GVL",
-  "Egg_Or_Boss": "egg",
-  "Channel_ID": "520599077675597825",
-  "Raid_Levels": [ 1, 2, 3, 4, 5 ],
-  "Ex_Eligible": true
-}
