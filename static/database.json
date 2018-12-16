@@ -1,17 +1,17 @@
 {
-  "LATEST": "2",
+  "LATEST": 3,
   "2": [{
       "sql": "ALTER TABLE pokebot.users ADD COLUMN pokemon_paused TEXT, ADD COLUMN raids_paused TEXT, ADD COLUMN quests_paused TEXT;",
       "data": "",
-      "gLog": "[Pokébot] New user paused options added to pokebot.users",
-      "bLog": "[Pokébot] Failed to update pokebot.users"
+      "gLog": "Updates Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
     }
   ],
   "3": [{
-      "sql": "ALTER TABLE pokebot.users ADD COLUMN pokemon_paused TEXT, ADD COLUMN raids_paused TEXT, ADD COLUMN quests_paused TEXT;",
+      "sql": "ALTER TABLE pokebot.quest_alerts ADD COLUMN user_name TEXT;",
       "data": "",
-      "gLog": "[Pokébot] New user paused options added to pokebot.users",
-      "bLog": "[Pokébot] Failed to update pokebot.users"
+      "gLog": "Update Applied to pokebot.quest_alerts",
+      "bLog": "[Pokébot] Failed to Update pokebot.quest_alerts"
     }
   ]
 }
