@@ -109,7 +109,7 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
                 if(subs.indexOf(simpleReward) >= 0 || subs.indexOf(questReward) >= 0){
 
                   // DEBUG
-                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED user filters.'); }
+                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest PASSED User Filters.'); }
 
                   // DEFINE VARIABLES
                   let quest = JSON.stringify(object), questEmbed = JSON.stringify(embed);
@@ -120,14 +120,14 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
                   // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
                   MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else{ console.info('[Pokébot] [subscriptions.js] Stored a '+reward+' Quest alert for '+userID+'.'); }
+                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+reward+' Quest Alert for '+userID+'.'); }
                   });
                 }
-                else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass user filters.'); } }
+                else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Did Not Pass User Filters.'); } }
               }
-              else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass secondary filters.'); } }
+              else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest Did Not Pass Secondary Filters.'); } }
             }
-            else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest did not pass initial filters.'); } }
+            else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest Did Not Pass Initial Filters.'); } }
           });
         }
       });
