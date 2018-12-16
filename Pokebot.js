@@ -183,10 +183,7 @@ MAIN.Get_Area = (lat,lon) => {
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_Embed = (embed, channelID) => {
   if(MAIN.Next_Bot==MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot=0; } else{ MAIN.Next_Bot++; }
-	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => {
-    //pokebotRestart();
-    console.error(embed,error);
-  });
+	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { pokebotRestart(); console.error(embed,error); });
 }
 
 // DETERMINE OBJECT CITY
@@ -384,6 +381,7 @@ OSCAR.on('ready', () => { OSCAR.user.setPresence({ status: 'invisible' }); });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
 async function botLogin(){
+  MAIN.Next_Bot=0; MAIN.User_Bot=0;
   await MAIN.login(MAIN.config.MAIN_BOT_TOKEN);
   if(MAIN.config.BOT_TOKENS[0]){ await MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
   if(MAIN.config.BOT_TOKENS[1]){ await MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.BOT_TOKENS[1]); }
@@ -400,11 +398,6 @@ async function botLogin(){
   if(MAIN.config.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
   if(MAIN.config.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
   if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
-}
-
-// BOT READY FUNCTION
-async function botReady(){
-  MAIN.Next_Bot=0; MAIN.User_Bot=0;
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 }
@@ -428,6 +421,5 @@ function pokebotRestart(){ process.exit(1); }
 async function start(){
   await updateDatabase();
   await botLogin();
-  await botReady();
 }
 start();
