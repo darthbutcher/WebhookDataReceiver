@@ -96,8 +96,8 @@ module.exports.run = async (MAIN, raid, city) => {
 
         // CREATE THE RAID EMBED
         raidEmbed = new Discord.RichEmbed().setThumbnail(raidUrl).setColor(embedColor)
-          .addField('**'+pokemonName+'** has taken over a Gym!', pokemonType+' | '+raidArea.name, false)
-          .addField(gymName, moveName1+' '+moveType1+' / '+moveName2+' '+moveType2, false)
+          .addField('**'+pokemonName+'** has taken over a Gym!', pokemonType, false)
+          .addField(gymName+' | '+raidArea.name, moveName1+' '+moveType1+' / '+moveName2+' '+moveType2, false)
           .addField('Raid Ends: '+endTime+' (*'+endMinutes+' Mins*)', 'Level '+raid.level+' | '+defendingTeam+raidSponsored, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .attachFile(attachment)

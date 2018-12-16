@@ -20,41 +20,32 @@ module.exports.run = async (MAIN, message) => {
 
   // CHECK EACH CITY FOR THE SUB CHANNEL
   MAIN.config.Cities.forEach((city,index) => {
-    if(message.channel.id!=city.sub_channel){ return; }
+    if(message.channel.id != city.sub_channel){ return; }
     else{
 
       // DELETE THE MESSAGE
       message.delete();
 
-      // SEE IF THE MESSAGE BEGINS WITH THE COMMAND PREFIX
-      if(!message.content.startsWith(prefix)){
-        return message.reply('All commands in this channel must start with `'+prefix+'`. Type `'+prefix+'help` for assistance.')
-          .then(m => m.delete(60000))
-          .catch(console.error);
-      }
-      else{
+      // LOAD DATABASE RECORD
+      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
 
-        // LOAD DATABASE RECORD
-        MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+        // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
+        if(!user || !user[0]){ MAIN.Save_Sub(message,city.name); }
+        else if(user[0].city!=city.name){
 
-          // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
-          if(!user || !user[0]){ MAIN.Save_Sub(message,city.name); }
-          else if(user[0].city!=city.name){
+          // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
+          return message.reply('You are not able to have subscriptions in two cities. Contact an admin to explain yourself.')
+            .then(m => m.delete(120000))
+            .catch(console.error);
+        }
+        else{
 
-            // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
-            return message.reply('You are not able to have subscriptions in two cities. Contact an admin to explain yourself.')
-              .then(m => m.delete(120000))
-              .catch(console.error);
-          }
-          else{
-
-            // FIND THE COMMAND AND SEND TO THE MODULE
-            let command=message.content.toLowerCase().split(' ')[0].slice(prefix.length);
-            let cmd=MAIN.commands.get(command);
-            if(cmd){ return cmd.run(MAIN, message, args, prefix); }
-          }
-        });
-      } return;
+          // FIND THE COMMAND AND SEND TO THE MODULE
+          let command=message.content.toLowerCase().split(' ')[0].slice(prefix.length);
+          let cmd=MAIN.commands.get(command);
+          if(cmd){ return cmd.run(MAIN, message, args, prefix); }
+        }
+      }); return;
     }
   });
 }

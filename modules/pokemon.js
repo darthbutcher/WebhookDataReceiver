@@ -86,11 +86,13 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
     let moveName2 = MAIN.moves[sighting.move_2].name;
     let moveType2 = await MAIN.Get_Move_Type(sighting.move_2);
 
-    // DETERMINE POKEMON NAME AND TYPE
+    // DETERMINE POKEMON NAME AND DETAILS
     let pokemonType = '';
     let pokemonName = MAIN.pokemon[sighting.pokemon_id].name;
-    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+'/'; });
-    pokemonType = pokemonType.slice(0,-1);
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' / '; });
+    pokemonType = pokemonType.slice(0,-3);
+    let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
+    let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
 
     // GET SPRITE IMAGE
@@ -107,9 +109,10 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 
     // CREATE AND SEND THE EMBED
     let pokemonEmbed=new Discord.RichEmbed().setColor('00ccff').setThumbnail(pokemonUrl)
-      .addField(pokemonName+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)', pokemonType+' | Level '+sighting.pokemon_level+weather+'\nCP '+sighting.cp+gender+'\n'+moveName1+' '+moveType1+' / '+moveName2+' '+moveType2, false)
-      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', pokemonArea.name, false)
-      .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
+      .addField(pokemonName+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)'+weatherBoost, pokemonType, false)
+      .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, moveName1+' '+moveType1+' / '+moveName2+' '+moveType2, false)
+      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', height+' | '+weight, false)
+      .addField(pokemonArea.name+'| Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .attachFile(attachment)
       .setImage('attachment://maptile.png');
 

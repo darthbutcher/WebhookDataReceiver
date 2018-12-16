@@ -128,7 +128,7 @@ MAIN.on('message', message => {
 MAIN.Save_Sub = (message,area) => {
 
   if(MAIN.User_Bot==MAIN.BOTS.length-1){ MAIN.User_Bot=0; } else{ MAIN.User_Bot++; }
-  
+
   MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, paused, bot, alert_time, city, pokemon_paused, raids_paused, quests_paused) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [message.member.id, message.member.user.tag, 'ALL', , , , 'NO', MAIN.User_Bot, '07:00', area, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
 
@@ -338,8 +338,8 @@ async function updateEachVersion(version){
         await MAIN.db[updateTo].forEach(async (update,index) => {
           await MAIN.sqlFunction(update.sql, update.data, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] '+update.gLog, update.bLog);
           await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [updateTo,u], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.')
-          await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+updateTo+'.');
         });
+        await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+updateTo+'.');
       }
     }
   });

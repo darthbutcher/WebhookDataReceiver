@@ -15,7 +15,7 @@ const Discord=require('discord.js');
 module.exports.run = async (MAIN, quest, city) => {
 
   // DEBUG
-  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received Quest ID: '+quest.pokestop_id); }
+  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received Quest. '+quest.pokestop_id); }
 
   // DEFINE VARIABLES
   let questTask = '', questUrl = '', imgUrl = '', questReward = '';
@@ -175,7 +175,7 @@ module.exports.run = async (MAIN, quest, city) => {
     if(MAIN.qConfig.Discord_Feeds == 'ENABLED'){
 
       // DEBUG LOG
-      if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest Sent to Filters. ID: '+quest.pokestop_id); }
+      if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest Sent To Filters. '+quest.pokestop_id); }
 
       // CHECK EACH FILTER
       MAIN.feeds.forEach((feed,index) => {
@@ -185,17 +185,20 @@ module.exports.run = async (MAIN, quest, city) => {
           if(feed.Type == 'quest'){
 
             // DEBUG LOG
-            if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Initial Filters. ID: '+quest.pokestop_id); }
+            if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Initial Filters. '+quest.pokestop_id); }
 
             // SECONDARY FILTERING BASED ON FILTER CONFIG
             if(feed.Rewards.indexOf(simpleReward) >= 0 || feed.Rewards.indexOf(questReward) >= 0){
 
               // LOGGING
-              if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Secondary Filters and Sent to Discord. ID: '+quest.pokestop_id); }
+              if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Secondary Filters and Sent to Discord. '+quest.pokestop_id); }
               else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Quest for '+city.name+'.'); }
 
               // SEND TO DISCORD
               MAIN.Send_Embed(questEmbed, feed.Channel_ID);
+            }
+            else{
+              if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest Ignored and Did Not Pass Filters. '+quest.pokestop_id); }
             }
           }
         }
