@@ -12,6 +12,12 @@
       "data": "",
       "gLog": "Update Applied to pokebot.quest_alerts",
       "bLog": "[Pokébot] Failed to Update pokebot.quest_alerts"
+    },
+    {
+      "sql": "UPDATE pokebot.users SET pokemon_paused = 'ACTIVE', raids_paused = 'ACTIVE', quests_paused = 'ACTIVE';",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
     }
   ]
 }
