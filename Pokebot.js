@@ -1,7 +1,5 @@
 // MODULE REQUIREMENTS
 const fs=require('fs');
-const rimraf = require('rimraf');
-const schedule = require('node-schedule');
 const mysql = require('mysql');
 const moment=require('moment');
 const Discord=require('discord.js');
@@ -318,18 +316,6 @@ setInterval(function() {
 //   rimraf('./static/files/*', function () { console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Map Tiles Directory Has Been Cleared.'); });
 // }, 86400000);
 
-// DATABASE UPDATE FUNCTION
-function performUpdate(updateNumber){
-  return new Promise(resolve => {
-    let updateTo = parseInt(updateNumber)+1;
-    MAIN.db[updateTo].forEach((update,index) => {
-      MAIN.sqlFunction(update.sql, update.data, update.gLog, update.bLog);
-      MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [updateTo,updateNumber], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.')
-    }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+updateTo+'.');
-    resolve('DONE');
-  });
-}
-
 // SQL QUERY FUNCTION
 MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
   return new Promise(resolve => {
@@ -338,6 +324,23 @@ MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
       if(logSuccess){ console.info(logSuccess); }
       resolve(result);
   	});
+  });
+}
+
+// PERFORM AN UPDATE FOR EACH VERSION UP TO LATEST
+async function updateEachVersion(version){
+  return new Promise(async (resolve) => {
+    for(let u = version; u <= MAIN.db.LATEST; u++){
+      if(u == MAIN.db.LATEST){ resolve('DONE'); }
+      else{
+        let updateTo = await u+1;
+        await MAIN.db[updateTo].forEach(async (update,index) => {
+          await MAIN.sqlFunction(update.sql, update.data, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] '+update.gLog, update.bLog);
+          await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [updateTo,u], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.')
+          await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+updateTo+'.');
+        });
+      }
+    }
   });
 }
 
@@ -350,14 +353,13 @@ async function updateDatabase(){
     await MAIN.sqlFunction(`CREATE TABLE IF NOT EXISTS pokebot.info (db_version INT)`, undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.info TABLE.');
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
       if(!row || !row[0]){
-        MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,[1], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.')
-        .then((db) => { for(let u=1; u < MAIN.db.LATEST; u++){ performUpdate(u); } resolve('Done'); });
+        await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,[1], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.')
+          .then(async (db) => { let version = await updateEachVersion(1); resolve(version); });
       }
-      else if(row[0].db_version != MAIN.update.LATEST){
-        await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database UPDATE found.'); console.info('Updating...');
-        for(let u = row[0].db_version; u < MAIN.db.LATEST; u++){ performUpdate(u); } resolve('Done');
+      else if(row[0].db_version < MAIN.db.LATEST){
+        await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database Update Found. Updating...');
+        let version = await updateEachVersion(row[0].db_version); resolve(version);
       }
-      else{ resolve('Done'); }
     });
   });
 }
@@ -397,16 +399,13 @@ async function botLogin(){
   if(MAIN.config.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
   if(MAIN.config.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
   if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
-  await botReady();
 }
 
 // BOT READY FUNCTION
 async function botReady(){
   MAIN.Next_Bot=0; MAIN.User_Bot=0;
-  updateDatabase().then(async function(updated){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
-  });
+  await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
+  await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 }
 
 // GET QUEST SCANNING STATUS
@@ -424,4 +423,10 @@ function questStatus(message){
 // RESTART FUNCTION
 function pokebotRestart(){ process.exit(1); }
 
-botLogin();
+// CRANK UP THE BOT
+async function start(){
+  await updateDatabase();
+  await botLogin();
+  await botReady();
+}
+start();
