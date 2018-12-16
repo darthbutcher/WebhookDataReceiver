@@ -126,8 +126,12 @@ MAIN.on('message', message => {
 
 // SAVE A USER IN THE USER TABLE
 MAIN.Save_Sub = (message,area) => {
+
   if(MAIN.User_Bot==MAIN.BOTS.length-1){ MAIN.User_Bot=0; } else{ MAIN.User_Bot++; }
-  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, paused, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, [message.member.id, message.member.user.tag, 'ALL', , , , 'NO', MAIN.User_Bot, '07:00', area], function (error, user, fields) {
+  
+  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, paused, bot, alert_time, city, pokemon_paused, raids_paused, quests_paused) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [message.member.id, message.member.user.tag, 'ALL', , , , 'NO', MAIN.User_Bot, '07:00', area, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+
     if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
     else{
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Added '+message.member.user.tag+' to the pokebot.user database.');
