@@ -360,6 +360,7 @@ async function updateDatabase(){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database Update Found. Updating...');
         let version = await updateEachVersion(row[0].db_version); resolve(version);
       }
+      else{ resolve(false); }
     });
   });
 }
