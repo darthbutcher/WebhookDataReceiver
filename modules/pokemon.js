@@ -147,9 +147,6 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
 
-    // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
-
     // GET GENDER
     let gender = await MAIN.Get_Gender(sighting.gender);
 
