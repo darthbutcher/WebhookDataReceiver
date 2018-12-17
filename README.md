@@ -2,9 +2,9 @@
 
 ## Join my discord server: https://discord.gg/BthYK68
 
-### This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user. 
+### This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user.
 
-(This is a work in progress guide. This bot is still technically in Beta as well)
+## This project is in Beta. So you will see errors at some point. 
 
 # Installation:
 ### 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
