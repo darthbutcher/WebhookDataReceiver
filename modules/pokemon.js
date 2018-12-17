@@ -142,7 +142,7 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
   let dMinutes = Math.floor((sighting.disappear_time-(time/1000))/60);
 
   // FETCH MAP TILE
-  MAIN.Static_Map_Tile(pokemon.latitude,pokemon.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
