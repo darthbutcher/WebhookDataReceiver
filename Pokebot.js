@@ -194,7 +194,7 @@ MAIN.Send_Embed = (embed, channelID) => {
 MAIN.Get_City = (object) => {
   let city='';
   for(let c=0;c<MAIN.config.Cities.length; c++){
-    if(insideGeofence([object.latitude,object.longitude], MAIN.config.Cities[c].coords)){
+    if(insideGeofence([object.latitude,object.longitude], MAIN.config.Cities[c].geofence)){
       city=MAIN.config.Cities[c]; return city
     }
   }
@@ -228,7 +228,7 @@ MAIN.Render_Map_Tile = (lat,lon,object_id) => {
       .then(() => map.image.save('./static/files/'+lat+','+lon+'.png'))
       //.then(() => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] New Map Tile Saved for '+lat+','+lon+'.'))
       .then(() => resolve('./static/files/'+lat+','+lon+'.png'))
-      .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile.',error); });
+      .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile. This error is due to a 404 request returned from the map tile server and is usually not re-occuring. If you see this error reocurring often, restart the bot.'); });
   });
 }
 
@@ -334,7 +334,7 @@ async function updateEachVersion(version){
     for(let u = version; u <= MAIN.db.LATEST; u++){
       if(u == MAIN.db.LATEST){ resolve('DONE'); }
       else{
-        let updateTo = await u+1;
+        let updateTo = u+1;
         await MAIN.db[updateTo].forEach(async (update,index) => {
           await MAIN.sqlFunction(update.sql, update.data, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] '+update.gLog, update.bLog);
           await MAIN.sqlFunction(`UPDATE pokebot.info SET db_version = ? WHERE db_version = ?`, [updateTo,u], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE pokebot.info TABLE.')
@@ -386,24 +386,24 @@ OSCAR.on('ready', () => { OSCAR.user.setPresence({ status: 'invisible' }); });
 // LOG IN BOTS AND ADD TO BOT ARRAY
 async function botLogin(){
   MAIN.Next_Bot=0; MAIN.User_Bot=0;
-  await MAIN.login(MAIN.config.MAIN_BOT_TOKEN);
-  if(MAIN.config.BOT_TOKENS[0]){ await MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
-  if(MAIN.config.BOT_TOKENS[1]){ await MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.BOT_TOKENS[1]); }
-  if(MAIN.config.BOT_TOKENS[2]){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(MAIN.config.BOT_TOKENS[2]); }
-  if(MAIN.config.BOT_TOKENS[3]){ await MAIN.BOTS.push(DELTA); DELTA.login(MAIN.config.BOT_TOKENS[3]); }
-  if(MAIN.config.BOT_TOKENS[4]){ await MAIN.BOTS.push(ECHO); ECHO.login(MAIN.config.BOT_TOKENS[4]); }
-  if(MAIN.config.BOT_TOKENS[5]){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(MAIN.config.BOT_TOKENS[5]); }
-  if(MAIN.config.BOT_TOKENS[6]){ await MAIN.BOTS.push(GULF); GULF.login(MAIN.config.BOT_TOKENS[6]); }
-  if(MAIN.config.BOT_TOKENS[7]){ await MAIN.BOTS.push(HOTEL); HOTEL.login(MAIN.config.BOT_TOKENS[7]); }
-  if(MAIN.config.BOT_TOKENS[8]){ await MAIN.BOTS.push(INDIA); INDIA.login(MAIN.config.BOT_TOKENS[8]); }
-  if(MAIN.config.BOT_TOKENS[9]){ await MAIN.BOTS.push(JULIET); JULIET.login(MAIN.config.BOT_TOKENS[9]); }
-  if(MAIN.config.BOT_TOKENS[10]){ await MAIN.BOTS.push(KILO); KILO.login(MAIN.config.BOT_TOKENS[10]); }
-  if(MAIN.config.BOT_TOKENS[11]){ await MAIN.BOTS.push(LIMA); LIMA.login(MAIN.config.BOT_TOKENS[11]); }
-  if(MAIN.config.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
-  if(MAIN.config.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
-  if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
-  await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
-  await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
+   MAIN.login(MAIN.config.MAIN_BOT_TOKEN);
+  if(MAIN.config.BOT_TOKENS[0]){ MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
+  if(MAIN.config.BOT_TOKENS[1]){ MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.BOT_TOKENS[1]); }
+  if(MAIN.config.BOT_TOKENS[2]){ MAIN.BOTS.push(CHARLIE); CHARLIE.login(MAIN.config.BOT_TOKENS[2]); }
+  if(MAIN.config.BOT_TOKENS[3]){ MAIN.BOTS.push(DELTA); DELTA.login(MAIN.config.BOT_TOKENS[3]); }
+  if(MAIN.config.BOT_TOKENS[4]){ MAIN.BOTS.push(ECHO); ECHO.login(MAIN.config.BOT_TOKENS[4]); }
+  if(MAIN.config.BOT_TOKENS[5]){ MAIN.BOTS.push(FOXTROT); FOXTROT.login(MAIN.config.BOT_TOKENS[5]); }
+  if(MAIN.config.BOT_TOKENS[6]){ MAIN.BOTS.push(GULF); GULF.login(MAIN.config.BOT_TOKENS[6]); }
+  if(MAIN.config.BOT_TOKENS[7]){ MAIN.BOTS.push(HOTEL); HOTEL.login(MAIN.config.BOT_TOKENS[7]); }
+  if(MAIN.config.BOT_TOKENS[8]){ MAIN.BOTS.push(INDIA); INDIA.login(MAIN.config.BOT_TOKENS[8]); }
+  if(MAIN.config.BOT_TOKENS[9]){ MAIN.BOTS.push(JULIET); JULIET.login(MAIN.config.BOT_TOKENS[9]); }
+  if(MAIN.config.BOT_TOKENS[10]){ MAIN.BOTS.push(KILO); KILO.login(MAIN.config.BOT_TOKENS[10]); }
+  if(MAIN.config.BOT_TOKENS[11]){ MAIN.BOTS.push(LIMA); LIMA.login(MAIN.config.BOT_TOKENS[11]); }
+  if(MAIN.config.BOT_TOKENS[12]){ MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
+  if(MAIN.config.BOT_TOKENS[13]){ MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
+  if(MAIN.config.BOT_TOKENS[14]){ MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 }
 
 // GET QUEST SCANNING STATUS

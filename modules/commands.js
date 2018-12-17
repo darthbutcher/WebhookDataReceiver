@@ -26,6 +26,11 @@ module.exports.run = async (MAIN, message) => {
       // DELETE THE MESSAGE
       message.delete();
 
+      // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
+      let member = MAIN.guilds.get(city.discord_id).members.get(message.member.id);
+      if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
+      else if(city.donor_role && !member.roles.has(city.donor_role)){ return; }
+
       // LOAD DATABASE RECORD
       MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
 

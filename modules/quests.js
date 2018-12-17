@@ -18,7 +18,7 @@ module.exports.run = async (MAIN, quest, city) => {
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received Quest. '+quest.pokestop_id); }
 
   // DEFINE VARIABLES
-  let questTask = '', questUrl = '', imgUrl = '', questReward = '';
+  let questTask = '', questUrl = '', questReward = '';
   let simpleReward = '', area = '', expireTime = MAIN.Bot_Time(null,'quest');
 
   // GET STATIC MAP TILE
@@ -188,11 +188,11 @@ module.exports.run = async (MAIN, quest, city) => {
             if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Initial Filters. '+quest.pokestop_id); }
 
             // SECONDARY FILTERING BASED ON FILTER CONFIG
-            if(feed.Rewards.indexOf(simpleReward) >= 0 || feed.Rewards.indexOf(questReward) >= 0){
+            if(feed.Rewards.toString().indexOf(simpleReward) >= 0 || feed.Rewards.toString().indexOf(questReward) >= 0){
 
               // LOGGING
               if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Secondary Filters and Sent to Discord. '+quest.pokestop_id); }
-              else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Quest for '+city.name+'.'); }
+              else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+simpleReward+' Quest for '+city.name+'.'); }
 
               // SEND TO DISCORD
               MAIN.Send_Embed(questEmbed, feed.Channel_ID);
