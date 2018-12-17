@@ -1,6 +1,6 @@
 # Pokebot
 
-## Join my discord server: https://discord.gg/BthYK68
+## Join my discord server: https://discord.gg/NnujtZ4
 
 ### This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user.
 
@@ -68,7 +68,7 @@
 
 (This is a work in progress guide. This bot is still technically in Beta as well)
 
-## Join my discord server: https://discord.gg/BthYK68
+## Join my discord server: https://discord.gg/NnujtZ4
 
 # Subscriptions
 
