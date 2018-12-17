@@ -136,27 +136,56 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 
 async function send_Without_IV(MAIN, sighting, channelID, time, city){
 
-  // DEFINE VARIABLES
-  let area = '';
-  let dTime = await MAIN.Bot_Time(sighting.disappear_time,'1');
-  let dMinutes = Math.floor((sighting.disappear_time-(time/1000))/60);
-
-  // FETCH MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
+    // DEFINE VARIABLES
+    let dTime = await MAIN.Bot_Time(sighting.disappear_time,'1');
+    let dMinutes = Math.floor((sighting.disappear_time-(time/1000))/60);
+
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
+    let attachment = new Discord.Attachment(imgUrl, 'maptile.png');
+
+    // DETERMINE POKEMON NAME AND DETAILS
+    let pokemonType = '';
+    let pokemonName = MAIN.pokemon[sighting.pokemon_id].name;
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' / '; });
+    pokemonType = pokemonType.slice(0,-3);
+
+
+    // GET SPRITE IMAGE
+    let pokemonUrl = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
+
+    // GET THE GENERAL AREA
+    let pokemonArea = await MAIN.Get_Area(sighting.latitude,sighting.longitude);
 
     // GET GENDER
     let gender = await MAIN.Get_Gender(sighting.gender);
 
-    // CREATE AND SEND EMBED
+    // GET WEATHER BOOST
+    let weatherBoost = await MAIN.Get_Weather(sighting.weather);
+
+    // CREATE AND SEND THE EMBED
     let pokemonEmbed=new Discord.RichEmbed().setColor('00ccff').setThumbnail(pokemonUrl)
-      .addField('A Wild **'+MAIN.pokemon[sighting.pokemon_id]+'** has appeared!', gender, false)
-      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', pokemonArea.name, false)
-      .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)',false)
+      .setTitle('A Wild **'+pokemonName+'** has Appeared!')
+      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', pokemonArea.name+weatherBoost+'\n'+pokemonType, false)
+      .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .attachFile(attachment)
       .setImage('attachment://maptile.png');
-    MAIN.Send_Embed(pokemonEmbed, channelID);
+
+    // MORE LOGS
+    if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Pokémon for '+city.name+'.'); }
+
+    // SEND EMBED TO FEEDS
+    if(MAIN.pConfig.Discord_Feeds=='ENABLED'){
+      MAIN.Send_Embed(pokemonEmbed, channelID);
+    }
+
+    // SEND TO SUBSCRIPTIONS MODULE
+    if(MAIN.pConfig.Subscriptions=='ENABLED'){
+      // parse_Subscription('sighting', sighting, pokemonEmbed, pokemonArea, city);
+    }
+
+    // END
+    return;
   });
 }
