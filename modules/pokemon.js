@@ -44,7 +44,7 @@ module.exports.run = async (MAIN, sighting, city) => {
             else if(feed.Post_Without_IV == true){
 
               // POST WITHOUT IVS IF OVERRIDDEN BY THE USER
-              send_Without_IV(MAIN, sighting, feed.Channel_ID, time, city);
+              send_Without_IV(MAIN, sighting, feed.Channel_ID, timeNow, city);
             }
           }
           else if(feed[pName].min_iv<=internalValue && feed.max_iv>=internalValue){
@@ -109,9 +109,9 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 
     // CREATE AND SEND THE EMBED
     let pokemonEmbed=new Discord.RichEmbed().setColor('00ccff').setThumbnail(pokemonUrl)
-      .addField(pokemonName+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)'+weatherBoost, pokemonType, false)
+      .setTitle(pokemonName+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+iv+'%)'+weatherBoost)
       .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, moveName1+' '+moveType1+' / '+moveName2+' '+moveType2, false)
-      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', height+' | '+weight, false)
+      .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', height+' | '+weight+'\n'+pokemonType, false)
       .addField(pokemonArea.name+'| Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .attachFile(attachment)
       .setImage('attachment://maptile.png');
