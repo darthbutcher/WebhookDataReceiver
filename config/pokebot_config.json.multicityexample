@@ -6,6 +6,7 @@
 		"Raids": "DISABLED",
 		"Subscriptions": "DISABLED"
 	},
+	"Custom_Emotes": true,
 	"LISTENING_PORT": 3333,
 	"PREFIX": ".",
 	"DB": {
