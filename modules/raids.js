@@ -18,14 +18,14 @@ module.exports.run = async (MAIN, raid, city) => {
   if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Received Raid ID: '+raid.gym_id); }
 
   // VARIABLES
-  let defendingTeam = '', area = '', raidSponsored = '', embedColor = '', raidType = '', raidEmbed = '', imgUrl = '';
+  let defendingTeam = '', area = '', raidSponsored = '', embedColor = '', raidType = '', raidEmbed = '', embedThumb = '';
   let timeNow = new Date().getTime(), hatchTime=MAIN.Bot_Time(raid.start,'1'), endTime = MAIN.Bot_Time(raid.end,'1');
   let hatchMinutes = Math.floor((raid.start-(timeNow/1000))/60), endMinutes = Math.floor((raid.end-(timeNow/1000))/60);
 
   MAIN.Static_Map_Tile(raid.latitude,raid.longitude).then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
+    let attachment = new Discord.Attachment(imgUrl, 'Raid_Alert.png');
 
     // DETERMINE THE GEOFENCE AREA
     let raidArea = await MAIN.Get_Area(raid.latitude,raid.longitude);
@@ -61,13 +61,22 @@ module.exports.run = async (MAIN, raid, city) => {
       case 0:
         raidType = 'Egg';
 
+        // GET EGG IMAGE
+        switch(raid.level){
+          case 1:
+          case 2: embedThumb = 'https://i.imgur.com/ABNC8aP.png'; break;
+          case 3:
+          case 4: embedThumb = 'https://i.imgur.com/zTvNq7j.png'; break;
+          case 5: embedThumb = 'https://i.imgur.com/jaTCRXJ.png'; break;
+        }
+
         // CREATE THE EGG EMBED
-        raidEmbed = new Discord.RichEmbed().setThumbnail(raid.url).setColor(embedColor)
+        raidEmbed = new Discord.RichEmbed().setThumbnail(embedThumb).setColor(embedColor)
           .addField(raid.gym_name, raidArea.name, false)
           .addField('Hatches: '+hatchTime+' (*'+hatchMinutes+' Mins*)', 'Level '+raid.level+' | '+defendingTeam+raidSponsored, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .attachFile(attachment)
-          .setImage('attachment://maptile.jpg');
+          .setImage('attachment://Raid_Alert.png');
 
         send_to_discord(MAIN, raidEmbed, raidType, raid, city); break;
 
@@ -101,7 +110,7 @@ module.exports.run = async (MAIN, raid, city) => {
           .addField('Raid Ends: '+endTime+' (*'+endMinutes+' Mins*)', 'Level '+raid.level+' | '+defendingTeam+raidSponsored, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .attachFile(attachment)
-          .setImage('attachment://maptile.jpg');
+          .setImage('attachment://Raid_Alert.png');
 
         send_to_discord(MAIN, raidEmbed, raidType, raid, city);
     }
@@ -122,8 +131,10 @@ function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
   // CHECK EACH FEED IN THE RAID ARRAY
   if(MAIN.rConfig.Discord_Feeds == 'ENABLED'){
 
+    // DEBUG
     if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Raid Sent to Filters. ID: '+raid.gym_id); }
 
+    // CHECK EACH FEED FILTER
     MAIN.feeds.forEach((feed,index) => {
 
       // ONLY LOOK AT FEEDS MARKED AS RAIDS
@@ -133,12 +144,8 @@ function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
         if(MAIN.config.Cities.length == 1 || city.name == feed.City){
           if(feed.Egg_Or_Boss == raidType.toLowerCase()){
 
-            if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Raid Passed Initial Filters. ID: '+raid.gym_id); }
-
             // FILTER FOR RAID LEVEL
             if(feed.Raid_Levels.indexOf(raid.level) >= 0){
-
-              if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Raid Passed Secondary Filters. ID: '+raid.gym_id); }
 
               // CHECK FOR EX ELIGIBLE REQUIREMENT
               if(feed.Ex_Eligible == undefined){
@@ -149,6 +156,9 @@ function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
                 if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Raid '+raidType+' for '+city.name+'.'); }
                 MAIN.Send_Embed(raidEmbed,feed.Channel_ID);
               }
+            }
+            else{
+              if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Raid Did Not Pass Feed Filter. '+raid.gym_id); }
             }
           }
         }
