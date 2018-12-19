@@ -14,12 +14,48 @@ const Discord=require('discord.js');
 
 module.exports.run = async (MAIN, quest, city) => {
 
-  // DEBUG
-  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received Quest. '+quest.pokestop_id); }
-
   // DEFINE VARIABLES
   let questTask = '', questUrl = '', questReward = '';
   let simpleReward = '', area = '', expireTime = MAIN.Bot_Time(null,'quest');
+
+  // DETERMINE THE QUEST REWARD
+  switch(quest.rewards[0].type){
+    // PLACEHOLDER
+    case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+
+    // ITEM REWARDS (EXCEPT STARDUST)
+    case 2:
+      simpleReward=MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
+      questReward=quest.rewards[0].info.amount+' '+MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
+      if(quest.rewards[0].info.amount>1){
+        if(questReward.indexOf('Berry')>=0){ questReward = questReward.toString().slice(0,-1)+'ies'; }
+        else{ questReward = questReward+'s'; }
+      } break;
+
+    // STARDUST REWARD
+    case 3:
+      questReward = quest.rewards[0].info.amount+' Stardust'; break;
+
+    // PLACEHOLDER
+    case 4:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+
+    // PLACEHOLDER
+    case 5:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+
+    // PLACEHOLDER
+    case 6:
+      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+
+    // ENCOUNTER REWARDS
+    case 7:
+      simpleReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
+      questReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
+  }
+
+  // DEBUG
+  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+questReward+' Quest. '+quest.pokestop_id); }
 
   // GET STATIC MAP TILE
   MAIN.Static_Map_Tile(quest.latitude,quest.longitude).then(async function(imgUrl){
@@ -32,43 +68,6 @@ module.exports.run = async (MAIN, quest, city) => {
 
     // CHECK FOR EMPTY DATA
     if(!quest.pokestop_id){ return; }
-
-    // DETERMINE THE QUEST REWARD AND CHANNEL
-    switch(quest.rewards[0].type){
-
-      // PLACEHOLDER
-      case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
-
-      // ITEM REWARDS (EXCEPT STARDUST)
-      case 2:
-        simpleReward=MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
-        questReward=quest.rewards[0].info.amount+' '+MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
-        if(quest.rewards[0].info.amount>1){
-          if(questReward.indexOf('Berry')>=0){ questReward = questReward.toString().slice(0,-1)+'ies'; }
-          else{ questReward = questReward+'s'; }
-        } break;
-
-      // STARDUST REWARD
-      case 3:
-        simpleReward = 'Stardust'; questReward = quest.rewards[0].info.amount+' Stardust'; break;
-
-      // PLACEHOLDER
-      case 4:
-        return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
-
-      // PLACEHOLDER
-      case 5:
-        return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
-
-      // PLACEHOLDER
-      case 6:
-        return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
-
-      // ENCOUNTER REWARDS
-      case 7:
-        simpleReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
-        questReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
-    }
 
     // GET REWARD ICON
     if(questReward.indexOf('Encounter')>=0){
@@ -174,9 +173,6 @@ module.exports.run = async (MAIN, quest, city) => {
     // SEND THE EMBED
     if(MAIN.qConfig.Discord_Feeds == 'ENABLED'){
 
-      // DEBUG LOG
-      if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest Sent To Filters. '+quest.pokestop_id); }
-
       // CHECK EACH FILTER
       MAIN.feeds.forEach((feed,index) => {
 
@@ -184,15 +180,12 @@ module.exports.run = async (MAIN, quest, city) => {
         if(MAIN.config.Cities.length == 1 || city.name == feed.City){
           if(feed.Type == 'quest'){
 
-            // DEBUG LOG
-            if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Initial Filters. '+quest.pokestop_id); }
-
             // SECONDARY FILTERING BASED ON FILTER CONFIG
-            if(feed.Rewards.toString().indexOf(simpleReward) >= 0 || feed.Rewards.toString().indexOf(questReward) >= 0){
+            if(feed.Rewards.indexOf(questReward) >= 0 || feed.Rewards.indexOf(simpleReward) >= 0){
 
               // LOGGING
               if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Quest PASSED Secondary Filters and Sent to Discord. '+quest.pokestop_id); }
-              else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+simpleReward+' Quest for '+city.name+'.'); }
+              else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+questReward+' Quest for '+city.name+'.'); }
 
               // SEND TO DISCORD
               MAIN.Send_Embed(questEmbed, feed.Channel_ID);
