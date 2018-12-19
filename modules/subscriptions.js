@@ -106,12 +106,9 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
               // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
               if(user.geofence == 'ALL' || userAreas.indexOf(area.name) >= 0){
 
-                // CONVERT REWARD LIST TO AN ARRAY
-                let subs = user.quests.split(',');
-
                 // USER FILTER
                 // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-                if(subs.indexOf(questReward) >= 0 || subs.indexOf(simpleReward) >=0){
+                if(user.quests.indexOf(questReward) >= 0 || user.quests.indexOf(simpleReward) >=0){
 
                   // DEFINE VARIABLES
                   let quest = JSON.stringify(object), questEmbed = JSON.stringify(embed);
