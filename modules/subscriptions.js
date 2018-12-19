@@ -21,6 +21,7 @@ config.Cities.forEach((channel,index) => {
 });
 
 module.exports.run = async (MAIN, type, object, embed, area, city) => {
+  let proceed = true;
 
   switch(type){
     // case 'raid':
@@ -49,74 +50,68 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
     //     }
     //   });
     case 'quest':
-      if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG] [subscriptions.js] Received Quest Subscription.'); }
 
+      // DETERMINE THE QUEST REWARD
+      let simpleReward='', questReward='';
+      switch(object.rewards[0].type){
+
+        // PLACEHOLDER
+        case 1:
+
+        // ITEM REWARDS (EXCEPT STARDUST)
+        case 2:
+          simpleReward=MAIN.proto.values['item_'+object.rewards[0].info.item_id];
+          questReward=object.rewards[0].info.amount+' '+MAIN.proto.values['item_'+object.rewards[0].info.item_id]; break;
+
+        // STARDUST REWARD
+        case 3:
+          questReward = object.rewards[0].info.amount+' Stardust'; break;
+
+        // PLACEHOLDER
+        case 4:
+
+        // PLACEHOLDER
+        case 5:
+
+        // PLACEHOLDER
+        case 6:
+
+        // ENCOUNTER REWARDS
+        case 7:
+          simpleReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name;
+          questReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name+' Encounter'; break;
+      }
+
+      if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Received '+questReward+' Quest.'); }
+
+      // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
       MAIN.database.query("SELECT * FROM pokebot.users", function (error, users, fields){
         if(users[0]){
           users.forEach((user,index) => {
 
-            // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
+            // FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
             let member = MAIN.guilds.get(city.discord_id).members.get(user.user_id);
-            if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
-            else if(city.donor_role && !member.roles.has(city.donor_role)){ return; }
+            if(!member){ proceed = false; }
+            else if(member.hasPermission('ADMINISTRATOR')){ proceed = true; }
+            else if(city.donor_role && !member.roles.has(city.donor_role)){ proceed = false; }
 
             // DEFINE VARIABLES
             let userAreas=user.geofence.split(','), userID=user.user_id;
 
             // LEVEL 1 FILTERS
             // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR CITY
-            if(user.paused != 'YES' && user.quests && city.name == user.city){
+            if(proceed = true && user.paused == 'NO' && user.quests && city.name == user.city){
 
               // LEVEL 2 FILTERS
               // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
               if(user.geofence == 'ALL' || userAreas.indexOf(area.name) >= 0){
 
-                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] Quest PASSED secondary filters.'); }
-
-
-
                 // CONVERT REWARD LIST TO AN ARRAY
                 let subs = user.quests.split(',');
 
-                // CHECK FOR SUBSCRIBED GYMS OR RAID BOSSES
-                // DETERMINE THE QUEST REWARD AND CHANNEL
-                switch(object.rewards[0].type){
-
-                  // PLACEHOLDER
-                  case 1:
-
-                  // ITEM REWARDS (EXCEPT STARDUST)
-                  case 2:
-                    simpleReward=MAIN.proto.values['item_'+object.rewards[0].info.item_id];
-                    questReward=object.rewards[0].info.amount+' '+MAIN.proto.values['item_'+object.rewards[0].info.item_id];
-                    break;
-
-                  // STARDUST REWARD
-                  case 3:
-                    simpleReward = 'Stardust';
-                    questReward = object.rewards[0].info.amount+' Stardust'; break;
-
-                  // PLACEHOLDER
-                  case 4:
-
-                  // PLACEHOLDER
-                  case 5:
-
-                  // PLACEHOLDER
-                  case 6:
-
-                  // ENCOUNTER REWARDS
-                  case 7:
-                    simpleReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name;
-                    questReward = MAIN.pokemon[object.rewards[0].info.pokemon_id].name+' Encounter'; break;
-                }
-
                 // USER FILTER
                 // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-                if(subs.indexOf(simpleReward) >= 0 || subs.indexOf(questReward) >= 0){
-
-                  // DEBUG
-                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest PASSED User Filters.'); }
+                if(subs.indexOf(questReward) >= 0 || subs.indexOf(simpleReward) >=0){
 
                   // DEFINE VARIABLES
                   let quest = JSON.stringify(object), questEmbed = JSON.stringify(embed);
@@ -127,14 +122,12 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
                   // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
                   MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+simpleReward+' Quest Alert for '+userID+'.'); }
+                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+questReward+' Quest Alert for '+userID+'.'); }
                   });
                 }
                 else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Did Not Pass User Filters.'); } }
               }
-              else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest Did Not Pass Secondary Filters.'); } }
             }
-            else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Quest Did Not Pass Initial Filters.'); } }
           });
         }
       });
