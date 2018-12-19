@@ -15,7 +15,7 @@ const Discord=require('discord.js');
 module.exports.run = async (MAIN, sighting, city) => {
 
   // DEBUG
-  //if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Received Encounter ID: '+sighting.encounter_id); }
+  if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Encounter. '+sighting.encounter_id); }
 
   // EStABLISH SIGHTING VARIABLES
   let timeNow = new Date().getTime(), pName=MAIN.pokemon[sighting.pokemon_id].name;
@@ -31,14 +31,15 @@ module.exports.run = async (MAIN, sighting, city) => {
           // CHECK IF POKEMON IS ENABLED OR SET TO A SPECIFIC IV
           if(feed[pName]=='True'){
 
-            // DEBUG
-            if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Passed Initial Filters. '+sighting.encounter_id); }
-
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED
             if(sighting.cp > 0){
               // CHECK THE MIN AND MAX IV SET FOR THE ENTIRE FEED
               if(feed.min_iv <= internalValue && feed.max_iv >= internalValue){
                 parse_Pokemon(MAIN, internalValue ,sighting, feed.Channel_ID, timeNow, city);
+              }
+              else{
+                // DEBUG
+                if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Did Not Pass Filters. '+sighting.encounter_id); }
               }
             }
             else if(feed.Post_Without_IV == true){
@@ -70,6 +71,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
   // DEBUG
   if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Received to Send to Discord. '+sighting.encounter_id); }
 
+  // FETCH THE MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
     // DEFINE VARIABLES
@@ -78,7 +80,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
     let pokeIV = Math.floor(sighting.iv*10)/10, weather='', area='';
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.png');
+    let attachment = new Discord.Attachment(imgUrl, 'Pokemon_Alert.png');
 
     // DETERMINE MOVE NAMES AND TYPES
     let moveName1 = MAIN.moves[sighting.move_1].name;
@@ -114,7 +116,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
       .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', height+' | '+weight+'\n'+pokemonType, false)
       .addField(pokemonArea.name+'| Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .attachFile(attachment)
-      .setImage('attachment://maptile.png');
+      .setImage('attachment://Pokemon_Alert.png');
 
     // MORE LOGS
     if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Pokémon for '+city.name+'.'); }
@@ -136,6 +138,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 
 async function send_Without_IV(MAIN, sighting, channelID, time, city){
 
+  // FETCH THE MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
     // DEFINE VARIABLES
@@ -143,14 +146,13 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
     let dMinutes = Math.floor((sighting.disappear_time-(time/1000))/60);
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.png');
+    let attachment = new Discord.Attachment(imgUrl, 'Pokemon_Alert.png');
 
     // DETERMINE POKEMON NAME AND DETAILS
     let pokemonType = '';
     let pokemonName = MAIN.pokemon[sighting.pokemon_id].name;
     MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' / '; });
     pokemonType = pokemonType.slice(0,-3);
-
 
     // GET SPRITE IMAGE
     let pokemonUrl = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
@@ -170,7 +172,7 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
       .addField('Disappears: '+dTime+' (*'+dMinutes+' Mins*)', pokemonArea.name+weatherBoost+'\n'+pokemonType, false)
       .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .attachFile(attachment)
-      .setImage('attachment://maptile.png');
+      .setImage('attachment://Pokemon_Alert.png');
 
     // MORE LOGS
     if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Pokémon for '+city.name+'.'); }
