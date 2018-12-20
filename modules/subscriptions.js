@@ -120,9 +120,10 @@ module.exports.run = async (MAIN, type, object, embed, area, city) => {
                   if(dbDate < timeNow){ dbDate = dbDate + 86400000; }
 
                   // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
-                  MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time) VALUES (?, ?, ?, ?, ?, ?, ?)`, [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate], function (error, user, fields) {
-                    if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+questReward+' Quest Alert for '+userID+'.'); }
+                  MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                    [user.user_id, user.user_name, quest, questEmbed, area.name, user.bot, dbDate, city.name], function (error, user, fields) {
+                      if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
+                      else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+questReward+' Quest Alert for '+userID+'.'); }
                   });
                 }
                 else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Did Not Pass User Filters.'); } }

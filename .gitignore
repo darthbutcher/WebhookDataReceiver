@@ -29,4 +29,4 @@ static/files
 static/quest_tiles/*.png
 static/raid_tiles/*.png
 static/pokemon_tiles/*.png
-static/files/*
+feeds/*.json
