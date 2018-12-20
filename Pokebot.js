@@ -7,6 +7,7 @@ const insideGeofence=require('point-in-polygon');
 const express=require('express');
 const bodyParser=require('body-parser');
 const StaticMaps=require('staticmaps');
+const Emojis = require('./Emojis.js');
 
 // EVENTS TO DISABLE TO SAVE MEMORY AND CPU
 var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','channelUpdate','clientUserGuildSettingsUpdate','clientUserSettingsUpdate',
@@ -33,10 +34,10 @@ MAIN.rConfig=require('./config/raid_config.json');
 MAIN.pConfig=require('./config/pokemon_config.json');
 MAIN.pokemon=require('./static/pokemon.json');
 MAIN.proto=require('./static/en.json');
-MAIN.emotes=require('./config/emotes.json');
 MAIN.rewards=require('./static/rewards.json');
 MAIN.moves=require('./static/moves.json');
-MAIN.db=require('./static/database.json')
+MAIN.db=require('./static/database.json');
+MAIN.types=require('./static/types.json');
 
 // DATABASE CONNECTION
 MAIN.database = mysql.createConnection({
@@ -209,43 +210,48 @@ MAIN.Get_Icon = (object, questReward) => {
 }
 
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS
-MAIN.Static_Map_Tile = (lat,lon,object_id) => {
+MAIN.Static_Map_Tile = (type,lat,lon,object_id) => {
   return new Promise(function(resolve, reject) {
-    let path='./static/files/'+lat+','+lon+'.png';
+    let path='./static/'+type+'_tiles/'+lat+','+lon+'.png';
     if(fs.existsSync(path)){ resolve(path); /*console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] USED AN EXISTING MAP TILE FOR '+lat+','+lon+'.');*/ }
-    else{ MAIN.Render_Map_Tile(lat,lon,object_id).then((location) => { resolve(location); }); }
+    else{
+      const zoom = 16, center = [lon,lat], options = { width: 400, height: 220 };
+      const map = new StaticMaps(options);
+      const marker = { img: `https://i.imgur.com/OGMRWnh.png`, width: 40, height: 40 };
+      marker.coord = [lon,lat]; map.addMarker(marker);
+      map.render(center, zoom)
+        .then(() => map.image.save('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
+        //.then(() => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] New Map Tile Saved for '+lat+','+lon+'.'))
+        .then(() => resolve('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
+        .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile. This error is due to a 404 request returned from the map tile server and is usually not re-occuring. If you see this error reocurring often, restart the bot.'); });
+    }
   });
 }
-
-// MAP TILE RENDER, CREATE, AND SAVE FUNCTION
-MAIN.Render_Map_Tile = (lat,lon,object_id) => {
-  return new Promise(function(resolve, reject) {
-    const zoom = 16, center = [lon,lat], options = { width: 400, height: 220 };
-    const map = new StaticMaps(options);
-    const marker = { img: `https://i.imgur.com/OGMRWnh.png`, width: 40, height: 40 };
-    marker.coord = [lon,lat]; map.addMarker(marker);
-    map.render(center, zoom)
-      .then(() => map.image.save('./static/files/'+lat+','+lon+'.png'))
-      //.then(() => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] New Map Tile Saved for '+lat+','+lon+'.'))
-      .then(() => resolve('./static/files/'+lat+','+lon+'.png'))
-      .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile. This error is due to a 404 request returned from the map tile server and is usually not re-occuring. If you see this error reocurring often, restart the bot.'); });
-  });
-}
-
 // GET WEATHER BOOST
 MAIN.Get_Weather = (weather) => {
   return new Promise(resolve => {
     let weatherBoost = '';
     switch(weather){
-      case 1: weatherBoost = ' '+MAIN.emotes.weather.clear+' *Boosted*'; break;
-      case 2: weatherBoost = ' '+MAIN.emotes.weather.rain+' *Boosted*'; break;
-      case 3: weatherBoost = ' '+MAIN.emotes.weather.partly_cloudy+' *Boosted*'; break;
-      case 4: weatherBoost = ' '+MAIN.emotes.weather.mostly_cloudy+' *Boosted*'; break;
-      case 5: weatherBoost = ' '+MAIN.emotes.weather.windy+' *Boosted*'; break;
-      case 6: weatherBoost = ' '+MAIN.emotes.weather.snow+' *Boosted*'; break;
-      case 7: weatherBoost = ' '+MAIN.emotes.weather.fog+' *Boosted*'; break;
-    }
-    resolve(weatherBoost);
+      case 1: weatherBoost = ' '+MAIN.emotes.clear+' *Boosted*'; break;
+      case 2: weatherBoost = ' '+MAIN.emotes.rain+' *Boosted*'; break;
+      case 3: weatherBoost = ' '+MAIN.emotes.partlyCloudy+' *Boosted*'; break;
+      case 4: weatherBoost = ' '+MAIN.emotes.cloudy+' *Boosted*'; break;
+      case 5: weatherBoost = ' '+MAIN.emotes.windy+' *Boosted*'; break;
+      case 6: weatherBoost = ' '+MAIN.emotes.snow+' *Boosted*'; break;
+      case 7: weatherBoost = ' '+MAIN.emotes.fog+' *Boosted*'; break;
+    } resolve(weatherBoost);
+  });
+}
+
+MAIN.Get_Team = (team_id) => {
+  return new Promise(resolve => {
+    let weatherBoost = '';
+    switch(team_id){
+      case 1: defendingTeam = MAIN.emotes.mystic+' Gym'; break;
+      case 2: defendingTeam = MAIN.emotes.valor+' Gym'; break;
+      case 3: defendingTeam = MAIN.emotes.instinct+' Gym'; break;
+      default: defendingTeam='Uncontested Gym';
+    } resolve(defendingTeam);
   });
 }
 
@@ -254,29 +260,28 @@ MAIN.Get_Move_Type = (moveNum) => {
   return new Promise(resolve => {
     let emote = '';
     switch(MAIN.moves[moveNum].type){
-      case 'Normal': emote = MAIN.emotes.types.Normal; break;
-      case 'Grass': emote = MAIN.emotes.types.Grass; break;
-      case 'Fire': emote = MAIN.emotes.types.Fire; break;
-      case 'Water': emote = MAIN.emotes.types.Water; break;
-      case 'Electric': emote = MAIN.emotes.types.Electric; break;
-      case 'Ground': emote = MAIN.emotes.types.Ground; break;
-      case 'Steel': emote = MAIN.emotes.types.Steel; break;
-      case 'Rock': emote = MAIN.emotes.types.Rock; break;
-      case 'Psychic': emote = MAIN.emotes.types.Psychic; break;
-      case 'Poison': emote = MAIN.emotes.types.Poison; break;
-      case 'Fairy': emote = MAIN.emotes.types.Fairy; break;
-      case 'Fighting': emote = MAIN.emotes.types.Fighting; break;
-      case 'Dark': emote = MAIN.emotes.types.Dark; break;
-      case 'Ghost': emote = MAIN.emotes.types.Ghost; break;
-      case 'Bug': emote = MAIN.emotes.types.Bug; break;
-      case 'Dragon': emote = MAIN.emotes.types.Dragon; break;
-      case 'Ice': emote = MAIN.emotes.types.Ice; break;
-      case 'Flying': emote = MAIN.emotes.types.Flying; break;
+      case 'Normal': emote = MAIN.emotes.normal; break;
+      case 'Grass': emote = MAIN.emotes.grass; break;
+      case 'Fire': emote = MAIN.emotes.fire; break;
+      case 'Water': emote = MAIN.emotes.water; break;
+      case 'Electric': emote = MAIN.emotes.electric; break;
+      case 'Ground': emote = MAIN.emotes.ground; break;
+      case 'Steel': emote = MAIN.emotes.steel; break;
+      case 'Rock': emote = MAIN.emotes.rock; break;
+      case 'Psychic': emote = MAIN.emotes.psychic; break;
+      case 'Poison': emote = MAIN.emotes.poison; break;
+      case 'Fairy': emote = MAIN.emotes.fairy; break;
+      case 'Fighting': emote = MAIN.emotes.fighting; break;
+      case 'Dark': emote = MAIN.emotes.dark; break;
+      case 'Ghost': emote = MAIN.emotes.ghost; break;
+      case 'Bug': emote = MAIN.emotes.bug; break;
+      case 'Dragon': emote = MAIN.emotes.dragon; break;
+      case 'Ice': emote = MAIN.emotes.ice; break;
+      case 'Flying': emote = MAIN.emotes.flying; break;
     }
     resolve(emote);
   });
 }
-
 // INTERVAL FUNCTION TO SEND QUEST SUBSCRIPTION DMS
 setInterval(function() {
   let timeNow=new Date().getTime();
@@ -403,7 +408,18 @@ async function botLogin(){
   if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
+
+  // SET ACTIVE BOOLEAN TO TRUE AND BOT POOL TO ZERO
   MAIN.Active=true; MAIN.Next_Bot=0; MAIN.User_Bot=0;
+
+  // CHECK FOR CUSTOM EMOTES (CHUCKLESLOVE MERGE)
+  if(MAIN.config.Custom_Emotes == false){
+    MAIN.emotes = new Emojis.DiscordEmojis();
+    MAIN.Custom_Emotes = true;
+
+    MAIN.emotes.Load(MAIN);
+  }
+  else{ MAIN.emotes = require('./config/emotes.json'); }
 }
 
 // GET QUEST SCANNING STATUS

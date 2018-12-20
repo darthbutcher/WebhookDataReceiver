@@ -72,7 +72,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
   if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Received to Send to Discord. '+sighting.encounter_id); }
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile('pokemon',sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
     // DEFINE VARIABLES
     let dTime = await MAIN.Bot_Time(sighting.disappear_time,'1');
@@ -91,7 +91,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
     // DETERMINE POKEMON NAME AND DETAILS
     let pokemonType = '';
     let pokemonName = MAIN.pokemon[sighting.pokemon_id].name;
-    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' / '; });
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
     pokemonType = pokemonType.slice(0,-3);
     let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
@@ -139,7 +139,7 @@ function parse_Pokemon(MAIN, iv, sighting, channelID, time, city){
 async function send_Without_IV(MAIN, sighting, channelID, time, city){
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile('pokemon',sighting.latitude,sighting.longitude).then(async function(imgUrl){
 
     // DEFINE VARIABLES
     let dTime = await MAIN.Bot_Time(sighting.disappear_time,'1');
@@ -151,7 +151,7 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
     // DETERMINE POKEMON NAME AND DETAILS
     let pokemonType = '';
     let pokemonName = MAIN.pokemon[sighting.pokemon_id].name;
-    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' / '; });
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
     pokemonType = pokemonType.slice(0,-3);
 
     // GET SPRITE IMAGE

@@ -58,7 +58,7 @@ module.exports.run = async (MAIN, quest, city) => {
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+questReward+' Quest. '+quest.pokestop_id); }
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile(quest.latitude,quest.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile('quest',quest.latitude,quest.longitude).then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');

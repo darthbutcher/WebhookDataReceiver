@@ -22,7 +22,7 @@ module.exports.run = async (MAIN, raid, city) => {
   let timeNow = new Date().getTime(), hatchTime=MAIN.Bot_Time(raid.start,'1'), endTime = MAIN.Bot_Time(raid.end,'1');
   let hatchMinutes = Math.floor((raid.start-(timeNow/1000))/60), endMinutes = Math.floor((raid.end-(timeNow/1000))/60);
 
-  MAIN.Static_Map_Tile(raid.latitude,raid.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile('raid',raid.latitude,raid.longitude).then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'Raid_Alert.png');
@@ -31,12 +31,7 @@ module.exports.run = async (MAIN, raid, city) => {
     let raidArea = await MAIN.Get_Area(raid.latitude,raid.longitude);
 
     // DETERMINE GYM CONTROL
-    switch(raid.team_id){
-      case 1: defendingTeam = MAIN.emotes.teams.mystic+' Gym'; break;
-      case 2: defendingTeam = MAIN.emotes.teams.valor+' Gym'; break;
-      case 3: defendingTeam = MAIN.emotes.teams.instinct+' Gym'; break;
-      default: defendingTeam='Uncontested Gym';
-    }
+    let defendingTeam = await MAIN.Get_Team(raid.team_id);
 
     // GET RAID LEVEL
     switch(raid.level){
@@ -87,8 +82,8 @@ module.exports.run = async (MAIN, raid, city) => {
         // DETERMINE POKEMON NAME AND TYPE
         let pokemonType = '';
         let pokemonName = MAIN.pokemon[raid.pokemon_id].name;
-        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => { pokemonType += type+' '+MAIN.emotes.types[type]+' /'; });
-        pokemonType = pokemonType.slice(0,-2);
+        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {  pokemonType += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
+        pokemonType = pokemonType.slice(0,-3);
 
         // DETERMINE MOVE NAMES AND TYPES
         let moveName1 = MAIN.moves[raid.move_1].name;
