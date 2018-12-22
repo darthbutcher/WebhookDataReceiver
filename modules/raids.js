@@ -144,11 +144,11 @@ function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
 
               // CHECK FOR EX ELIGIBLE REQUIREMENT
               if(feed.Ex_Eligible == undefined){
-                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Raid '+raidType+' for '+city.name+'.'); }
+                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Raid '+raidType+' for '+city.name+'.'); }
                 MAIN.Send_Embed(raidEmbed,feed.Channel_ID);
               }
               else if(feed.Ex_Eligible == raid.sponsor_id){
-                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Raid '+raidType+' for '+city.name+'.'); }
+                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Raid '+raidType+' for '+city.name+'.'); }
                 MAIN.Send_Embed(raidEmbed,feed.Channel_ID);
               }
             }

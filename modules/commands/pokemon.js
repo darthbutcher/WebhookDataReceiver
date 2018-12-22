@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, args, prefix) => {
+module.exports.run = async (MAIN, message, args, prefix, city) => {
 
   // DECLARE VARIABLES
   let nickname = '';
@@ -11,7 +11,7 @@ module.exports.run = async (MAIN, message, args, prefix) => {
   let requestAction = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Pokémon Subscriptions?')
-    .setFooter('You can \'view\', \'add\', \'remove\', or \'edit\'.');
+    .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
 
@@ -20,7 +20,7 @@ module.exports.run = async (MAIN, message, args, prefix) => {
 
     // DEFINE COLLECTOR AND FILTER
     const filter = cMessage => cMessage.member.id==message.member.id;
-    const collector = message.channel.createMessageCollector(filter, { time: 120000 });
+    const collector = message.channel.createMessageCollector(filter, { time: 60000 });
 
     // FILTER COLLECT EVENT
     collector.on('collect', message => {
@@ -77,7 +77,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix){
     else{
       if(reason == 'pause'){ change = 'PAUSED'; }
       if(reason == 'resume'){ change = 'ACTIVE'; }
-      MAIN.database.query("UPDATE pokebot.users SET pokemon_paused = ? WHERE user_id = ?", [change,message.member.id], function (error, user, fields) {
+      MAIN.database.query("UPDATE pokebot.users SET pokemon_status = ? WHERE user_id = ?", [change,message.member.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -145,7 +145,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 120000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -173,11 +173,8 @@ async function subscription_view(MAIN, message, nickname, prefix){
               case 'view': subscription_view(MAIN, message, nickname, prefix); break;
               case 'resume':
               case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-              default:
-                return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
             }
           });
-
         });
       }
     }
@@ -275,8 +272,43 @@ async function subscription_create(MAIN, message, nickname, prefix){
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle(sub.name+' Subscription Complete!')
-          .setFooter('Saved to the Pokébot Database.');
-        return message.channel.send(subscription_success).then(m => m.delete(5000)).catch(console.error);
+          .setDescription('Saved to the Pokébot Database.')
+          .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+        return message.channel.send(subscription_success).then( msg => {
+
+          // DEFINE COLLECTOR AND FILTER
+          const filter = cMessage => cMessage.member.id==message.member.id;
+          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+
+          // FILTER COLLECT EVENT
+          collector.on('collect', message => {
+            switch(message.content.toLowerCase()){
+              case 'add': collector.stop('add'); break;
+              case 'remove': collector.stop('remove'); break;
+              case 'edit': collector.stop('edit'); break;
+              case 'view': collector.stop('view'); break;
+              case 'pause': collector.stop('pause'); break;
+              case 'resume': collector.stop('resume'); break;
+              default:
+                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
+            }
+          });
+          // COLLECTOR HAS BEEN ENDED
+          collector.on('end', (collected,reason) => {
+
+            // DELETE ORIGINAL MESSAGE
+            msg.delete();
+            switch(reason){
+              case 'cancel': return;
+              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+              case 'edit': subscription_modify(MAIN, message, nickname, prefix); break;
+              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+              case 'resume':
+              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+            }
+          });
+        });
       }
     });
   });
@@ -335,8 +367,43 @@ async function subscription_remove(MAIN, message, nickname, prefix){
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
             .setAuthor(nickname, message.member.user.displayAvatarURL)
             .setTitle(remove_name+' Subscription Removed!')
-            .setFooter('Saved to the Pokébot Database.');
-          return message.channel.send(subscription_success).then(m => m.delete(5000)).catch(console.error);
+            .setDescription('Saved to the Pokébot Database.')
+            .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+          return message.channel.send(subscription_success).then( msg => {
+
+            // DEFINE COLLECTOR AND FILTER
+            const filter = cMessage => cMessage.member.id==message.member.id;
+            const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+
+            // FILTER COLLECT EVENT
+            collector.on('collect', message => {
+              switch(message.content.toLowerCase()){
+                case 'add': collector.stop('add'); break;
+                case 'remove': collector.stop('remove'); break;
+                case 'edit': collector.stop('edit'); break;
+                case 'view': collector.stop('view'); break;
+                case 'pause': collector.stop('pause'); break;
+                case 'resume': collector.stop('resume'); break;
+                default:
+                  message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
+              }
+            });
+            // COLLECTOR HAS BEEN ENDED
+            collector.on('end', (collected,reason) => {
+
+              // DELETE ORIGINAL MESSAGE
+              msg.delete();
+              switch(reason){
+                case 'cancel': return;
+                case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+                case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+                case 'edit': subscription_modify(MAIN, message, nickname, prefix); break;
+                case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+                case 'resume':
+                case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+              }
+            });
+          });
         }
       });
     }
@@ -433,10 +500,45 @@ async function subscription_modify(MAIN, message, nickname, prefix){
             if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
             else{
               let modification_success = new Discord.RichEmbed().setColor('00ff00')
-              .setAuthor(nickname, message.member.user.displayAvatarURL)
-              .setTitle(sub.name+' Subscription Modified!')
-              .setFooter('Saved to the Pokébot Database.');
-              return message.channel.send(modification_success).then(m => m.delete(5000)).catch(console.error);
+                .setAuthor(nickname, message.member.user.displayAvatarURL)
+                .setTitle(sub.name+' Subscription Modified!')
+                .setDescription('Saved to the Pokébot Database.')
+                .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+              return message.channel.send(modification_success).then( msg => {
+
+                // DEFINE COLLECTOR AND FILTER
+                const filter = cMessage => cMessage.member.id==message.member.id;
+                const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+
+                // FILTER COLLECT EVENT
+                collector.on('collect', message => {
+                  switch(message.content.toLowerCase()){
+                    case 'add': collector.stop('add'); break;
+                    case 'remove': collector.stop('remove'); break;
+                    case 'edit': collector.stop('edit'); break;
+                    case 'view': collector.stop('view'); break;
+                    case 'pause': collector.stop('pause'); break;
+                    case 'resume': collector.stop('resume'); break;
+                    default:
+                      message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
+                  }
+                });
+                // COLLECTOR HAS BEEN ENDED
+                collector.on('end', (collected,reason) => {
+
+                  // DELETE ORIGINAL MESSAGE
+                  msg.delete();
+                  switch(reason){
+                    case 'cancel': return;
+                    case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+                    case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+                    case 'edit': subscription_modify(MAIN, message, nickname, prefix); break;
+                    case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+                    case 'resume':
+                    case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+                  }
+                });
+              });
             }
           });
       }
@@ -457,7 +559,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
 
     // DEFINE COLLECTOR AND FILTER
     const filter = cMessage => cMessage.member.id == message.member.id;
-    const collector = message.channel.createMessageCollector(filter, { time: 120000 });
+    const collector = message.channel.createMessageCollector(filter, { time: 60000 });
 
     switch(type){
 

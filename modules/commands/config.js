@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, args, prefix) => {
+module.exports.run = async (MAIN, message, args, prefix, city) => {
   if(message.member.hasPermission('ADMINISTRATOR')){
     switch(args[0]){
       case 'quest':

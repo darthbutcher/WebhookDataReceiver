@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, args, prefix) => {
+module.exports.run = async (MAIN, message, args, prefix, city) => {
   if(args[0]=='admin'){
     let questHelp=new Discord.RichEmbed().setColor('00ff00')
       .setAuthor('Admin Commands:')

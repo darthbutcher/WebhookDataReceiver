@@ -39,8 +39,8 @@ module.exports.run = async (MAIN, sighting, city) => {
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED
             if(sighting.cp > 0){
-              // CHECK THE MIN AND MAX IV SET FOR THE ENTIRE FEED
-              if(feed.min_iv <= internal_value && feed.max_iv >= internal_value){
+              // CHECK THE MIN AND MAX IV AND LEVEL SET FOR THE ENTIRE FEED
+              if(feed.min_iv <= internal_value && feed.max_iv >= internal_value && feed.min_level <= sighting.pokemon_level && feed.max_level >= sighting.pokemon_level){
                 parse_Pokemon(MAIN, internal_value ,sighting, feed.Channel_ID, timeNow, city);
               }
               else{
@@ -136,7 +136,7 @@ function parse_Pokemon(MAIN, internal_value, sighting, channelID, time, city){
       .setImage('attachment://Pokemon_Alert.png');
 
     // MORE LOGS
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Pokémon for '+city.name+'.'); }
+    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Pokémon for '+city.name+'.'); }
 
     // SEND EMBED TO FEEDS
     if(MAIN.p_config.Discord_Feeds == 'ENABLED'){ MAIN.Send_Embed(pokemon_embed, channelID); }
@@ -185,7 +185,7 @@ async function send_Without_IV(MAIN, sighting, channelID, time, city){
       .setImage('attachment://Pokemon_Alert.png');
 
     // MORE LOGS
-    if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a Pokémon for '+city.name+'.'); }
+    if(MAIN.logging=='ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Pokémon for '+city.name+'.'); }
 
     // SEND EMBED TO FEEDS
     if(MAIN.p_config.Discord_Feeds=='ENABLED'){ MAIN.Send_Embed(pokemon_embed, channelID); }

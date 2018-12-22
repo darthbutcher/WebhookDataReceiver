@@ -122,7 +122,7 @@ MAIN.Save_Sub = (message,area) => {
 
   if(MAIN.User_Bot==MAIN.BOTS.length-1){ MAIN.User_Bot=0; } else{ MAIN.User_Bot++; }
 
-  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, paused, bot, alert_time, city, pokemon_paused, raids_paused, quests_paused) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, city, pokemon_.setFooter('You can type \'view\', \'time\', raids_.setFooter('You can type \'view\', \'time\', quests_.setFooter('You can type \'view\', \'time\') VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [message.member.id, message.member.user.tag, 'ALL', , , , 'NO', MAIN.User_Bot, '07:00', area, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
 
     if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
@@ -276,23 +276,25 @@ setInterval(function() {
   let timeNow=new Date().getTime();
   MAIN.database.query("SELECT * FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) {
     if(alerts && alerts[0]){
-      alerts.forEach((alert,index) => {
-        setTimeout(function() {
-          MAIN.BOTS[alert.bot].guilds.get('266738315380785152').fetchMember(alert.user_id).then( TARGET => {
-            let questEmbed=JSON.parse(alert.embed);
-            let attachment = new Discord.Attachment(questEmbed.file.attachment, questEmbed.file.name);
-            let alertEmbed=new Discord.RichEmbed()
-              .setColor(questEmbed.color)
-              .setThumbnail(questEmbed.thumbnail.url)
-              .addField(questEmbed.fields[0].name, questEmbed.fields[0].value, false)
-              .addField(questEmbed.fields[1].name, questEmbed.fields[1].value, false)
-              .addField(questEmbed.fields[2].name, questEmbed.fields[2].value, false)
-              .setImage(questEmbed.image.url)
+      alerts.forEach( async (alert,index) => {
+        setTimeout(async function() {
+          let quest = JSON.parse(alert.quest);
+          let city = await MAIN.Get_City(quest);
+          MAIN.BOTS[alert.bot].guilds.get(city.discord_id).fetchMember(alert.user_id).then( TARGET => {
+            let quest_embed = JSON.parse(alert.embed);
+            let attachment = new Discord.Attachment(quest_embed.file.attachment, quest_embed.file.name);
+            let alert_embed = new Discord.RichEmbed()
+              .setColor(quest_embed.color)
+              .setThumbnail(quest_embed.thumbnail.url)
+              .addField(quest_embed.fields[0].name, quest_embed.fields[0].value, false)
+              .addField(quest_embed.fields[1].name, quest_embed.fields[1].value, false)
+              .addField(quest_embed.fields[2].name, quest_embed.fields[2].value, false)
+              .setImage(quest_embed.image.url)
               .attachFile(attachment)
-              .setImage('attachment://'+questEmbed.file.name)
-              .setFooter(questEmbed.footer.text);
-            TARGET.send(alertEmbed).catch( error => {
-              console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']'+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.');
+              .setImage('attachment://'+quest_embed.file.name)
+              .setFooter(quest_embed.footer.text);
+            TARGET.send(alert_embed).catch( error => {
+              console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']'+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.',error);
             });
           });
         }, 2000*index);
@@ -399,28 +401,17 @@ async function botLogin(){
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 
   // SET ACTIVE BOOLEAN TO TRUE AND BOT POOL TO ZERO
-  MAIN.Active=true; MAIN.Next_Bot=0; MAIN.User_Bot=0;
+  MAIN.Active = true; MAIN.Next_Bot = 0; MAIN.User_Bot = 0;
 
   // CHECK FOR CUSTOM EMOTES (CHUCKLESLOVE MERGE)
   if(MAIN.config.Custom_Emotes == false){
     MAIN.emotes = new Emojis.DiscordEmojis();
     MAIN.Custom_Emotes = true;
-
     MAIN.emotes.Load(MAIN);
   }
-  else{ MAIN.emotes = require('./config/emotes.json'); }
-}
-
-// GET QUEST SCANNING STATUS
-function questStatus(message){
-  let scanned, total;
-  MAIN.database.query(`SELECT * from rdmdb.pokestop WHERE quest_type IS NOT NULL`, function (error, result, fields) {
-    console.log(result.length); scanned=result.length;
-  });
-  MAIN.database.query(`SELECT * FROM rdmdb.pokestop`, function (error, result, fields) {
-    console.log(result.length); total=result.length;
-  });
-  setTimeout(function() { message.channel.send('Quest Scanning Progress: ```'+scanned+'/'+total+'```'); }, 5000);
+  else{
+    MAIN.Custom_Emotes = false;
+    MAIN.emotes = require('./config/emotes.json'); }
 }
 
 // RESTART FUNCTION

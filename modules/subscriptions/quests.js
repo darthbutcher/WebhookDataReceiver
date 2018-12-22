@@ -60,7 +60,7 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
         else if(city.donor_role && !member.roles.has(city.donor_role)){ proceed = false; }
 
         // DEFINE VARIABLES
-        let userAreas=user.geofence.split(','), userID=user.user_id;
+        let user_areas=user.geofence.split(',');
 
         // LEVEL 1 FILTERS
         // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR CITY
@@ -68,27 +68,34 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
 
           // LEVEL 2 FILTERS
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-          if(user.geofence == 'ALL' || userAreas.indexOf(area.name) >= 0){
+          if(user.geofence == 'ALL' || user_areas.indexOf(area.name) >= 0){
 
             // CONVERT REWARD LIST TO AN ARRAY
             let subs = user.quests.split(',');
 
             // USER FILTER
             // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-            if(subs.indexOf(questReward) >= 0 || subs.indexOf(simpleReward) >=0){
+            if(subs.indexOf(questReward) >= 0 || subs.indexOf(simpleReward) >= 0){
 
               // DEFINE VARIABLES
               let quest_object = JSON.stringify(quest), quest_embed = JSON.stringify(embed);
+
+              // CHECK THE TIME VERSUS THE USERS SET SUBSCRIPTION TIME
               let timeNow = new Date().getTime(); let todaysDate = moment(timeNow).format('MM/DD/YYYY');
               let dbDate = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
-              if(dbDate < timeNow){ dbDate = dbDate + 86400000; }
 
-              // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
-              MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, dbDate, city.name], function (error, user, fields) {
-                  if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                  else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] [subscriptions.js] [QUEST] Stored a '+questReward+' Quest Alert for '+userID+'.'); }
-              });
+              // SEND THE QUEST ALERT TO THE USER
+              if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+questReward+' Quest DM to '+user.user_name+'.'); }
+              if(dbDate < timeNow){ MAIN.Send_DM(city.discord_id, user.user_id, embed, user.bot); }
+              else{
+
+                // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
+                MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                  [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, dbDate, city.name], function (error, user, fields) {
+                    if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
+                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+questReward+' Quest Alert for '+user.user_name+'.'); }
+                });
+              }
             }
             else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Did Not Pass User Filters.'); } }
           }

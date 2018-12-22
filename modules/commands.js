@@ -33,8 +33,7 @@ module.exports.run = async (MAIN, message) => {
 
   // CHECK EACH CITY FOR THE SUB CHANNEL
   MAIN.config.Cities.forEach((city,index) => {
-    if(message.channel.id != city.sub_channel){ return; }
-    else{
+    if(message.channel.id == city.sub_channel){ 
 
       // DELETE THE MESSAGE
       message.delete();
@@ -61,7 +60,7 @@ module.exports.run = async (MAIN, message) => {
           // FIND THE COMMAND AND SEND TO THE MODULE
           let command = message.content.toLowerCase().split(' ')[0].slice(MAIN.config.PREFIX.length);
           let cmd = modules.get(command);
-          if(cmd){ return cmd.run(MAIN, message, args, prefix); }
+          if(cmd){ return cmd.run(MAIN, message, args, prefix, city); }
         }
       }); return;
     }
