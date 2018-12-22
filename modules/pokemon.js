@@ -16,7 +16,7 @@ const Subscription = require('./subscriptions/pokemon.js');
 module.exports.run = async (MAIN, sighting, city) => {
 
   // DEBUG
-  if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Encounter. '+sighting.encounter_id); }
+  if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Pokemon. '+sighting.encounter_id); }
 
   // EStABLISH SIGHTING VARIABLES
   let timeNow = new Date().getTime(), pName=MAIN.pokemon[sighting.pokemon_id].name;
@@ -45,7 +45,7 @@ module.exports.run = async (MAIN, sighting, city) => {
               }
               else{
                 // DEBUG
-                if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Did Not Pass Any Filters. '+sighting.encounter_id); }
+                if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters. '+sighting.encounter_id); }
               }
             }
             else if(feed.Post_Without_IV == true){
@@ -68,18 +68,18 @@ module.exports.run = async (MAIN, sighting, city) => {
           }
           else{
             // DEBUG
-            if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Did Not Pass Any Filters. '+sighting.encounter_id); }
+            if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters. '+sighting.encounter_id); }
           } return;
         }
         else{
           // DEBUG
-          if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter set to False or No Channel_ID in the Feed. '+sighting.encounter_id); }
+          if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Set to False or No Channel_ID in the Feed json. '+sighting.encounter_id); }
         }
       }
     }
     else{
       // DEBUG
-      if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Did Not Pass City Check. '+sighting.encounter_id); }
+      if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass City Check. '+sighting.encounter_id); }
     }
   });
 }

@@ -34,7 +34,7 @@ const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE
 const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
 // CACHE DATA FROM JSONS
-MAIN.config = require('./config/bot_config.json');
+MAIN.config = require('./config/config.json');
 MAIN.geofence = require('./config/geofences.json');
 MAIN.q_config = require('./config/quest_config.json');
 MAIN.r_config = require('./config/raid_config.json');
