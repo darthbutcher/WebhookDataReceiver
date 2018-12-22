@@ -1,3 +1,15 @@
+const Discord = require('discord.js');
+const moment = require('moment');
+const fs = require('fs');
+
+const modules = new Discord.Collection();
+fs.readdir('./modules/commands', (err,files) => {
+  let commandFiles = files.filter(f => f.split('.').pop()==='js');
+  commandFiles.forEach((f,i) => {
+    let command = require('./commands/'+f); modules.set(f.slice(0,-3), command);
+  });
+});
+
 //#############################################################//
 //#############################################################//
 //    _____ ____  __  __ __  __          _   _ _____   _____   //
@@ -13,10 +25,11 @@
 module.exports.run = async (MAIN, message) => {
 
   // DEFINE VARIABLES
-  let prefix=MAIN.config.PREFIX, args=message.content.toLowerCase().split(' ').slice(1);
+  let prefix = MAIN.config.PREFIX;
+  let args = message.content.toLowerCase().split(' ').slice(1);
 
   // CHECK IF THE MESSAGE IS FROM A BOT
-  if(message.author.bot==true){ return; }
+  if(message.author.bot == true){ return; }
 
   // CHECK EACH CITY FOR THE SUB CHANNEL
   MAIN.config.Cities.forEach((city,index) => {
@@ -36,7 +49,7 @@ module.exports.run = async (MAIN, message) => {
 
         // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
         if(!user || !user[0]){ MAIN.Save_Sub(message,city.name); }
-        else if(user[0].city!=city.name){
+        else if(user[0].city != city.name){
 
           // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
           return message.reply('You are not able to have subscriptions in two cities. Contact an admin to explain yourself.')
@@ -46,8 +59,8 @@ module.exports.run = async (MAIN, message) => {
         else{
 
           // FIND THE COMMAND AND SEND TO THE MODULE
-          let command=message.content.toLowerCase().split(' ')[0].slice(prefix.length);
-          let cmd=MAIN.commands.get(command);
+          let command = message.content.toLowerCase().split(' ')[0].slice(MAIN.config.PREFIX.length);
+          let cmd = modules.get(command);
           if(cmd){ return cmd.run(MAIN, message, args, prefix); }
         }
       }); return;

@@ -22,7 +22,7 @@ module.exports.run = async (MAIN, raid, city) => {
   let timeNow = new Date().getTime(), hatchTime=MAIN.Bot_Time(raid.start,'1'), endTime = MAIN.Bot_Time(raid.end,'1');
   let hatchMinutes = Math.floor((raid.start-(timeNow/1000))/60), endMinutes = Math.floor((raid.end-(timeNow/1000))/60);
 
-  MAIN.Static_Map_Tile('raid',raid.latitude,raid.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile(raid.latitude,raid.longitude,'raid').then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'Raid_Alert.png');
@@ -43,7 +43,7 @@ module.exports.run = async (MAIN, raid, city) => {
     }
 
     // CHECK IF SPONSORED GYM
-    if(raid.sponsor_id == true){ raidSponsored = ' | '+MAIN.emotes.ex_pass+' Eligible'; }
+    if(raid.sponsor_id == true){ raidSponsored = ' | '+MAIN.emotes.exPass+' Eligible'; }
 
     // CHECK FOR GYM NAME
     if(!raid.gym_name){ gymName = 'No Name'; }
@@ -113,7 +113,7 @@ module.exports.run = async (MAIN, raid, city) => {
 
 
     // SEND TO THE SUBSCRIPTION MODULE
-    if(MAIN.rConfig.Subscriptions == 'ENABLED'){
+    if(MAIN.r_config.Subscriptions == 'ENABLED'){
 
     }
 
@@ -124,7 +124,7 @@ module.exports.run = async (MAIN, raid, city) => {
 
 function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
   // CHECK EACH FEED IN THE RAID ARRAY
-  if(MAIN.rConfig.Discord_Feeds == 'ENABLED'){
+  if(MAIN.r_config.Discord_Feeds == 'ENABLED'){
 
     // DEBUG
     if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [raids.js] Raid Sent to Filters. ID: '+raid.gym_id); }
@@ -137,7 +137,7 @@ function send_to_discord(MAIN, raidEmbed, raidType, raid, city){
 
         // FILTER FOR EGG OR RAID AND CITY
         if(MAIN.config.Cities.length == 1 || city.name == feed.City){
-          if(feed.Egg_Or_Boss == raidType.toLowerCase()){
+          if(feed.Egg_Or_Boss.toLowerCase() == raidType.toLowerCase()){
 
             // FILTER FOR RAID LEVEL
             if(feed.Raid_Levels.indexOf(raid.level) >= 0){

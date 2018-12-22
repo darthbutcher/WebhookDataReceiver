@@ -1,4 +1,5 @@
 const Discord=require('discord.js');
+const Subscription = require('./subscriptions/quests.js');
 
 //#########################################################//
 //#########################################################//
@@ -8,7 +9,7 @@ const Discord=require('discord.js');
 //#####  | |  | | |  | |  __|  \___ \   | |  \___ \   #####//
 //#####  | |__| | |__| | |____ ____) |  | |  ____) |  #####//
 //#####   \___\_\\____/|______|_____/   |_| |_____/   #####//
-//#####      QUEST POSTING AND DM SUBSCRIPTIONS       #####//
+//#####            QUEST PARSING AND FEEDS            #####//
 //#########################################################//
 //#########################################################//
 
@@ -58,7 +59,7 @@ module.exports.run = async (MAIN, quest, city) => {
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+questReward+' Quest. '+quest.pokestop_id); }
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile('quest',quest.latitude,quest.longitude).then(async function(imgUrl){
+  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
@@ -171,7 +172,7 @@ module.exports.run = async (MAIN, quest, city) => {
       .setFooter('Expires: '+expireTime);
 
     // SEND THE EMBED
-    if(MAIN.qConfig.Discord_Feeds == 'ENABLED'){
+    if(MAIN.q_config.Discord_Feeds == 'ENABLED'){
 
       // CHECK EACH FILTER
       MAIN.feeds.forEach((feed,index) => {
@@ -200,9 +201,8 @@ module.exports.run = async (MAIN, quest, city) => {
     else{ console.info('[Pokébot] Quest ignored due to Disabled Discord setting.'); }
 
     // SEND TO SUBSCRIPTIONS FUNCTION
-    if(MAIN.qConfig.Subscriptions == 'ENABLED'){
-      let quest_subs = MAIN.modules.get('subscriptions.js');
-      if(quest_subs){ quest_subs.run(MAIN, 'quest', quest, questEmbed, questArea, city); }
+    if(MAIN.q_config.Subscriptions == 'ENABLED'){
+      Subscription.run(MAIN, quest, questEmbed, questArea, city);
     }
     else{ console.info('[Pokébot] Quest ignored due to Disabled Subscription setting.'); }
 

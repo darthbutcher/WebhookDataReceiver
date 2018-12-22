@@ -1,13 +1,20 @@
 // MODULE REQUIREMENTS
-const fs=require('fs');
+const fs = require('fs');
 const mysql = require('mysql');
-const moment=require('moment');
-const Discord=require('discord.js');
-const insideGeofence=require('point-in-polygon');
-const express=require('express');
-const bodyParser=require('body-parser');
-const StaticMaps=require('staticmaps');
-const Emojis = require('./Emojis.js');
+const moment = require('moment');
+const Discord = require('discord.js');
+const insideGeofence = require('point-in-polygon');
+const express = require('express');
+const bodyParser = require('body-parser');
+
+// LOAD MODULES
+const StaticMaps = require('staticmaps');
+const Emojis = require('./modules/emojis.js');
+const Quests = require('./modules/quests.js');
+const Pokemon = require('./modules/pokemon.js');
+const Raids = require('./modules/raids.js');
+const Commands = require('./modules/commands.js');
+
 
 // EVENTS TO DISABLE TO SAVE MEMORY AND CPU
 var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','channelUpdate','clientUserGuildSettingsUpdate','clientUserSettingsUpdate',
@@ -17,27 +24,27 @@ var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','chan
   'reconnecting','resume','roleCreate','roleDelete','roleUpdate','typingStart','typingStop','userNoteUpdate','userUpdate','voiceStateUpdate','warn'];
 
 // DEFINE BOTS AND DISABLE ALL EVENTS TO SAVE MEMORY AND CPU
-const MAIN=new Discord.Client({ disabledEvents: eventsToDisable }); const ALPHA=new Discord.Client({ disabledEvents: eventsToDisable });
-const BRAVO=new Discord.Client({ disabledEvents: eventsToDisable }); const CHARLIE=new Discord.Client({ disabledEvents: eventsToDisable });
-const DELTA=new Discord.Client({ disabledEvents: eventsToDisable }); const ECHO=new Discord.Client({ disabledEvents: eventsToDisable });
-const FOXTROT=new Discord.Client({ disabledEvents: eventsToDisable }); const GULF=new Discord.Client({ disabledEvents: eventsToDisable });
-const HOTEL=new Discord.Client({ disabledEvents: eventsToDisable }); const INDIA=new Discord.Client({ disabledEvents: eventsToDisable });
-const JULIET=new Discord.Client({ disabledEvents: eventsToDisable }); const KILO=new Discord.Client({ disabledEvents: eventsToDisable });
-const LIMA=new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE=new Discord.Client({ disabledEvents: eventsToDisable });
-const NOVEMBER=new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
+const MAIN = new Discord.Client({ disabledEvents: eventsToDisable }); const ALPHA=new Discord.Client({ disabledEvents: eventsToDisable });
+const BRAVO = new Discord.Client({ disabledEvents: eventsToDisable }); const CHARLIE=new Discord.Client({ disabledEvents: eventsToDisable });
+const DELTA = new Discord.Client({ disabledEvents: eventsToDisable }); const ECHO=new Discord.Client({ disabledEvents: eventsToDisable });
+const FOXTROT = new Discord.Client({ disabledEvents: eventsToDisable }); const GULF=new Discord.Client({ disabledEvents: eventsToDisable });
+const HOTEL = new Discord.Client({ disabledEvents: eventsToDisable }); const INDIA=new Discord.Client({ disabledEvents: eventsToDisable });
+const JULIET = new Discord.Client({ disabledEvents: eventsToDisable }); const KILO=new Discord.Client({ disabledEvents: eventsToDisable });
+const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE=new Discord.Client({ disabledEvents: eventsToDisable });
+const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
 // CACHE DATA FROM JSONS
-MAIN.config=require('./config/pokebot_config.json');
-MAIN.geofence=require('./config/geofences.json');
-MAIN.qConfig=require('./config/quest_config.json');
-MAIN.rConfig=require('./config/raid_config.json');
-MAIN.pConfig=require('./config/pokemon_config.json');
-MAIN.pokemon=require('./static/pokemon.json');
-MAIN.proto=require('./static/en.json');
-MAIN.rewards=require('./static/rewards.json');
-MAIN.moves=require('./static/moves.json');
-MAIN.db=require('./static/database.json');
-MAIN.types=require('./static/types.json');
+MAIN.config = require('./config/bot_config.json');
+MAIN.geofence = require('./config/geofences.json');
+MAIN.q_config = require('./config/quest_config.json');
+MAIN.r_config = require('./config/raid_config.json');
+MAIN.p_config = require('./config/pokemon_config.json');
+MAIN.pokemon = require('./static/pokemon.json');
+MAIN.proto = require('./static/en.json');
+MAIN.rewards = require('./static/rewards.json');
+MAIN.moves = require('./static/moves.json');
+MAIN.db = require('./static/database.json');
+MAIN.types = require('./static/types.json');
 
 // DATABASE CONNECTION
 MAIN.database = mysql.createConnection({
@@ -49,39 +56,19 @@ MAIN.database = mysql.createConnection({
 MAIN.database.connect();
 
 // GLOBAL VARIABLES
-MAIN.BOTS=[];
+MAIN.BOTS = [];
 
 // DEFINE LOGGING & DEBUGGING
-MAIN.logging=MAIN.config.CONSOLE_LOGS;
-MAIN.debug=MAIN.config.DEBUG;
-
-// DEFINE AND LOAD ALL MODULES
-MAIN.modules=new Discord.Collection();
-fs.readdir('./modules', (error,files) => {
-	let moduleFiles=files.filter(f => f.split('.').pop()==='js'), mCount=0;
-	moduleFiles.forEach((script,index) => {
-		delete require.cache[require.resolve('./modules/'+script)]; mCount++
-		let module=require('./modules/'+script); MAIN.modules.set(script, module);
-	}); console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+mCount+' Modules.');
-});
-
-// DEFINE AND LOAD ALL COMMANDS
-MAIN.commands=new Discord.Collection();
-fs.readdir('./commands', (err,files) => {
-  let commandFiles=files.filter(f => f.split('.').pop()==='js'), cCount=0;
-  commandFiles.forEach((f,i) => {
-    delete require.cache[require.resolve('./commands/'+f)]; cCount++;
-    let command=require('./commands/'+f); MAIN.commands.set(f.slice(0,-3), command);
-  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+cCount+' Commands.');
-});
+MAIN.logging = MAIN.config.CONSOLE_LOGS;
+MAIN.debug = MAIN.config.DEBUG;
 
 // DEFINE AND LOAD ALL FEEDS
-MAIN.feeds=[];
+MAIN.feeds = [];
 fs.readdir('./feeds', (err,files) => {
-  let feedFiles=files.filter(f => f.split('.').pop()==='json'), fCount=0;
+  let feedFiles = files.filter(f => f.split('.').pop()==='json'), fCount=0;
   feedFiles.forEach((f,i) => {
     delete require.cache[require.resolve('./feeds/'+f)];
-    let feed=require('./feeds/'+f); MAIN.feeds.push(feed); fCount++
+    let feed = require('./feeds/'+f); MAIN.feeds.push(feed); fCount++
   }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+fCount+' Pokémon Feeds.');
 });
 
@@ -93,36 +80,41 @@ app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] ['+MAIN.Bot
 
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
 app.post('/', (webhook, resolve) => {
-  let PAYLOAD=webhook.body;
+  let PAYLOAD = webhook.body;
   if(MAIN.Active != true){ return; }
   // SEPARATE EACH PAYLOAD AND SORT
-  PAYLOAD.forEach((data,index) => {
-    let city = MAIN.Get_City(data.message);
+  PAYLOAD.forEach( async (data,index) => {
+    let city = await MAIN.Get_City(data.message);
 		switch(data.type){
 
       // SEND TO POKEMON MODULE
 			case 'pokemon':
-				let pokemon=MAIN.modules.get('pokemon.js');
-				if(pokemon){ pokemon.run(MAIN, data.message, city); } return;
+				Pokemon.run(MAIN, data.message, city); return;
 
       // SEND TO RAIDS MODULE
 			case 'raid':
-        let raids=MAIN.modules.get('raids.js');
-				if(raids){ raids.run(MAIN, data.message, city); } return;
+        Raids.run(MAIN, data.message, city); return;
 
       // SEND TO QUESTS MODULE
 			case 'quest':
-				let quests=MAIN.modules.get('quests.js');
-				if(quests){ quests.run(MAIN, data.message, city); } return;
+				Quests.run(MAIN, data.message, city); return;
 			default: return;
 		}
 	});
 });
 
+// DETERMINE OBJECT CITY
+MAIN.Get_City = (object) => {
+  return new Promise(function(resolve, reject) {
+    MAIN.config.Cities.forEach((city,index) => {
+      if(insideGeofence([object.latitude,object.longitude], city.geofence)){ resolve(city); }
+    }); resolve(undefined);
+  });
+}
+
 // SEND MESSAGE TO COMMAND MODULE
 MAIN.on('message', message => {
-  let commands=MAIN.modules.get('commands.js');
-  if(commands){ commands.run(MAIN, message); } return;
+  Commands.run(MAIN, message); return;
 });
 
 // SAVE A USER IN THE USER TABLE
@@ -191,14 +183,11 @@ MAIN.Send_Embed = (embed, channelID) => {
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { pokebotRestart(); console.error(embed,error); });
 }
 
-// DETERMINE OBJECT CITY
-MAIN.Get_City = (object) => {
-  let city='';
-  for(let c=0;c<MAIN.config.Cities.length; c++){
-    if(insideGeofence([object.latitude,object.longitude], MAIN.config.Cities[c].geofence)){
-      city=MAIN.config.Cities[c]; return city
-    }
-  }
+// CHOOSE NEXT BOT AND SEND EMBED
+MAIN.Send_DM = (guild_id, user_id, embed, bot) => {
+  MAIN.BOTS[bot].guilds.get(guild_id).fetchMember(user_id).then( TARGET => {
+    TARGET.send(embed).catch(console.error);
+  });
 }
 
 // GET QUEST REWARD ICON
@@ -210,7 +199,7 @@ MAIN.Get_Icon = (object, questReward) => {
 }
 
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS
-MAIN.Static_Map_Tile = (type,lat,lon,object_id) => {
+MAIN.Static_Map_Tile = (lat,lon,type) => {
   return new Promise(function(resolve, reject) {
     let path='./static/'+type+'_tiles/'+lat+','+lon+'.png';
     if(fs.existsSync(path)){ resolve(path); /*console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] USED AN EXISTING MAP TILE FOR '+lat+','+lon+'.');*/ }

@@ -1,0 +1,57 @@
+{
+	"CONSOLE_LOGS": "ENABLED",
+	"LISTENING_PORT": 3333,
+	"PREFIX": ".",
+	"Custom_Emotes": true,
+	"DB": {
+		"host": "173.249.12.160",
+		"username": "tallypokemap",
+		"password": "MewtwoMachamp",
+		"port": "3306"
+	},
+	"MAIN_BOT_TOKEN": "NDAzMzc5MDg0NDg4MzQzNTYz.DvCmKA.oQ9tQivQI9Ujml-tJOXKV5US60s",
+	"BOT_TOKENS": [
+		"NDk1NDMzMjYxNDEwMTU2NTQ1.DujhnQ.CrA1_8U1oKv1Ie2nAxSLlCe5Y1c",
+		"NTA5MTcyMjg1ODQ5MjA2ODEz.Dujhqw.zG3uagHLUpxk6C3MBKN7PqE7Jak",
+		"NTA5MTcyNDM4NzU2NjIyMzM2.DujhuQ.8lXL77AA-smYDjbragrcemrqo3k",
+		"NTA5MTcyNTQwOTAwMzc2NTc2.Dujhxw.fxh57F-H5RApmGN4aMN8nwV0smc",
+		"NTA5MTczNzIxNDU0MzQ2MjQx.Dujh1A.fbIQC-UfU106QNUd1zxqX8w0pwI",
+		"NTA5MTczODIzNjQwNDM2NzQ3.Dujh6g.RTYCCwcblO8nmMhKNMZIw-Q-ZSU",
+		"NTA5MzU1NDg1NzkxNjQ5ODEy.Dujh-A.2UrcBwULxAO9tsAQWjA23RiTURE",
+		"NTA5Mzc1MjcyMTM1Njg4MTkz.DujiBA.q6xJGh793tuPh-7Kgj2aJ7Ecajk",
+		"NTA5Mzc1NjA3NDQ5MTkwNDMz.DujiEw.H3VpN4GDCS4SgL7bGEaLnCzEC9k",
+		"NTA5Mzc1NzYyMTU2MDkzNDUw.DujiHw.7Kd01oNLdqfZZOPI8gSReZMMucY"
+	],
+	"Cities": [{
+			"name": "TLH",
+			"discord_id": "266738315380785152",
+			"sub_channel": "492517376177471488",
+			"donor_role": "277658037982986240",
+			"geofence": [
+				[ 30.6602342907156, -84.4900058930563 ],
+				[ 30.6555089203099, -84.025833529775 ],
+				[ 30.2197893566858, -84.0313266938375 ],
+				[ 30.2292821958155, -84.5202182954 ]
+			]
+		},
+		{
+			"name": "GVL",
+			"discord_id": "520254085148966912",
+			"sub_channel": "520604206206287883",
+			"donor_role": "",
+			"geofence": [
+				[ 30.0131018170097,-82.7258020345773 ],
+				[ 30.0178582943932,-81.9320398275461 ],
+				[ 29.2455478689372,-81.9238000814523 ],
+				[ 29.2551333644272,-82.7312951986398 ]
+			]
+		}
+	],
+	"DEBUG": {
+		"Quests": "DISABLED",
+		"Pokemon": "DISABLED",
+		"Raids": "DISABLED",
+		"Subscriptions": "DISABLED",
+		"City": "DISABLED"
+	}
+}

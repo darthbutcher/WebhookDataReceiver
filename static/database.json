@@ -1,5 +1,5 @@
 {
-  "LATEST": 4,
+  "LATEST": 5,
   "1": [{
       "sql": "",
       "data": "",
@@ -32,6 +32,43 @@
       "data": "",
       "gLog": "Update Applied to pokebot.quest_alerts",
       "bLog": "[Pokébot] Failed to Update pokebot.quest_alerts"
+    }
+  ],
+  "5": [{
+      "sql": "ALTER TABLE pokebot.users CHANGE `paused` `status` TEXT;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
+    },
+    {
+      "sql": "ALTER TABLE pokebot.users CHANGE `pokemon_paused` `pokemon_status` TEXT;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
+    },
+    {
+      "sql": "ALTER TABLE pokebot.users CHANGE `raids_paused` `raids_status` TEXT;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
+    },
+    {
+      "sql": "ALTER TABLE pokebot.users CHANGE `quests_paused` `quests_status` TEXT;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
+    },
+    {
+      "sql": "UPDATE pokebot.users SET status = 'ACTIVE' WHERE status = 'NO';",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
+    },
+    {
+      "sql": "UPDATE pokebot.users SET status = 'PAUSED' WHERE status = 'YES';",
+      "data": "",
+      "gLog": "Update Applied to pokebot.users",
+      "bLog": "[Pokébot] Failed to Update pokebot.users"
     }
   ]
 }
