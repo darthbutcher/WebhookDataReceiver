@@ -19,7 +19,7 @@ module.exports.run = async (MAIN, sighting, city) => {
   if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Pokemon. '+sighting.encounter_id); }
 
   // EStABLISH SIGHTING VARIABLES
-  let timeNow = new Date().getTime(), pName=MAIN.pokemon[sighting.pokemon_id].name;
+  let timeNow = new Date().getTime(), pokemon_name=MAIN.pokemon[sighting.pokemon_id].name;
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
   internal_value = Math.floor(internal_value*1000)/10;
 
@@ -32,10 +32,10 @@ module.exports.run = async (MAIN, sighting, city) => {
 
     if(MAIN.config.Cities.length == 1 || city.name == feed.City){
       if(feed.Type == 'pokemon'){
-        if(feed.Channel_ID && feed[pName] != 'False'){
+        if(feed.Channel_ID && feed[pokemon_name] != 'False'){
 
           // CHECK IF POKEMON IS ENABLED OR SET TO A SPECIFIC IV
-          if(feed[pName]=='True'){
+          if(feed[pokemon_name]=='True'){
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED
             if(sighting.cp > 0){
@@ -54,7 +54,7 @@ module.exports.run = async (MAIN, sighting, city) => {
               send_Without_IV(MAIN, sighting, feed.Channel_ID, timeNow, city);
             }
           }
-          else if(feed[pName].min_iv<=internal_value && feed.max_iv>=internal_value){
+          else if(feed[pokemon_name].min_iv<=internal_value && feed.max_iv>=internal_value){
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
             if(sighting.cp>0){
