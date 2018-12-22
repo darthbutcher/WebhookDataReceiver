@@ -9,19 +9,6 @@
 		"password": "MewtwoMachamp",
 		"port": "3306"
 	},
-	"MAIN_BOT_TOKEN": "",
-	"BOT_TOKENS": [
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		"",
-		""
-	],
 	"Cities": [{
 			"name": "TLH",
 			"discord_id": "266738315380785152",

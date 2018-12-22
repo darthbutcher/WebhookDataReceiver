@@ -23,14 +23,25 @@
 hs_err_pid*
 
 config/*.json
+
 feeds/*.txt
+
 node_modules
+
 static/files
+
 static/quest_tiles/*.png
+
 static/raid_tiles/*.png
+
 static/pokemon_tiles/*.png
+
 feeds/*.json
+
 *.DS_Store
+
 feeds/*.DS_Store
+
 static/*.DS_Store
+
 modules/*.DS_Store
