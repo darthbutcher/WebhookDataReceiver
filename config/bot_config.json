@@ -9,18 +9,18 @@
 		"password": "MewtwoMachamp",
 		"port": "3306"
 	},
-	"MAIN_BOT_TOKEN": "NDAzMzc5MDg0NDg4MzQzNTYz.DvCmKA.oQ9tQivQI9Ujml-tJOXKV5US60s",
+	"MAIN_BOT_TOKEN": "",
 	"BOT_TOKENS": [
-		"NDk1NDMzMjYxNDEwMTU2NTQ1.DujhnQ.CrA1_8U1oKv1Ie2nAxSLlCe5Y1c",
-		"NTA5MTcyMjg1ODQ5MjA2ODEz.Dujhqw.zG3uagHLUpxk6C3MBKN7PqE7Jak",
-		"NTA5MTcyNDM4NzU2NjIyMzM2.DujhuQ.8lXL77AA-smYDjbragrcemrqo3k",
-		"NTA5MTcyNTQwOTAwMzc2NTc2.Dujhxw.fxh57F-H5RApmGN4aMN8nwV0smc",
-		"NTA5MTczNzIxNDU0MzQ2MjQx.Dujh1A.fbIQC-UfU106QNUd1zxqX8w0pwI",
-		"NTA5MTczODIzNjQwNDM2NzQ3.Dujh6g.RTYCCwcblO8nmMhKNMZIw-Q-ZSU",
-		"NTA5MzU1NDg1NzkxNjQ5ODEy.Dujh-A.2UrcBwULxAO9tsAQWjA23RiTURE",
-		"NTA5Mzc1MjcyMTM1Njg4MTkz.DujiBA.q6xJGh793tuPh-7Kgj2aJ7Ecajk",
-		"NTA5Mzc1NjA3NDQ5MTkwNDMz.DujiEw.H3VpN4GDCS4SgL7bGEaLnCzEC9k",
-		"NTA5Mzc1NzYyMTU2MDkzNDUw.DujiHw.7Kd01oNLdqfZZOPI8gSReZMMucY"
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		"",
+		""
 	],
 	"Cities": [{
 			"name": "TLH",
