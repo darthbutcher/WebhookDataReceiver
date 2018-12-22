@@ -18,6 +18,6 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
     questHelp.addField('`'+prefix+'area`', 'Shows Area subscription options.', false)
       .addField('`'+prefix+'time`', 'Shows Quest subscription delivery time options.', false)
       .addField('`'+prefix+'pause` | `'+prefix+'resume`', 'Pause or Resume ALL subscription alerts.', false);
-    return message.channel.send(questHelp).then(m => m.delete(30000)).catch(console.error);
+    return message.channel.send(questHelp).catch(console.error);
   }
 }
