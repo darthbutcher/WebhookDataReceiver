@@ -36,7 +36,7 @@ module.exports.run = async (MAIN, message) => {
     if(message.channel.id == city.sub_channel){
 
       // DELETE THE MESSAGE
-      if(message.content != prefix+'help'){ message.delete(); }
+      message.delete();
 
       // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
       let member = MAIN.guilds.get(city.discord_id).members.get(message.member.id);
