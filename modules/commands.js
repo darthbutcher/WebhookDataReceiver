@@ -33,10 +33,10 @@ module.exports.run = async (MAIN, message) => {
 
   // CHECK EACH CITY FOR THE SUB CHANNEL
   MAIN.config.Cities.forEach((city,index) => {
-    if(message.channel.id == city.sub_channel){ 
+    if(message.channel.id == city.sub_channel){
 
       // DELETE THE MESSAGE
-      message.delete();
+      if(message.content != prefix+'help'){ message.delete(); }
 
       // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
       let member = MAIN.guilds.get(city.discord_id).members.get(message.member.id);
