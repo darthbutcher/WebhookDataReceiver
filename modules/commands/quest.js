@@ -27,6 +27,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
         case 'view': collector.stop('view'); break;
         case 'pause': collector.stop('pause'); break;
         case 'resume': collector.stop('resume'); break;
+        case 'time': collector.stop('time'); break;
         default: message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
       }
     });
@@ -101,7 +102,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -111,20 +112,20 @@ async function subscription_view(MAIN, message, nickname, prefix){
               case 'view': collector.stop('view'); break;
               case 'pause': collector.stop('pause'); break;
               case 'resume': collector.stop('resume'); break;
-              default:
-                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
+              case 'time': collector.stop('time'); break;
             }
           });
+
           // COLLECTOR HAS BEEN ENDED
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
             msg.delete();
             switch(reason){
-              case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
               case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
               case 'resume':
               case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
             }
@@ -144,7 +145,6 @@ async function subscription_time(MAIN, message, nickname, prefix){
     // RETRIEVE POKEMON NAME FROM USER
     let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
-    else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
     // UPDATE THE USER'S RECORD
     MAIN.database.query("UPDATE pokebot.users SET time = ? WHERE user_id = ?", [sub,message.member.id], function (error, user, fields) {
@@ -159,7 +159,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -169,20 +169,20 @@ async function subscription_time(MAIN, message, nickname, prefix){
               case 'view': collector.stop('view'); break;
               case 'pause': collector.stop('pause'); break;
               case 'resume': collector.stop('resume'); break;
-              default:
-                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
+              case 'time': collector.stop('time'); break;
             }
           });
+
           // COLLECTOR HAS BEEN ENDED
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
             msg.delete();
             switch(reason){
-              case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
               case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
               case 'resume':
               case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
             }
@@ -233,7 +233,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -308,7 +308,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -349,7 +349,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
     // DEFINE COLLECTOR AND FILTER
     const filter = cMessage => cMessage.member.id == message.member.id;
-    const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+    const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
     switch(type){
 
@@ -392,7 +392,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
       // DEFINE COLLECTOR AND FILTER
       const filter = cMessage => cMessage.member.id==message.member.id;
-      const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+      const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
       // FILTER COLLECT EVENT
       collector.on('collect', message => {

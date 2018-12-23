@@ -23,7 +23,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
 
     // DEFINE COLLECTOR AND FILTER
     const filter = cMessage => cMessage.member.id==message.member.id;
-    const collector = message.channel.createMessageCollector(filter, { time: 120000 });
+    const collector = message.channel.createMessageCollector(filter, { time: 60000 });
 
     // FILTER COLLECT EVENT
     collector.on('collect', message => {
@@ -68,7 +68,7 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
 
       // DEFINE COLLECTOR AND FILTER
       const filter = cMessage => cMessage.member.id==message.member.id;
-      const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+      const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
       // FILTER COLLECT EVENT
       collector.on('collect', message => {
@@ -77,8 +77,6 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
           case 'remove': collector.stop('remove'); break;
           case 'view': collector.stop('view'); break;
           case 'cancel': collector.stop('cancel'); break;
-          default:
-            message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
         }
       });
       // COLLECTOR HAS BEEN ENDED
@@ -145,7 +143,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -154,8 +152,6 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
               case 'remove': collector.stop('remove'); break;
               case 'view': collector.stop('view'); break;
               case 'cancel': collector.stop('cancel'); break;
-              default:
-                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
             }
           });
           // COLLECTOR HAS BEEN ENDED
@@ -216,7 +212,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array){
 
           // DEFINE COLLECTOR AND FILTER
           const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
 
           // FILTER COLLECT EVENT
           collector.on('collect', message => {
@@ -225,8 +221,6 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array){
               case 'remove': collector.stop('remove'); break;
               case 'view': collector.stop('view'); break;
               case 'cancel': collector.stop('cancel'); break;
-              default:
-                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
             }
           });
           // COLLECTOR HAS BEEN ENDED
