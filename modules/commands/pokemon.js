@@ -11,7 +11,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
   let requestAction = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Pokémon Subscriptions?')
-    .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+    .setFooter('You can type \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
 
@@ -112,7 +112,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('Pokémon Subscriptions')
           .setDescription('Overall Status: `'+user[0].status+'`\nPokemon Status: `'+user[0].pokemon_status+'`')
-          .setFooter('You can \'view\', \'add\', \'remove\', or \'edit\'.');
+          .setFooter('You can type \'view\', \'add\', \'remove\', or \'edit\'.');
 
         // IF POKEMON SUBSCRIPTIONS OVER 25
         if(pokemon.subscriptions.length > 25){
@@ -271,7 +271,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle(sub.name+' Subscription Complete!')
           .setDescription('Saved to the Pokébot Database.')
-          .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+          .setFooter('You can type \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
         return message.channel.send(subscription_success).then( msg => {
 
           // DEFINE COLLECTOR AND FILTER
@@ -364,7 +364,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
             .setAuthor(nickname, message.member.user.displayAvatarURL)
             .setTitle(remove_name+' Subscription Removed!')
             .setDescription('Saved to the Pokébot Database.')
-            .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+            .setFooter('You can type \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
           return message.channel.send(subscription_success).then( msg => {
 
             // DEFINE COLLECTOR AND FILTER
@@ -497,7 +497,7 @@ async function subscription_modify(MAIN, message, nickname, prefix){
                 .setAuthor(nickname, message.member.user.displayAvatarURL)
                 .setTitle(sub.name+' Subscription Modified!')
                 .setDescription('Saved to the Pokébot Database.')
-                .setFooter('You can \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
+                .setFooter('You can type \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
               return message.channel.send(modification_success).then( msg => {
 
                 // DEFINE COLLECTOR AND FILTER
