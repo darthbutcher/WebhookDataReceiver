@@ -36,7 +36,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
     collector.on('end', (collected,reason) => {
 
       // DELETE ORIGINAL MESSAGE
-      msg.delete();
+      //msg.delete();
       switch(reason){
         case 'add': subscription_create(MAIN, message, nickname, prefix); break;
         case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -120,7 +120,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            msg.delete();
+            //msg.delete();
             switch(reason){
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -145,7 +145,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
     // RETRIEVE POKEMON NAME FROM USER
     let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].alert_time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
-
+    else if(sub.toLowerCase() == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
     // UPDATE THE USER'S RECORD
     MAIN.database.query("UPDATE pokebot.users SET alert_time = ? WHERE user_id = ?", [sub,message.member.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(5000)).catch(console.error); }
@@ -177,7 +177,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            msg.delete();
+            //msg.delete();
             switch(reason){
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -256,7 +256,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            msg.delete();
+            //msg.delete();
             switch(reason){
               case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
@@ -329,7 +329,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            msg.delete();
+            //msg.delete();
             switch(reason){
               case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
@@ -444,7 +444,8 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
       // COLLECTOR ENDED
       collector.on('end', (collected,reason) => {
-        msg.delete(); resolve(reason);
+        //msg.delete();
+        resolve(reason);
       });
     });
   });
