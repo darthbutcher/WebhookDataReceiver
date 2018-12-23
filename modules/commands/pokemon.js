@@ -190,7 +190,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
   let sub = {};
 
   // RETRIEVE POKEMON NAME FROM USER
-  sub.name = await sub_collector(MAIN,'Name',nickname,message, undefined,'Names are not case-sensitive.',sub);
+  sub.name = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'all\'  or the Pokémon name. Names are not case-sensitive.',sub);
   if(sub.name.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
   else if(sub.name == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
