@@ -147,13 +147,13 @@ async function subscription_time(MAIN, message, nickname, prefix){
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET time = ? WHERE user_id = ?", [sub,message.member.id], function (error, user, fields) {
+    MAIN.database.query("UPDATE pokebot.users SET alert_time = ? WHERE user_id = ?", [sub,message.member.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(5000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('Time Changed!')
-          .setDescription('`'+sub+'`` Saved to the Pokébot Database.')
+          .setDescription('`'+sub+'` Saved to the Pokébot Database.')
           .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
         message.channel.send(subscription_success).then( msg => {
 
@@ -417,6 +417,21 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
             for(let r = 0; r < MAIN.q_config.Quest_Rewards.length+1; r++){
               if(r == MAIN.q_config.Quest_Rewards.length+1){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Quest reward. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
               else if(message.content.toLowerCase() == MAIN.q_config.Quest_Rewards[r].toLowerCase()){ collector.stop(MAIN.q_config.Quest_Rewards[r]); break; }
+            } break;
+
+          case type.indexOf('Time')>=0:
+            if(message.content.length < 6 && message.content.indexOf(':') >= 0){
+              let times = message.content.split(':');
+              console.log(parseInt(times[0]) >= 0+' '+parseInt(times[0]) < 23+' '+parseInt(times[1]) <= 59+' '+parseInt(times[1]) >= 0);
+              if(parseInt(times[0]) >= 0 && parseInt(times[0]) < 23 && parseInt(times[1]) <= 59 && parseInt(times[1]) >= 0){
+                collector.stop(message.content); break;
+              }
+              else{
+                message.reply('`'+message.content+'` doesn\'t appear to be a valid Time. Please check the requirements and try again.').then(m => m.delete(5000)).catch(console.error); break;
+              } break;
+            }
+            else{
+              message.reply('`'+message.content+'` doesn\'t appear to be a valid Time. Please check the requirements and try again.').then(m => m.delete(5000)).catch(console.error); break;
             } break;
 
           // GET CONFIRMATION
