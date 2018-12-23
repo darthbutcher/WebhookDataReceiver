@@ -14,7 +14,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
   // GET USER NICKNAME
   if(message.member.nickname){ nickname = message.member.nickname; } else{ nickname = message.member.user.username; }
 
-  let requestAction = new Discord.RichEmbed().setColor('00ff00')
+  let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Area Subscriptions?')
     .setFooter('You can type \'view\', \'add\', or \'remove\'.');

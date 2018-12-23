@@ -1,5 +1,7 @@
 const Discord=require('discord.js');
 
+MAX_ALL_SUBS = [ '1', '2', '3', '4', '5' ];
+
 module.exports.run = async (MAIN, message, args, prefix, city) => {
 
   // DECLARE VARIABLES
@@ -8,7 +10,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
   // GET USER NICKNAME
   if(message.member.nickname){ nickname = message.member.nickname; } else{ nickname = message.member.user.username; }
 
-  let requestAction = new Discord.RichEmbed().setColor('00ff00')
+  let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Pokémon Subscriptions?')
     .setFooter('You can type \'view\', \'add\', \'remove\', \'edit\', \'pause\' or \'resume\'.');
@@ -190,7 +192,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
   let sub = {};
 
   // RETRIEVE POKEMON NAME FROM USER
-  sub.name = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'all\'  or the Pokémon name. Names are not case-sensitive.',sub);
+  sub.name = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'All\'  or the Pokémon name. Names are not case-sensitive.',sub);
   if(sub.name.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
   else if(sub.name == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
@@ -235,9 +237,8 @@ async function subscription_create(MAIN, message, nickname, prefix){
   else if(sub.name == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
     let pokemon = '';
-
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].pokemon){
       pokemon = {};
@@ -247,6 +248,19 @@ async function subscription_create(MAIN, message, nickname, prefix){
     else{
       pokemon = JSON.parse(user[0].pokemon);
       if(!pokemon.subscriptions[0]){ pokemon.subscriptions.push(sub); }
+      else if(sub.name == 'ALL'){
+        let s = 1;
+        await MAX_ALL_SUBS.forEach((max_num,index) => {
+          pokemon.subscriptions.forEach((subscription,index) => {
+            let sub_name = sub.name+'-'+max_num;
+            if(sub_name == subscription.name){ s++; }
+          });
+        });
+
+        // RENAME ALL SUB AND PUSH TO ARRAY
+        sub.name = sub.name+'-'+s.toString();
+        pokemon.subscriptions.push(sub);
+      }
       else{
 
         // CONVERT TO OBJECT AND CHECK EACH SUBSCRIPTION
@@ -254,7 +268,9 @@ async function subscription_create(MAIN, message, nickname, prefix){
         pokemon.subscriptions.forEach((subscription,index) => {
 
           // ADD OR OVERWRITE IF EXISTING
-          if(subscription.name == sub.name){ pokemon.subscriptions[index] = sub; }
+          if(subscription.name == sub.name){
+            pokemon.subscriptions[index] = sub;
+          }
           else if(index == pokemon.subscriptions.length-1){ pokemon.subscriptions.push(sub); }
         });
       }
@@ -336,8 +352,6 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 
           // CHECK THE USERS RECORD FOR THE SUBSCRIPTION
           pokemon.subscriptions.forEach((subscription,index) => {
-
-            console.log(subscription.name.toLowerCase()+' '+remove_name.toLowerCase());
 
             if(subscription.name.toLowerCase() == remove_name.toLowerCase()){
 
@@ -649,7 +663,8 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
 
       // COLLECTOR ENDED
       collector.on('end', (collected,reason) => {
-        msg.delete(); resolve(reason);
+        msg.delete();
+        resolve(reason);
       });
     });
   });

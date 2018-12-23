@@ -209,7 +209,7 @@ MAIN.Static_Map_Tile = (lat,lon,type) => {
         .then(() => map.image.save('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
         //.then(() => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] New Map Tile Saved for '+lat+','+lon+'.'))
         .then(() => resolve('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
-        .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile. This error is due to a 404 request returned from the map tile server and is usually not re-occuring. If you see this error reocurring often, restart the bot.'); });
+        .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile.',error); });
     }
   });
 }
