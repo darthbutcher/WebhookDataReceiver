@@ -16,7 +16,6 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
     if(MAIN.q_config.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'q`  |  `'+prefix+'quest`', 'Initializes Quest Subscription Options.', false); }
     if(MAIN.r_config.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'raid`', 'Initializes Raid Subscription Options.', false); }
     questHelp.addField('`'+prefix+'area`', 'Shows Area subscription options.', false)
-      .addField('`'+prefix+'time`', 'Shows Quest subscription delivery time options.', false)
       .addField('`'+prefix+'pause` | `'+prefix+'resume`', 'Pause or Resume ALL subscription alerts.', false);
     return message.channel.send(questHelp).catch(console.error);
   }
