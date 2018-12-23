@@ -143,7 +143,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
 
     // RETRIEVE POKEMON NAME FROM USER
-    let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
+    let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].alert_time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
 
     // UPDATE THE USER'S RECORD
