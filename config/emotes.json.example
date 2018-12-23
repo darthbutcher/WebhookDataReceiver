@@ -1,8 +1,8 @@
 {
   "clear":"<:weather_clear:409041567534415873>",
   "rain": "<:weather_rain:418570342391480320>",
-  "partly_cloudy": "<:weather_partly_cloudy:418570238368546837>",
-  "mostly_cloudy": "<:weather_cloudy:418570003193921536>",
+  "partlyCloudy": "<:weather_partly_cloudy:418570238368546837>",
+  "cloudy": "<:weather_cloudy:418570003193921536>",
   "windy": "<:weather_windy:409041567593136128>",
   "snow": "<:weather_snow:409041567551062016>",
   "fog": "<:weather_foggy:418570089084747807>",
@@ -27,6 +27,6 @@
   "electric": "<:type_electric:408293833864904704>",
   "dragon": "<:type_dragon:408293833512845312>",
   "dark": "<:type_dark:408293833055666176>",
-  "bug": "<:type_bug:408293832451686403>".
-  "checkyes": "<:yes:526072075824398346>"
+  "bug": "<:type_bug:408293832451686403>",
+  "checkYes": "<:yes:526072075824398346>"
 }
