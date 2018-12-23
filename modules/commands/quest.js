@@ -196,6 +196,9 @@ async function subscription_time(MAIN, message, nickname, prefix){
 // SUBSCRIPTION CREATE FUNCTION
 async function subscription_create(MAIN, message, nickname, prefix){
 
+  //DECLARE VARIABLES
+  let index ='', quests = '';
+
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
 
@@ -205,8 +208,10 @@ async function subscription_create(MAIN, message, nickname, prefix){
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
     // DEFINED VARIABLES
-    let index = quests.indexOf(sub);
-    let quests = user[0].quests.split(',');
+    if(user[0].quests){
+      quests = user[0].quests.split(',');
+      index = quests.indexOf(sub);
+    }
     let rewards = MAIN.q_config.Quest_Rewards.toString().toLowerCase().split(',');
     let reward_index = rewards.indexOf(sub.toLowerCase());
 
@@ -345,7 +350,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
   return new Promise(function(resolve, reject) {
 
     // DELCARE VARIABLES
-    let timeout = true, instruction = '';
+    let timeout = true, instruction = '', reward_list = '', user_rewards = '';
 
     // DEFINE COLLECTOR AND FILTER
     const filter = cMessage => cMessage.member.id == message.member.id;
@@ -355,15 +360,19 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
       // POKEMON NAME EMBED
       case 'Name':
-        let user_rewards = user_quests.split(','), reward_list = '';
+      if(user_quests){
+        user_rewards = user_quests.split(',');
+      }
+      else{ user_rewards = 'None';  }
 
         // CREATE REWARD LIST AND ADD CHECK FOR SUBSCRIBED REWARDS
         MAIN.q_config.Quest_Rewards.forEach((reward,index) => {
-          if(user_rewards.indexOf(reward) < 0){
+          if(user_rewards.indexOf(reward) > 0){
             reward_list += reward+' '+MAIN.emotes.checkYes+'\n';
           }
           else{ reward_list += reward+'\n'; }
         });
+        if(!reward_list){ reward_list = user_rewards; }
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Quest would you like to Subscribe to?')
