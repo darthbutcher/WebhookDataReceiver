@@ -36,7 +36,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
     collector.on('end', (collected,reason) => {
 
       // DELETE ORIGINAL MESSAGE
-      //msg.delete();
+      msg.delete();
       switch(reason){
         case 'add': subscription_create(MAIN, message, nickname, prefix); break;
         case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -120,7 +120,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            //msg.delete();
+            msg.delete();
             switch(reason){
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -177,7 +177,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            //msg.delete();
+            msg.delete();
             switch(reason){
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
               case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
@@ -256,7 +256,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            //msg.delete();
+            msg.delete();
             switch(reason){
               case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
@@ -329,7 +329,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
           collector.on('end', (collected,reason) => {
 
             // DELETE ORIGINAL MESSAGE
-            //msg.delete();
+            msg.delete();
             switch(reason){
               case 'cancel': return;
               case 'add': subscription_create(MAIN, message, nickname, prefix); break;
@@ -444,7 +444,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
       // COLLECTOR ENDED
       collector.on('end', (collected,reason) => {
-        //msg.delete();
+        msg.delete();
         resolve(reason);
       });
     });

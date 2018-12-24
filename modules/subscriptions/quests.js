@@ -85,8 +85,10 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
               let dbDate = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
 
               // SEND THE QUEST ALERT TO THE USER
-              if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+questReward+' Quest DM to '+user.user_name+'.'); }
-              if(dbDate < timeNow){ MAIN.Send_DM(city.discord_id, user.user_id, embed, user.bot); }
+              if(dbDate < timeNow){ 
+                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+questReward+' Quest DM to '+user.user_name+'.'); }
+                MAIN.Send_DM(city.discord_id, user.user_id, embed, user.bot);
+              }
               else{
 
                 // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
