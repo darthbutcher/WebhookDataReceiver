@@ -51,14 +51,25 @@ module.exports.run = async (MAIN, message) => {
         else if(user[0].city != city.name){
 
           // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
-          return message.reply('You are not able to have subscriptions in two cities. Contact an admin to explain yourself.')
-            .then(m => m.delete(120000))
+          return message.reply('You are not able to have subscriptions in two cities at this time.')
+            .then(m => m.delete(30000))
             .catch(console.error);
         }
         else{
+          let command = '';
 
           // FIND THE COMMAND AND SEND TO THE MODULE
-          let command = message.content.toLowerCase().split(' ')[0].slice(MAIN.config.PREFIX.length);
+          switch(true){
+            case message.content == 'restart':
+              if(message.member.hasPermission('ADMINISTRATOR')){
+                process.exit(1).catch(console.error);
+              } break;
+            case message.content.startsWith(prefix+'p'): command = 'pokemon'; break;
+            case message.content.startsWith(prefix+'r'): command = 'raid'; break;
+            case message.content.startsWith(prefix+'q'): command = 'quest'; break;
+            default: command = message.constent.slice(prefix.length);
+          }
+
           let cmd = modules.get(command);
           if(cmd){ return cmd.run(MAIN, message, args, prefix, city); }
         }

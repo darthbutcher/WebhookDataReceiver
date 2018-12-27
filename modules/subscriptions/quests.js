@@ -1,5 +1,5 @@
-const Discord=require('discord.js');
-const moment=require('moment');
+const Discord = require('discord.js');
+const moment = require('moment');
 
 //#########################################################//
 //#########################################################//
@@ -16,7 +16,7 @@ const moment=require('moment');
 module.exports.run = async (MAIN, quest, embed, area, city) => {
 
   // DETERMINE THE QUEST REWARD
-  let simpleReward='', questReward='';
+  let simple_reward = '', quest_reward = '';
   switch(quest.rewards[0].type){
 
     // PLACEHOLDER
@@ -24,12 +24,12 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
 
     // ITEM REWARDS (EXCEPT STARDUST)
     case 2:
-      simpleReward=MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
-      questReward=quest.rewards[0].info.amount+' '+MAIN.proto.values['item_'+quest.rewards[0].info.item_id]; break;
+      simple_reward = MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
+      quest_reward = quest.rewards[0].info.amount+' '+MAIN.proto.values['item_'+quest.rewards[0].info.item_id]; break;
 
     // STARDUST REWARD
     case 3:
-      questReward = quest.rewards[0].info.amount+' Stardust'; break;
+      quest_reward = quest.rewards[0].info.amount+' Stardust'; break;
 
     // PLACEHOLDER
     case 4:
@@ -42,11 +42,15 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
 
     // ENCOUNTER REWARDS
     case 7:
-      simpleReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
-      questReward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
+      simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
+      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
   }
 
-  if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Received '+questReward+' Quest.'); }
+
+
+    // DEBUG ACK
+    if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [quests.js] [QUEST] Received '+quest_reward+' Quest.'); }
+
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
   MAIN.database.query("SELECT * FROM pokebot.users", function (error, users, fields){
@@ -75,31 +79,38 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
 
             // USER FILTER
             // CHECK IF THE REWARD IS ONE THEY ARE SUBSCRIBED TO
-            if(subs.indexOf(questReward) >= 0 || subs.indexOf(simpleReward) >= 0){
+            if(subs.indexOf(quest_reward) >= 0 || subs.indexOf(simple_reward) >= 0){
 
               // DEFINE VARIABLES
               let quest_object = JSON.stringify(quest), quest_embed = JSON.stringify(embed);
 
               // CHECK THE TIME VERSUS THE USERS SET SUBSCRIPTION TIME
-              let timeNow = new Date().getTime(); let todaysDate = moment(timeNow).format('MM/DD/YYYY');
-              let dbDate = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
+              let time_now = new Date().getTime(); let todaysDate = moment(time_now).format('MM/DD/YYYY');
+              let db_date = moment(todaysDate+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
 
               // SEND THE QUEST ALERT TO THE USER
-              if(dbDate < timeNow){ 
-                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+questReward+' Quest DM to '+user.user_name+'.'); }
+              if(db_date < time_now){
+                if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+quest_reward+' Quest DM to '+user.user_name+'.'); }
                 MAIN.Send_DM(city.discord_id, user.user_id, embed, user.bot);
               }
               else{
 
                 // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
                 MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, dbDate, city.name], function (error, user, fields) {
+                  [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, db_date, city.name], function (error, user, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
-                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+questReward+' Quest Alert for '+user.user_name+'.'); }
+                    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
                 });
               }
             }
-            else{ if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG] [subscriptions.js] [QUEST] Did Not Pass User Filters.'); } }
+            else{
+              // DEBUG
+              if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [quests.js] [QUEST] '+quest_reward+' Did Not Pass '+user.user_name+'\'s Reward Filters.'); }
+            }
+          }
+          else{
+            // DEBUG
+            if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [quests.js] [QUEST] '+quest_reward+' Did Not Pass '+user.user_name+'\'s Area Filters.'); }
           }
         }
       });
