@@ -67,7 +67,7 @@ module.exports.run = async (MAIN, message) => {
             case message.content.startsWith(prefix+'p'): command = 'pokemon'; break;
             case message.content.startsWith(prefix+'r'): command = 'raid'; break;
             case message.content.startsWith(prefix+'q'): command = 'quest'; break;
-            default: command = message.constent.slice(prefix.length);
+            default: command = message.content.slice(prefix.length);
           }
 
           let cmd = modules.get(command);
