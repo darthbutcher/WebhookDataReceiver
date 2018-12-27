@@ -54,12 +54,16 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
 async function subscription_view(MAIN, message, nickname, prefix, area_array){
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
 
+    let area_list = '';
+    if(!user[0].geofence){ area_list = 'None'; }
+    else{ area_list = user[0].geofence.replace(/,/g,'\n'); }
+
     // CREATE THE EMBED
     let area_subs = new Discord.RichEmbed()
       .setAuthor(nickname, message.member.user.displayAvatarURL)
       .setTitle('Area Subscriptions')
       .setDescription('Overall Status: `'+user[0].status+'`')
-      .addField('Your Areas:', user[0].geofence.replace(/,/g,'\n'),false)
+      .addField('Your Areas:', area_list, false)
       .setFooter('You can type \'view\', \'add\', or \'remove\'.');
 
     // SEND THE EMBED
