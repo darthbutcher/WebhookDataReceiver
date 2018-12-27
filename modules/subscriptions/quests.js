@@ -97,7 +97,7 @@ module.exports.run = async (MAIN, quest, embed, area, city) => {
 
                 // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
                 MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, city) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-                  [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, db_date, city.name], function (error, user, fields) {
+                  [user.user_id, user.user_name, quest_object, quest_embed, area.name, user.bot, db_date, city.name], function (error, alert, fields) {
                     if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
                     else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
                 });
