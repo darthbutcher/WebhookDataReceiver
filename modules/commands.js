@@ -60,10 +60,10 @@ module.exports.run = async (MAIN, message) => {
 
           // FIND THE COMMAND AND SEND TO THE MODULE
           switch(true){
+            case message.content.startsWith(prefix+'pause'): command = 'pause'; break;
+            case message.content.startsWith(prefix+'resume'): command = 'resume'; break;
             case message.content == 'restart':
-              if(message.member.hasPermission('ADMINISTRATOR')){
-                process.exit(1).catch(console.error);
-              } break;
+              if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
             case message.content.startsWith(prefix+'p'): command = 'pokemon'; break;
             case message.content.startsWith(prefix+'r'): command = 'raid'; break;
             case message.content.startsWith(prefix+'q'): command = 'quest'; break;
