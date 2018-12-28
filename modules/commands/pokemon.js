@@ -400,9 +400,9 @@ async function subscription_remove(MAIN, message, nickname, prefix){
         case 'time': return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); break;
         case 'cancel': return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error);
         case 'all':
-          let confirm = await sub_collector(MAIN,'Confirm-Remove',nickname,message,sub.name,'Type \'Yes\' or \'No\'. Subscription will be saved.',sub);
+          let confirm = await sub_collector(MAIN,'Confirm-Remove',nickname,message,remove_name,'Type \'Yes\' or \'No\'. Subscription will be saved.',undefined);
           if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
-          else if(sub.name == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
+          else if(confirm == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
           found = true; pokemon.subscriptions = []; break;
         default:
 
@@ -689,6 +689,13 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           case message.content.toLowerCase() == 'ACTIVE':
           case message.content.toLowerCase() == 'cancel': collector.stop('cancel'); break;
 
+          // GET CONFIRMATION
+          case type.indexOf('Confirm-Add')>=0:
+          case type.indexOf('Confirm-Remove')>=0:
+            if(message.content.toLowerCase() == 'yes'){ collector.stop('Yes'); }
+            else if(message.content.toLowerCase() == 'no'){ collector.stop('No'); }
+            else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); } break;
+
           // POKEMON NAME
           case type.indexOf('Name')>=0:
           case type.indexOf('Modify')>=0:
@@ -725,12 +732,6 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
             else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
             else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); } break;
 
-          // GET CONFIRMATION
-          case type.indexOf('Confirm-Add')>=0:
-          case type.indexOf('Confirm-Remove')>=0:
-            if(message.content.toLowerCase() == 'yes'){ collector.stop('Yes'); }
-            else if(message.content.toLowerCase() == 'no'){ collector.stop('No'); }
-            else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); } break;
         }
       });
 
