@@ -16,40 +16,36 @@
   - Type `node -v` again in your terminal post install to confirm installation.
 
 ### 4: Install npm package requirements.
-  - `npm install [package]` Replace [package] with the names above on by one.
-    Packages:
-    - discord.js
-    - moment
-    - mysql
-    - fs
-    - point-in-polygon
-    - express
-    - body-parser
-    - rimraf
-    - staticmaps
-    - pm2 (must be installed with -g flag and sometimes as sudo. `npm install -g pm2`.
+  - Run `npm install` in your cloned directory.
 
 ### 5: Edit the Config files and save them without the `.example` on them.
-  - Emotes.json
+  - Emotes.ini
     You have the option of setting your own custom emotes. If "Custom_Emotes" is set to false in your config, you will need to join then add your bots to these servers:
       https://discord.gg/zqVCfPy - WEATHER, TEAMS, GYMS, TYPES
       https://discord.gg/AnECN8U - Legendary boss emojis
     If you choose `true` for custom emotes, you will need to edit the emotes.json.example like below:
       - This will be the emotes the bot uses for the embed posts (team emblems and Ex Icon. Images you can upload to your discord server are in the files folder under emotes. To get the emote IDs in you server, type \:youremotename: in discord. This will output something like `<:instinct:499334776189091871>`. Paste those into the emotes.json.example and save as emotes.json.
-  - Geofences.json
+  - Geojson.json
       - Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
-  - Pokebot_config.json
-      - Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 10 bot tokens can be used at this time. If you have less than 10, delete the other example numbers or you will get invalid credential errors when starting the script. For "Cities", you only need to put one City if you scan only one. If you have multiple cities and want separate feeds, then you would add more cities. The geofence for this city is to identify the City.
-      - The Main Bot requires at minimum Manage Messages, View Channel, and Manage Channel permissions for the subscription channel.
+      - Go to http://geojson.io/ and draw your geofences. You MUST add a "name" field to each geofence. If you want to use sub areas (smaller detailed geofences within larger geofences), you must add a sub_area field and then true or false as the value.
+  - config.ini
+      - Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 15 bot tokens can be used at this time. If you have less than 15, delete the other example numbers or you will get invalid credential errors when starting the script.
+  - discords.json
+      - You need to add each Discord you plan on serving. Pokebot is multi-discord capable.
 
-## 6: Feeds
-  In /feeds you will find examples of pokemon, quest, and raid feeds. These files can be named whatever you want, there is no more name requirement. These are pokemon filters based on PA type, also with a min_iv and max_iv override. If you do not include a Channel_ID, the bot will ignore the filter.
-  
+## 6: Channels
+   - Fill out each channels.ini file with the channels, chosen filter, and areas. If you do not want to filter by area, use the name that you gave your discord in discords.json.
+      - channels_pokemon.ini
+      - channels_raids.ini
+      - channels_quests.ini
+
+## 7: Filters
+  In /filters you will find examples of pokemon, quest, and raid feeds. These files can be named whatever you want, there is no more name requirement. These are pokemon filters based on PA type, also with a min_iv and max_iv override. If you do not include a Channel_ID, the bot will ignore the filter.
+
   #### Quests
    - The "Type" field must be "quest".
    - Quest feeds can be filtered by reward and/or encounter. Add each reward our encounter to the "Rewards" array.
-   - They are case sensitive, so please see examples.
-   - The "Type" must be set to "quest" and the "City" must match what you put in your pokebot_config.json for the "name" field. This requirement is so that this Pokebot can be used across multiple cities in one instance.
+   - They are case sensitive, so please see examples. Refer to /static/en.json for all rewards.
 
   #### Raids
    - The "Type field must be "raid".
@@ -66,7 +62,7 @@
    - More specific IVs can be set for each pokemon (replace `True`/`False` with `{"min_iv":"80"}`), but that value must be within the min_iv and max_iv you set.
    - You can set the bot to post without IVs using the "Post_Without_IV" field. Set this to `true` or `false`.
 
-## 7: Start the bot. `pm2 start Pokebot.js`
+## 8: Start the bot. `pm2 start Pokebot.js`
   - If you get errors that are not because of missing configs, Contact me via discord.
   - PM2 Docs http://pm2.keymetrics.io/docs/usage/cluster-mode/
 
