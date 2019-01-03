@@ -19,18 +19,24 @@ port = 3306
 ; BOT TOKENS
 ; You can add up to 15 BOT_TOKENS[].
 ; The MAIN token cannot be in the BOT_TOKEN[] section.
+; You do not have to delete unused spots anymore.
 [TOKENS]
 MAIN = MAINTOKEN
-BOT_TOKENS[] = TOKEN1
-BOT_TOKENS[] = TOKEN2
-BOT_TOKENS[] = TOKEN3
-BOT_TOKENS[] = TOKEN4
-BOT_TOKENS[] = TOKEN5
-BOT_TOKENS[] = TOKEN6
-BOT_TOKENS[] = TOKEN7
-BOT_TOKENS[] = TOKEN8
-BOT_TOKENS[] = TOKEN9
-BOT_TOKENS[] = TOKEN10
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
+BOT_TOKENS[] = TOKEN
 
 ; Enable or Disable Custom Emotes
 ; If enabled, you must join and invite your bots to the following servers:

@@ -342,22 +342,23 @@ OSCAR.on('ready', () => { OSCAR.user.setPresence({ status: 'invisible' }); });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
 async function bot_login(){
-  await MAIN.login(MAIN.config.TOKENS.MAIN);
-  if(MAIN.config.TOKENS.BOT_TOKENS[0]){ await MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.TOKENS.BOT_TOKENS[0]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[1]){ await MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.TOKENS.BOT_TOKENS[1]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[2]){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(MAIN.config.TOKENS.BOT_TOKENS[2]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[3]){ await MAIN.BOTS.push(DELTA); DELTA.login(MAIN.config.TOKENS.BOT_TOKENS[3]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[4]){ await MAIN.BOTS.push(ECHO); ECHO.login(MAIN.config.TOKENS.BOT_TOKENS[4]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[5]){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(MAIN.config.TOKENS.BOT_TOKENS[5]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[6]){ await MAIN.BOTS.push(GULF); GULF.login(MAIN.config.TOKENS.BOT_TOKENS[6]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[7]){ await MAIN.BOTS.push(HOTEL); HOTEL.login(MAIN.config.TOKENS.BOT_TOKENS[7]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[8]){ await MAIN.BOTS.push(INDIA); INDIA.login(MAIN.config.TOKENS.BOT_TOKENS[8]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[9]){ await MAIN.BOTS.push(JULIET); JULIET.login(MAIN.config.TOKENS.BOT_TOKENS[9]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[10]){ await MAIN.BOTS.push(KILO); KILO.login(MAIN.config.TOKENS.BOT_TOKENS[10]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[11]){ await MAIN.BOTS.push(LIMA); LIMA.login(MAIN.config.TOKENS.BOT_TOKENS[11]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.TOKENS.BOT_TOKENS[12]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.TOKENS.BOT_TOKENS[13]); }
-  if(MAIN.config.TOKENS.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.TOKENS.BOT_TOKENS[14]); }
+  let token = MAIN.config.TOKENS;
+  await MAIN.login(token.MAIN);
+  if(token.BOT_TOKENS[0] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(ALPHA); ALPHA.login(token.BOT_TOKENS[0]); }
+  if(token.BOT_TOKENS[1] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(BRAVO); BRAVO.login(token.BOT_TOKENS[1]); }
+  if(token.BOT_TOKENS[2] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(token.BOT_TOKENS[2]); }
+  if(token.BOT_TOKENS[3] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(DELTA); DELTA.login(token.BOT_TOKENS[3]); }
+  if(token.BOT_TOKENS[4] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(ECHO); ECHO.login(token.BOT_TOKENS[4]); }
+  if(token.BOT_TOKENS[5] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(token.BOT_TOKENS[5]); }
+  if(token.BOT_TOKENS[6] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(GULF); GULF.login(token.BOT_TOKENS[6]); }
+  if(token.BOT_TOKENS[7] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(HOTEL); HOTEL.login(token.BOT_TOKENS[7]); }
+  if(token.BOT_TOKENS[8] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(INDIA); INDIA.login(token.BOT_TOKENS[8]); }
+  if(token.BOT_TOKENS[9] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(JULIET); JULIET.login(token.BOT_TOKENS[9]); }
+  if(token.BOT_TOKENS[10] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(KILO); KILO.login(token.BOT_TOKENS[10]); }
+  if(token.BOT_TOKENS[11] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(LIMA); LIMA.login(token.BOT_TOKENS[11]); }
+  if(token.BOT_TOKENS[12] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(MIKE); MIKE.login(token.BOT_TOKENS[12]); }
+  if(token.BOT_TOKENS[13] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(token.BOT_TOKENS[13]); }
+  if(token.BOT_TOKENS[14] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(OSCAR); OSCAR.login(token.BOT_TOKENS[14]); }
   if(MAIN.config.DEBUG.Quests == 'ENABLED'){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Quest Debugging is ENABLED.');
   }

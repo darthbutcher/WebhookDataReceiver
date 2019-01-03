@@ -18,26 +18,26 @@ const insideGeojson = require('point-in-geopolygon');
 module.exports.run = async (MAIN, quest) => {
 
   // DEFINE VARIABLES
-  let main_area = '', sub_area = '', server = '', area = {};
+  let main_area = '', sub_area = '', server = '', quest_area = {};
   let quest_task = '', quest_url = '', quest_reward = '';
   let simple_reward = '', expireTime = MAIN.Bot_Time(null,'quest');
 
   // DEFINE THE DISCORD THE OBJECT NEEDS TO BE SENT TO
-  await MAIN.Discord.Servers.forEach((bot_discord,index) => {
-    if(insideGeofence([quest.latitude,quest.longitude], bot_discord.geofence)){ server = bot_discord; }
+  await MAIN.Discord.Servers.forEach((config_discord,index) => {
+    if(insideGeofence([quest.latitude,quest.longitude], config_discord.geofence)){ server = config_discord; }
   });
 
   // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
   await MAIN.geofences.features.forEach((geofence,index) => {
     if(insideGeojson.polygon(geofence.geometry.coordinates, [quest.longitude,quest.latitude])){
-      if(geofence.properties.sub_area != 'true'){ area.main = geofence.properties.name; }
-      else if(geofence.properties.sub_area == 'false'){  area.sub = geofence.properties.name;  }
+      if(geofence.properties.sub_area != 'true'){ quest_area.main = geofence.properties.name; }
+      else if(geofence.properties.sub_area == 'false'){  quest_area.sub = geofence.properties.name;  }
     }
   });
 
-  if(area.sub){ quest_area = area.sub; }
-  else if(area.main){ quest_area = area.main; }
-  else{ quest_area = server.name; }
+  if(area.sub){ embed_area = quest_area.sub; }
+  else if(area.main){ embed_area = quest_area.main; }
+  else{ embed_area = server.name; }
 
   // DETERMINE THE QUEST REWARD
   switch(quest.rewards[0].type){
@@ -183,7 +183,7 @@ module.exports.run = async (MAIN, quest) => {
     let quest_embed = new Discord.RichEmbed()
       .attachFile(attachment).setImage('attachment://maptile.jpg')
       .setColor(embedColor).setThumbnail(quest_url)
-      .addField( quest_reward+'  |  '+quest_area, quest_task, false)
+      .addField( quest_reward+'  |  '+embed_area, quest_task, false)
       .addField('Pokéstop:', quest.pokestop_name, false)
       .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)')
       .setFooter('Expires: '+expireTime);
@@ -199,8 +199,8 @@ module.exports.run = async (MAIN, quest) => {
         let filter = MAIN.Filters.get(quest_channel[1].filter);
 
         // THROW ERRORS FOR INVALID DATA
-        if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
-        if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
+        if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+quest_channel[0]+' does not appear to exist.'); }
+        if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+quest_channel[0]+' does not appear to exist.'); }
 
         if(channel.guild.id == server.id){
 

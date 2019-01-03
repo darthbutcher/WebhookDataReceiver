@@ -17,11 +17,13 @@ const insideGeojson = require('point-in-geopolygon');
 
 module.exports.run = async (MAIN, sighting) => {
 
-  // ESTABLISH SIGHTING VARIABLES
-  let main_area = '', sub_area = '', server = '', area = {};
+  // VARIABLES
   let time_now = new Date().getTime(), pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
   internal_value = Math.floor(internal_value*1000)/10;
+
+  // DISCORD AND AREA VARIABLES
+  let main_area = '', sub_area = '', server = '', geofence_area = {}, embed_area = '';
 
   // DEFINE THE DISCORD THE OBJECT NEEDS TO BE SENT TO
   await MAIN.Discord.Servers.forEach((bot_discord,index) => {
@@ -31,18 +33,18 @@ module.exports.run = async (MAIN, sighting) => {
   // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
   await MAIN.geofences.features.forEach((geofence,index) => {
     if(insideGeojson.polygon(geofence.geometry.coordinates, [sighting.longitude,sighting.latitude])){
-      if(geofence.properties.sub_area != 'true'){ area.main = geofence.properties.name; }
-      else if(geofence.properties.sub_area == 'false'){  area.sub = geofence.properties.name;  }
+      if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
+      else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
     }
   });
-
-  // DEBUG
-  if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Pokemon. '+sighting.encounter_id); }
 
   // DEFINE AREA FOR EMBED
   if(area.sub){ embed_area = area.sub; sub_area = area.sub; }
   else if(area.main){ embed_area = area.main; main_area = area.main; }
   else{ embed_area = server.name; main_area = server.name; }
+
+  // DEBUG
+  if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Saw an Pokemon. '+sighting.encounter_id); }
 
   if(sighting.cp > 0 && MAIN.config.POKEMON.Subscriptions == 'ENABLED'){
     Subscription.run(MAIN, internal_value, sighting, area, embed_area, server, time_now);
@@ -56,8 +58,8 @@ module.exports.run = async (MAIN, sighting) => {
     let filter = MAIN.Filters.get(pokemon_channel[1].filter);
 
     // THROW ERRORS FOR INVALID DATA
-    if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
-    if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
+    if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); }
+    if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+pokemon_channel[0]+' does not appear to exist.'); }
 
     if(channel.guild.id == server.id){
 
