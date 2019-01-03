@@ -154,10 +154,10 @@ function raid_filtration(MAIN, raid_embed, raid_type, raid, server, main_area, s
 
       let geofences = raid_channel[1].geofences;
       let channel = MAIN.channels.get(raid_channel[0]);
-      let feed = MAIN.Filters.get(raid_channel[1].filter);
+      let filter = MAIN.Filters.get(raid_channel[1].filter);
 
       // THROW ERRORS FOR INVALID DATA
-      if(!feed){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
+      if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
       if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
 
       // FILTER FOR DISCORD ID
