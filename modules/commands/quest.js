@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, args, prefix, city) => {
+module.exports.run = async (MAIN, message, args, prefix, discord) => {
 
   // DECLARE VARIABLES
   let nickname = '';
@@ -52,17 +52,17 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
 
 // PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
 function subscription_status(MAIN, message, nickname, reason, prefix){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
     if(user[0].quest_paused == 'ACTIVE' && reason == 'resume'){
-      return message.reply('Your Quest subsctipions are already `ACTIVE`.').then(m => m.delete(5000)).catch(console.error);
+      return message.reply('Your Quest subscriptions are already `ACTIVE`.').then(m => m.delete(5000)).catch(console.error);
     }
     else if(user[0].quest_paused == 'PAUSED' && reason == 'pause'){
-      return message.reply('You Quest subsctipions are already `PAUSED`.').then(m => m.delete(5000)).catch(console.error);
+      return message.reply('You Quest subscriptions are already `PAUSED`.').then(m => m.delete(5000)).catch(console.error);
     }
     else{
       if(reason == 'pause'){ change = 'PAUSED'; }
       if(reason == 'resume'){ change = 'ACTIVE'; }
-      MAIN.database.query("UPDATE pokebot.users SET quests_status = ? WHERE user_id = ?", [change,message.member.id], function (error, user, fields) {
+      MAIN.database.query("UPDATE pokebot.users SET quests_status = ? WHERE user_id = ? AND discord_id = ?", [change, message.member.id, message.guild.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -78,7 +78,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix){
 
 // SUBSCRIPTION VIEW FUNCTION
 async function subscription_view(MAIN, message, nickname, prefix){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].quests){ return message.reply('You have no saved Quest subscriptions.').then(m => m.delete(5000)).catch(console.error); }
@@ -86,7 +86,49 @@ async function subscription_view(MAIN, message, nickname, prefix){
 
       let user_quests = user[0].quests.split(',');
 
-      if(!user_quests[0]){ return message.reply('You have no saved Quest subscriptions.').then(m => m.delete(5000)).catch(console.error); }
+      if(!user_quests[0]){
+
+        // CREATE THE EMBED
+        let no_subscriptions = new Discord.RichEmbed()
+          .setAuthor(nickname, message.member.user.displayAvatarURL)
+          .setTitle('You do not have any Quest Subscriptions!')
+          .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');
+
+        // SEND THE EMBED
+        message.channel.send(no_subscriptions).catch(console.error).then( msg => {
+
+          // DEFINE COLLECTOR AND FILTER
+          const filter = cMessage => cMessage.member.id==message.member.id;
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
+
+          // FILTER COLLECT EVENT
+          collector.on('collect', message => {
+            switch(message.content.toLowerCase()){
+              case 'add': collector.stop('add'); break;
+              case 'remove': collector.stop('remove'); break;
+              case 'view': collector.stop('view'); break;
+              case 'pause': collector.stop('pause'); break;
+              case 'resume': collector.stop('resume'); break;
+              case 'time': collector.stop('time'); break;
+            }
+          });
+
+          // COLLECTOR HAS BEEN ENDED
+          collector.on('end', (collected,reason) => {
+
+            // DELETE ORIGINAL MESSAGE
+            msg.delete();
+            switch(reason){
+              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
+              case 'resume':
+              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+            }
+          });
+        });
+      }
       else{
 
         // CREATE THE EMBED
@@ -96,7 +138,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
           .setDescription('Overall Status: `'+user[0].status+'`\n'
                          +'Quest Status: `'+user[0].quests_status+'`\n'
                          +'Delivery Time: '+user[0].alert_time)
-          .addField('Your Subscriptions:',user[0].quests.toString().replace(/,/g,'\n'),false)
+          .addField('Your Subscriptions:','**'+user[0].quests.toString().replace(/,/g,'\n**'),false)
           .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');
 
         // SEND THE EMBED
@@ -142,14 +184,14 @@ async function subscription_view(MAIN, message, nickname, prefix){
 async function subscription_time(MAIN, message, nickname, prefix){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE POKEMON NAME FROM USER
     let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].alert_time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub.toLowerCase() == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET alert_time = ? WHERE user_id = ?", [sub,message.member.id], function (error, user, fields) {
+    MAIN.database.query("UPDATE pokebot.users SET alert_time = ? WHERE user_id = ? AND discord_id = ?", [sub,message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(5000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -202,7 +244,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
   let index ='', quests = '';
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE POKEMON NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, user[0].quests, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Reward.', undefined);
@@ -214,21 +256,21 @@ async function subscription_create(MAIN, message, nickname, prefix){
       quests = user[0].quests.split(',');
       index = quests.indexOf(sub);
     }
-    let rewards = MAIN.q_config.Quest_Rewards.toString().toLowerCase().split(',');
+    let rewards = MAIN.config.QUEST.Rewards.toString().toLowerCase().split(',');
     let reward_index = rewards.indexOf(sub.toLowerCase());
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].quests){ quests = sub; }
     else{
       if(index >= 0){ return message.reply('You are already subscribed to this quest reward.').then(m => m.delete(10000)).catch(console.error); }
-      else{ quests.push(MAIN.q_config.Quest_Rewards[reward_index]); }
+      else{ quests.push(MAIN.config.QUEST.Rewards[reward_index]); }
     }
 
     // CONVERT ARRAY TO STRING
     quests = quests.toString();
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET quests = ? WHERE user_id = ?", [quests,message.member.id], function (error, user, fields) {
+    MAIN.database.query("UPDATE pokebot.users SET quests = ? WHERE user_id = ? AND discord_id = ?", [quests, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -278,7 +320,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
 async function subscription_remove(MAIN, message, nickname, prefix){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE POKEMON NAME FROM USER
     let sub = await sub_collector(MAIN, 'Remove', nickname, message, user[0].quests, 'Names are not case-sensitive.', undefined);
@@ -288,13 +330,97 @@ async function subscription_remove(MAIN, message, nickname, prefix){
     // DEFINED VARIABLES
     let quests = user[0].quests.split(',');
     let index = quests.indexOf(sub);
-    let rewards = MAIN.q_config.Quest_Rewards.toString().toLowerCase().split(',');
+    let rewards = MAIN.config.QUEST.Rewards.toString().toLowerCase().split(',');
     let reward_index = rewards.indexOf(sub.toLowerCase());
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
-    if(!user[0].quests){ return message.reply('You are not subscribed to any Quests.').then(m => m.delete(10000)).catch(console.error); }
+    if(!user[0].quests){
+
+      // CREATE THE EMBED
+      let no_subscriptions = new Discord.RichEmbed()
+        .setAuthor(nickname, message.member.user.displayAvatarURL)
+        .setTitle('You do not have any Quest Subscriptions!')
+        .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');
+
+      // SEND THE EMBED
+      message.channel.send(no_subscriptions).catch(console.error).then( msg => {
+
+        // DEFINE COLLECTOR AND FILTER
+        const filter = cMessage => cMessage.member.id==message.member.id;
+        const collector = message.channel.createMessageCollector(filter, { time: 30000 });
+
+        // FILTER COLLECT EVENT
+        collector.on('collect', message => {
+          switch(message.content.toLowerCase()){
+            case 'add': collector.stop('add'); break;
+            case 'remove': collector.stop('remove'); break;
+            case 'view': collector.stop('view'); break;
+            case 'pause': collector.stop('pause'); break;
+            case 'resume': collector.stop('resume'); break;
+            case 'time': collector.stop('time'); break;
+          }
+        });
+
+        // COLLECTOR HAS BEEN ENDED
+        collector.on('end', (collected,reason) => {
+
+          // DELETE ORIGINAL MESSAGE
+          msg.delete();
+          switch(reason){
+            case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+            case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+            case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+            case 'time': subscription_time(MAIN, message, nickname, prefix); break;
+            case 'resume':
+            case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+          }
+        });
+      });
+    }
     else{
-      if(index < 0){ return message.reply('You are not subscribed to this Quest.').then(m => m.delete(10000)).catch(console.error); }
+      if(index < 0){
+
+        // CREATE THE EMBED
+        let no_quest = new Discord.RichEmbed()
+          .setAuthor(nickname, message.member.user.displayAvatarURL)
+          .setTitle('You are not Subscribed to that Quest!')
+          .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');
+
+        // SEND THE EMBED
+        message.channel.send(no_quest).catch(console.error).then( msg => {
+
+          // DEFINE COLLECTOR AND FILTER
+          const filter = cMessage => cMessage.member.id==message.member.id;
+          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
+
+          // FILTER COLLECT EVENT
+          collector.on('collect', message => {
+            switch(message.content.toLowerCase()){
+              case 'add': collector.stop('add'); break;
+              case 'remove': collector.stop('remove'); break;
+              case 'view': collector.stop('view'); break;
+              case 'pause': collector.stop('pause'); break;
+              case 'resume': collector.stop('resume'); break;
+              case 'time': collector.stop('time'); break;
+            }
+          });
+
+          // COLLECTOR HAS BEEN ENDED
+          collector.on('end', (collected,reason) => {
+
+            // DELETE ORIGINAL MESSAGE
+            msg.delete();
+            switch(reason){
+              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
+              case 'resume':
+              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+            }
+          });
+        });
+      }
       else{ quests.splice(index,1); }
     }
 
@@ -302,15 +428,17 @@ async function subscription_remove(MAIN, message, nickname, prefix){
     quests = quests.toString();
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET quests = ? WHERE user_id = ?", [quests,message.member.id], function (error, user, fields) {
+    MAIN.database.query("UPDATE pokebot.users SET quests = ? WHERE user_id = ? AND discord_id = ?", [quests, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
+
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle(sub+' Subscription Removed!')
           .setFooter('Saved to the Pokébot Database.')
           .setDescription('Saved to the Pokébot Database.')
           .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
+
         message.channel.send(subscription_success).then( msg => {
 
           // DEFINE COLLECTOR AND FILTER
@@ -368,7 +496,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
       else{ user_rewards = 'None';  }
 
         // CREATE REWARD LIST AND ADD CHECK FOR SUBSCRIBED REWARDS
-        MAIN.q_config.Quest_Rewards.forEach((reward,index) => {
+        MAIN.config.QUEST.Rewards.forEach((reward,index) => {
           if(user_rewards.indexOf(reward) > 0){
             reward_list += reward+' '+MAIN.emotes.checkYes+'\n';
           }
@@ -387,7 +515,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Quest do you want to remove?')
-          .addField('Your Quests:', sub_list, false)
+          .addField('Your Subscriptions:', '**'+sub_list+'**', false)
           .setFooter(requirements); break;
 
       // REMOVEAL EMBED
@@ -395,7 +523,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What time do you want to set for Quest DM Alerts?')
-          .setDescription('Current Time: ``'+user_quests+'``')
+          .setDescription('Current Time: `'+user_quests+'`')
           .setFooter(requirements); break;
     }
 
@@ -416,9 +544,11 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
           case type.indexOf('Name')>=0:
           case type.indexOf('Remove')>=0:
             if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); break; }
-            for(let r = 0; r < MAIN.q_config.Quest_Rewards.length+1; r++){
-              if(r == MAIN.q_config.Quest_Rewards.length+1){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Quest reward. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
-              else if(message.content.toLowerCase() == MAIN.q_config.Quest_Rewards[r].toLowerCase()){ collector.stop(MAIN.q_config.Quest_Rewards[r]); break; }
+            for(let r = 0; r < MAIN.config.QUEST.Rewards.length+1; r++){
+              if(r == MAIN.config.QUEST.Rewards.length+1){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Quest reward. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
+              else if(MAIN.config.QUEST.Rewards[r] && message.content.toLowerCase() == MAIN.config.QUEST.Rewards[r].toLowerCase()){
+                collector.stop(MAIN.config.QUEST.Rewards[r]); break;
+              }
             } break;
 
           case type.indexOf('Time')>=0:

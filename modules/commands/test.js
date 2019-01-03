@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, prefix, city) => {
+module.exports.run = async (MAIN, message, prefix, discord) => {
 
   MAIN.Static_Map_Tile(52.4945528,13.437524,"123456789").then(function(imgUrl){
 

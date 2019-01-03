@@ -1,20 +1,21 @@
 // MODULE REQUIREMENTS
 const fs = require('fs');
+const ini = require('ini');
 const mysql = require('mysql');
 const moment = require('moment');
-const Discord = require('discord.js');
-const insideGeofence = require('point-in-polygon');
 const express = require('express');
+const Discord = require('discord.js');
 const bodyParser = require('body-parser');
+const insideGeofence = require('point-in-polygon');
+const insideGeojson = require('point-in-geopolygon');
 
 // LOAD MODULES
 const StaticMaps = require('staticmaps');
+const Raids = require('./modules/raids.js');
 const Emojis = require('./modules/emojis.js');
 const Quests = require('./modules/quests.js');
 const Pokemon = require('./modules/pokemon.js');
-const Raids = require('./modules/raids.js');
 const Commands = require('./modules/commands.js');
-
 
 // EVENTS TO DISABLE TO SAVE MEMORY AND CPU
 var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','channelUpdate','clientUserGuildSettingsUpdate','clientUserSettingsUpdate',
@@ -34,17 +35,30 @@ const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE
 const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
 // CACHE DATA FROM JSONS
-MAIN.config = require('./config/config.json');
-MAIN.geofence = require('./config/geofences.json');
-MAIN.q_config = require('./config/quest_config.json');
-MAIN.r_config = require('./config/raid_config.json');
-MAIN.p_config = require('./config/pokemon_config.json');
-MAIN.pokemon = require('./static/pokemon.json');
 MAIN.proto = require('./static/en.json');
-MAIN.rewards = require('./static/rewards.json');
 MAIN.moves = require('./static/moves.json');
 MAIN.db = require('./static/database.json');
 MAIN.types = require('./static/types.json');
+MAIN.pokemon = require('./static/pokemon.json');
+MAIN.rewards = require('./static/rewards.json');
+MAIN.Discord = require('./config/discords.json');
+MAIN.geofences = require('./config/geojson.json');
+MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
+
+// LOAD RAID FEED CHANNELS
+const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', 'utf-8'));
+MAIN.Raid_Channels = [];
+for (var key in raid_channels){ MAIN.Raid_Channels.push([key, raid_channels[key]]); }
+
+// LOAD POKEMON FEED CHANNELS
+const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.ini', 'utf-8'));
+MAIN.Pokemon_Channels = [];
+for (var key in pokemon_channels){ MAIN.Pokemon_Channels.push([key, pokemon_channels[key]]); }
+
+// LOAD QUEST FEED CHANNELS
+const quest_channels = ini.parse(fs.readFileSync('./config/channels_quests.ini', 'utf-8'));
+MAIN.Quest_Channels = [];
+for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
 
 // DATABASE CONNECTION
 MAIN.database = mysql.createConnection({
@@ -52,8 +66,7 @@ MAIN.database = mysql.createConnection({
   user: MAIN.config.DB.username,
   password: MAIN.config.DB.password,
   port: MAIN.config.DB.port
-});
-MAIN.database.connect();
+}); MAIN.database.connect();
 
 // GLOBAL VARIABLES
 MAIN.BOTS = [];
@@ -61,16 +74,6 @@ MAIN.BOTS = [];
 // DEFINE LOGGING & DEBUGGING
 MAIN.logging = MAIN.config.CONSOLE_LOGS;
 MAIN.debug = MAIN.config.DEBUG;
-
-// DEFINE AND LOAD ALL FEEDS
-MAIN.feeds = [];
-fs.readdir('./feeds', (err,files) => {
-  let feedFiles = files.filter(f => f.split('.').pop()==='json'), fCount=0;
-  feedFiles.forEach((f,i) => {
-    delete require.cache[require.resolve('./feeds/'+f)];
-    let feed = require('./feeds/'+f); MAIN.feeds.push(feed); fCount++
-  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+fCount+' Pokémon Feeds.');
-});
 
 // CREATE SERVER
 const app=express().use(bodyParser.json());
@@ -80,48 +83,50 @@ app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] ['+MAIN.Bot
 
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
 app.post('/', (webhook, resolve) => {
-  let PAYLOAD = webhook.body;
+  let PAYLOAD = webhook.body, object_area = {}, discord = '';
+
+  // IGNORE IF BOT HAS NOT BEEN FINISHED STARTUP
   if(MAIN.Active != true){ return; }
+
   // SEPARATE EACH PAYLOAD AND SORT
   PAYLOAD.forEach( async (data,index) => {
-    let city = await MAIN.Get_City(data.message);
-		switch(data.type){
 
-      // SEND TO POKEMON MODULE
-			case 'pokemon':
-				Pokemon.run(MAIN, data.message, city); return;
+    // IGNORE IF NOT A SPECIFIED OBJECT
+    if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
-      // SEND TO RAIDS MODULE
-			case 'raid':
-        Raids.run(MAIN, data.message, city); return;
-
-      // SEND TO QUESTS MODULE
-			case 'quest':
-				Quests.run(MAIN, data.message, city); return;
-			default: return;
-		}
-	});
+      // SEND TO OBJECT MODULES
+  		switch(data.type){
+        // SEND TO POKEMON MODULE
+  			case 'pokemon':
+  				Pokemon.run(MAIN, data.message); break;
+        // SEND TO RAIDS MODULE
+  			case 'raid':
+          Raids.run(MAIN, data.message); break;
+        // SEND TO QUESTS MODULE
+  			case 'quest':
+  				Quests.run(MAIN, data.message); break;
+  		}
+    }
+	}); return;
 });
 
-// DETERMINE OBJECT CITY
-MAIN.Get_City = (object) => {
-  return new Promise(function(resolve, reject) {
-    MAIN.config.Cities.forEach((city,index) => {
-      if(insideGeofence([object.latitude,object.longitude], city.geofence)){ resolve(city); }
-    }); resolve(undefined);
-  });
-}
-
 // SEND MESSAGE TO COMMAND MODULE
-MAIN.on('message', message => {
-  Commands.run(MAIN, message); return;
+MAIN.on('message', message => { return Commands.run(MAIN, message); });
+
+MAIN.Filters = new Discord.Collection();
+fs.readdir('./filters', (err,filters) => {
+  let filter_files = filters.filter(f => f.split('.').pop()==='json'), filter_count=0;
+  filter_files.forEach((f,i) => {
+    delete require.cache[require.resolve('./filters/'+f)]; filter_count++;
+    let filter = require('./filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
+  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+filter_count+' Filters.');
 });
 
 // SAVE A USER IN THE USER TABLE
 MAIN.Save_Sub = (message,area) => {
   if(MAIN.User_Bot == MAIN.BOTS.length-1){ MAIN.User_Bot = 0; } else{ MAIN.User_Bot++; }
-  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, city, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [message.member.id, message.member.user.tag, 'ALL', , , , 'ACTIVE', MAIN.User_Bot, '07:00', area, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    [message.member.id, message.member.user.tag, 'ALL', , , , 'ACTIVE', MAIN.User_Bot, '07:00', message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
     if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
     else{
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Added '+message.member.user.tag+' to the pokebot.user database.');
@@ -140,43 +145,22 @@ MAIN.Bot_Time = (time,type) => {
   if(type=='stamp'){ return moment(now).format('HH:mmA'); }
 }
 
-// TRANSLATE GENDER FUNCTION
-MAIN.Get_Gender = (genderID) => {
-  let gender='';
-  switch(genderID){
-    case 1: gender=' | ♂Male'; break;
-    case 2: gender=' | ♀Female'; break;
-    default: gender='No Gender';
-  } return gender;
-}
-
 // OBTAIN POKEMON SPRITE
-MAIN.Get_Sprite = (form,id) => {
-  let spriteUrl='';
+MAIN.Get_Sprite = (form, id) => {
+  let spriteUrl = '';
   switch(id.toString().length){
-    case 1: spriteUrl='https://www.serebii.net/sunmoon/pokemon/00'+id+'.png'; break;
-    case 2: spriteUrl='https://www.serebii.net/sunmoon/pokemon/0'+id+'.png'; break;
-    case 3: spriteUrl='https://www.serebii.net/sunmoon/pokemon/'+id+'.png'; break;
+    case 1: spriteUrl = 'https://www.serebii.net/sunmoon/pokemon/00'+id+'.png'; break;
+    case 2: spriteUrl = 'https://www.serebii.net/sunmoon/pokemon/0'+id+'.png'; break;
+    case 3: spriteUrl = 'https://www.serebii.net/sunmoon/pokemon/'+id+'.png'; break;
   }
   // CHECK FOR ALOLAN
-  if(form>0 && MAIN.pokemon.alolan_forms.indexOf(form)>=0){ spriteUrl=spriteUrl.toString().slice(0,-4)+'-a.png'; }
+  if(form > 0 && MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ spriteUrl = spriteUrl.toString().slice(0,-4)+'-a.png'; }
   return spriteUrl;
-}
-
-// OBTAIN OBECT GEOFENCE
-MAIN.Get_Area = (lat,lon) => {
-  let area='';
-  for(let gf=0; gf<MAIN.geofence.areas.length; gf++){
-    if(insideGeofence([lat,lon], MAIN.geofence.areas[gf].coords)){
-      area=MAIN.geofence.areas[gf];
-      if(area.sub_area==true){ return area; }
-    }
-  } return area;
 }
 
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_Embed = (embed, channelID) => {
-  if(MAIN.Next_Bot==MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot=0; } else{ MAIN.Next_Bot++; }
+  if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { pokebotRestart(); console.error(embed,error); });
 }
 
@@ -188,10 +172,10 @@ MAIN.Send_DM = (guild_id, user_id, embed, bot) => {
 }
 
 // GET QUEST REWARD ICON
-MAIN.Get_Icon = (object, questReward) => {
-  let questUrl='';
+MAIN.Get_Icon = (object, quest_reward) => {
+  let questUrl = '';
   MAIN.rewards.array.forEach((reward,index) => {
-    if(questReward.indexOf(reward.name)>=0){ questUrl=reward.url; }
+    if(quest_reward.indexOf(reward.name) >= 0){ questUrl = reward.url; }
   }); return questUrl;
 }
 
@@ -207,67 +191,48 @@ MAIN.Static_Map_Tile = (lat,lon,type) => {
       marker.coord = [lon,lat]; map.addMarker(marker);
       map.render(center, zoom)
         .then(() => map.image.save('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
-        //.then(() => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] New Map Tile Saved for '+lat+','+lon+'.'))
         .then(() => resolve('./static/'+type+'_tiles/'+lat+','+lon+'.png'))
         .catch(function(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Unable To Save Map Tile.',error); });
     }
   });
 }
-// GET WEATHER BOOST
-MAIN.Get_Weather = (weather) => {
-  return new Promise(resolve => {
-    let weatherBoost = '';
-    switch(weather){
-      case 1: weatherBoost = ' '+MAIN.emotes.clear+' *Boosted*'; break;
-      case 2: weatherBoost = ' '+MAIN.emotes.rain+' *Boosted*'; break;
-      case 3: weatherBoost = ' '+MAIN.emotes.partlyCloudy+' *Boosted*'; break;
-      case 4: weatherBoost = ' '+MAIN.emotes.cloudy+' *Boosted*'; break;
-      case 5: weatherBoost = ' '+MAIN.emotes.windy+' *Boosted*'; break;
-      case 6: weatherBoost = ' '+MAIN.emotes.snow+' *Boosted*'; break;
-      case 7: weatherBoost = ' '+MAIN.emotes.fog+' *Boosted*'; break;
-    } resolve(weatherBoost);
-  });
-}
 
-MAIN.Get_Team = (team_id) => {
+// GET EMOTE
+MAIN.Get_Detail = (category,variable) => {
   return new Promise(resolve => {
-    let weatherBoost = '';
-    switch(team_id){
-      case 1: defendingTeam = MAIN.emotes.mystic+' Gym'; break;
-      case 2: defendingTeam = MAIN.emotes.valor+' Gym'; break;
-      case 3: defendingTeam = MAIN.emotes.instinct+' Gym'; break;
-      default: defendingTeam='Uncontested Gym';
-    } resolve(defendingTeam);
-  });
-}
-
-// GET WEATHER BOOST
-MAIN.Get_Move_Type = (moveNum) => {
-  return new Promise(resolve => {
-    let emote = '';
-    switch(MAIN.moves[moveNum].type){
-      case 'Normal': emote = MAIN.emotes.normal; break;
-      case 'Grass': emote = MAIN.emotes.grass; break;
-      case 'Fire': emote = MAIN.emotes.fire; break;
-      case 'Water': emote = MAIN.emotes.water; break;
-      case 'Electric': emote = MAIN.emotes.electric; break;
-      case 'Ground': emote = MAIN.emotes.ground; break;
-      case 'Steel': emote = MAIN.emotes.steel; break;
-      case 'Rock': emote = MAIN.emotes.rock; break;
-      case 'Psychic': emote = MAIN.emotes.psychic; break;
-      case 'Poison': emote = MAIN.emotes.poison; break;
-      case 'Fairy': emote = MAIN.emotes.fairy; break;
-      case 'Fighting': emote = MAIN.emotes.fighting; break;
-      case 'Dark': emote = MAIN.emotes.dark; break;
-      case 'Ghost': emote = MAIN.emotes.ghost; break;
-      case 'Bug': emote = MAIN.emotes.bug; break;
-      case 'Dragon': emote = MAIN.emotes.dragon; break;
-      case 'Ice': emote = MAIN.emotes.ice; break;
-      case 'Flying': emote = MAIN.emotes.flying; break;
+    switch(category){
+      case 'team':
+        switch(variable){
+          case 1: emote = MAIN.emotes.mystic+' Gym'; break;
+          case 2: emote = MAIN.emotes.valor+' Gym'; break;
+          case 3: emote = MAIN.emotes.instinct+' Gym'; break;
+          default: emote = 'Uncontested Gym';
+        } resolve(emote); break;
+      case 'type':
+        switch(MAIN.moves[variable].type){
+          case 'Normal': emote = MAIN.emotes.normal; break;
+          case 'Grass': emote = MAIN.emotes.grass; break;
+          case 'Fire': emote = MAIN.emotes.fire; break;
+          case 'Water': emote = MAIN.emotes.water; break;
+          case 'Electric': emote = MAIN.emotes.electric; break;
+          case 'Ground': emote = MAIN.emotes.ground; break;
+          case 'Steel': emote = MAIN.emotes.steel; break;
+          case 'Rock': emote = MAIN.emotes.rock; break;
+          case 'Psychic': emote = MAIN.emotes.psychic; break;
+          case 'Poison': emote = MAIN.emotes.poison; break;
+          case 'Fairy': emote = MAIN.emotes.fairy; break;
+          case 'Fighting': emote = MAIN.emotes.fighting; break;
+          case 'Dark': emote = MAIN.emotes.dark; break;
+          case 'Ghost': emote = MAIN.emotes.ghost; break;
+          case 'Bug': emote = MAIN.emotes.bug; break;
+          case 'Dragon': emote = MAIN.emotes.dragon; break;
+          case 'Ice': emote = MAIN.emotes.ice; break;
+          case 'Flying': emote = MAIN.emotes.flying; break;
+        } resolve(emote); break;
     }
-    resolve(emote);
   });
 }
+
 // INTERVAL FUNCTION TO SEND QUEST SUBSCRIPTION DMS
 setInterval(function() {
   let timeNow=new Date().getTime();
@@ -276,8 +241,7 @@ setInterval(function() {
       alerts.forEach( async (alert,index) => {
         setTimeout(async function() {
           let quest = JSON.parse(alert.quest);
-          let city = await MAIN.Get_City(quest);
-          MAIN.BOTS[alert.bot].guilds.get(city.discord_id).fetchMember(alert.user_id).then( TARGET => {
+          MAIN.BOTS[alert.bot].guilds.get(alert.discord_id).fetchMember(alert.user_id).then( TARGET => {
             let quest_embed = JSON.parse(alert.embed);
             let attachment = new Discord.Attachment(quest_embed.file.attachment, quest_embed.file.name);
             let alert_embed = new Discord.RichEmbed()
@@ -339,7 +303,7 @@ async function updateEachVersion(version){
 }
 
 // CREATE DATABASE, TABLES, AND CHECK FOR UPDATES
-async function updateDatabase(){
+async function update_database(){
   return new Promise(async function(resolve, reject) {
     await MAIN.sqlFunction('CREATE DATABASE IF NOT EXISTS pokebot', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE Pokébot DATABASE.');
     await MAIN.sqlFunction('CREATE TABLE IF NOT EXISTS pokebot.users (user_id TEXT, user_name TEXT, geofence TEXT, pokemon TEXT, quests TEXT, raids TEXT, paused TEXT, bot TEXT, alert_time TEXT, city TEXT)', undefined, undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO CREATE THE pokebot.user TABLE.');
@@ -377,38 +341,53 @@ NOVEMBER.on('ready', () => { NOVEMBER.user.setPresence({ status: 'invisible' });
 OSCAR.on('ready', () => { OSCAR.user.setPresence({ status: 'invisible' }); });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
-async function botLogin(){
-  await MAIN.login(MAIN.config.MAIN_BOT_TOKEN);
-  if(MAIN.config.BOT_TOKENS[0]){ await MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.BOT_TOKENS[0]); }
-  if(MAIN.config.BOT_TOKENS[1]){ await MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.BOT_TOKENS[1]); }
-  if(MAIN.config.BOT_TOKENS[2]){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(MAIN.config.BOT_TOKENS[2]); }
-  if(MAIN.config.BOT_TOKENS[3]){ await MAIN.BOTS.push(DELTA); DELTA.login(MAIN.config.BOT_TOKENS[3]); }
-  if(MAIN.config.BOT_TOKENS[4]){ await MAIN.BOTS.push(ECHO); ECHO.login(MAIN.config.BOT_TOKENS[4]); }
-  if(MAIN.config.BOT_TOKENS[5]){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(MAIN.config.BOT_TOKENS[5]); }
-  if(MAIN.config.BOT_TOKENS[6]){ await MAIN.BOTS.push(GULF); GULF.login(MAIN.config.BOT_TOKENS[6]); }
-  if(MAIN.config.BOT_TOKENS[7]){ await MAIN.BOTS.push(HOTEL); HOTEL.login(MAIN.config.BOT_TOKENS[7]); }
-  if(MAIN.config.BOT_TOKENS[8]){ await MAIN.BOTS.push(INDIA); INDIA.login(MAIN.config.BOT_TOKENS[8]); }
-  if(MAIN.config.BOT_TOKENS[9]){ await MAIN.BOTS.push(JULIET); JULIET.login(MAIN.config.BOT_TOKENS[9]); }
-  if(MAIN.config.BOT_TOKENS[10]){ await MAIN.BOTS.push(KILO); KILO.login(MAIN.config.BOT_TOKENS[10]); }
-  if(MAIN.config.BOT_TOKENS[11]){ await MAIN.BOTS.push(LIMA); LIMA.login(MAIN.config.BOT_TOKENS[11]); }
-  if(MAIN.config.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.BOT_TOKENS[12]); }
-  if(MAIN.config.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.BOT_TOKENS[13]); }
-  if(MAIN.config.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.BOT_TOKENS[14]); }
-  await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging is set to: '+MAIN.config.CONSOLE_LOGS);
+async function bot_login(){
+  await MAIN.login(MAIN.config.TOKENS.MAIN);
+  if(MAIN.config.TOKENS.BOT_TOKENS[0]){ await MAIN.BOTS.push(ALPHA); ALPHA.login(MAIN.config.TOKENS.BOT_TOKENS[0]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[1]){ await MAIN.BOTS.push(BRAVO); BRAVO.login(MAIN.config.TOKENS.BOT_TOKENS[1]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[2]){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(MAIN.config.TOKENS.BOT_TOKENS[2]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[3]){ await MAIN.BOTS.push(DELTA); DELTA.login(MAIN.config.TOKENS.BOT_TOKENS[3]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[4]){ await MAIN.BOTS.push(ECHO); ECHO.login(MAIN.config.TOKENS.BOT_TOKENS[4]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[5]){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(MAIN.config.TOKENS.BOT_TOKENS[5]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[6]){ await MAIN.BOTS.push(GULF); GULF.login(MAIN.config.TOKENS.BOT_TOKENS[6]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[7]){ await MAIN.BOTS.push(HOTEL); HOTEL.login(MAIN.config.TOKENS.BOT_TOKENS[7]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[8]){ await MAIN.BOTS.push(INDIA); INDIA.login(MAIN.config.TOKENS.BOT_TOKENS[8]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[9]){ await MAIN.BOTS.push(JULIET); JULIET.login(MAIN.config.TOKENS.BOT_TOKENS[9]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[10]){ await MAIN.BOTS.push(KILO); KILO.login(MAIN.config.TOKENS.BOT_TOKENS[10]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[11]){ await MAIN.BOTS.push(LIMA); LIMA.login(MAIN.config.TOKENS.BOT_TOKENS[11]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[12]){ await MAIN.BOTS.push(MIKE); MIKE.login(MAIN.config.TOKENS.BOT_TOKENS[12]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[13]){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(MAIN.config.TOKENS.BOT_TOKENS[13]); }
+  if(MAIN.config.TOKENS.BOT_TOKENS[14]){ await MAIN.BOTS.push(OSCAR); OSCAR.login(MAIN.config.TOKENS.BOT_TOKENS[14]); }
+  if(MAIN.config.DEBUG.Quests == 'ENABLED'){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Quest Debugging is ENABLED.');
+  }
+  if(MAIN.config.DEBUG.Raids == 'ENABLED'){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Raid Debugging is ENABLED.');
+  }
+  if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokemon Debugging is ENABLED.');
+  }
+  if(MAIN.config.DEBUG.Subscription == 'ENABLED'){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Subscription Debugging is ENABLED.');
+  }
+  if(MAIN.config.CONSOLE_LOGS == 'ENABLED'){
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Console Logging is ENABLED');
+  }
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 
   // SET ACTIVE BOOLEAN TO TRUE AND BOT POOL TO ZERO
   MAIN.Active = true; MAIN.Next_Bot = 0; MAIN.User_Bot = 0;
 
   // CHECK FOR CUSTOM EMOTES (CHUCKLESLOVE MERGE)
-  if(MAIN.config.Custom_Emotes == false){
+  if(MAIN.config.EMOTES.Custom == false){
     MAIN.emotes = new Emojis.DiscordEmojis();
     MAIN.Custom_Emotes = true;
     MAIN.emotes.Load(MAIN);
   }
   else{
     MAIN.Custom_Emotes = false;
-    MAIN.emotes = require('./config/emotes.json'); }
+    MAIN.emotes = ini.parse(fs.readFileSync('./config/emotes.ini', 'utf-8'));
+  }
 }
 
 // RESTART FUNCTION
@@ -416,7 +395,6 @@ function pokebotRestart(){ process.exit(1); }
 
 // CRANK UP THE BOT
 async function start(){
-  await updateDatabase();
-  await botLogin();
-}
-start();
+  await update_database();
+  await bot_login();
+} start();

@@ -1,0 +1,7 @@
+{
+  "Type": "raid",
+  "Egg_Or_Boss": "boss",
+  "Raid_Levels": [ 5 ],
+  "Boss_IDs": [ ],
+  "Ex_Eligible": false
+}

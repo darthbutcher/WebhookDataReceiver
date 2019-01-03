@@ -1,14 +1,17 @@
-const Discord=require('discord.js');
+const Discord = require('discord.js');
+const insideGeofence = require('point-in-polygon');
+const insideGeojson = require('point-in-geopolygon');
 
-module.exports.run = async (MAIN, message, args, prefix, city) => {
+module.exports.run = async (MAIN, message, args, prefix, discord) => {
 
   // DECLARE VARIABLES
   let nickname = '', area_array = '', available_areas ='';
 
-  MAIN.geofence.areas.forEach((area,index) => {
-    if(city.name == area.city){ area_array += area.name+','; }
-  });
-  area_array = area_array.slice(0,-1);
+  await MAIN.geofences.features.forEach((geofence,index) => {
+    if(insideGeofence([geofence.geometry.coordinates[0][0][1],geofence.geometry.coordinates[0][0][0]], discord.geofence)){
+      if(geofence.properties.name){ area_array += geofence.properties.name+','; }
+    }
+  }); area_array = area_array.slice(0,-1);
 
   // GET USER NICKNAME
   if(message.member.nickname){ nickname = message.member.nickname; } else{ nickname = message.member.user.username; }
@@ -52,7 +55,7 @@ module.exports.run = async (MAIN, message, args, prefix, city) => {
 
 // AREA VIEW FUNCTION
 async function subscription_view(MAIN, message, nickname, prefix, area_array){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
 
     let area_list = '';
     if(!user[0].geofence){ area_list = 'None'; }
@@ -105,7 +108,7 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
 async function subscription_create(MAIN, message, nickname, prefix, area_array){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array);
@@ -130,7 +133,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
     areas = areas.toString();
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET geofence = ? WHERE user_id = ?", [areas,message.member.id], function (error, user, fields) {
+    MAIN.database.query("UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?", [areas, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(5000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -177,7 +180,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
 async function subscription_remove(MAIN, message, nickname, prefix, area_array){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], async function (error, user, fields) {
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array);
@@ -196,7 +199,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array){
     else{ areas = areas.toString(); }
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query(`UPDATE pokebot.users SET geofence = ? WHERE user_id = ?`, [areas, message.member.id], function (error, user, fields) {
+    MAIN.database.query(`UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [areas, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ console.error(error); return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')

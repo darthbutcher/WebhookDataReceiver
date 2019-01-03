@@ -22,7 +22,7 @@ fs.readdir('./modules/commands', (err,files) => {
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, message) => {
+module.exports.run = async (MAIN, message, discord) => {
 
   // DEFINE VARIABLES
   let prefix = MAIN.config.PREFIX;
@@ -31,27 +31,27 @@ module.exports.run = async (MAIN, message) => {
   // CHECK IF THE MESSAGE IS FROM A BOT
   if(message.author.bot == true){ return; }
 
-  // CHECK EACH CITY FOR THE SUB CHANNEL
-  MAIN.config.Cities.forEach((city,index) => {
-    if(message.channel.id == city.sub_channel){
+  // CHECK EACH DISCORD FOR THE SUB CHANNEL
+  MAIN.Discord.Servers.forEach((discord,index) => {
+    if(message.channel.id == discord.sub_channel){
 
       // DELETE THE MESSAGE
       message.delete();
 
-      // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
-      let member = MAIN.guilds.get(city.discord_id).members.get(message.member.id);
-      if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
-      else if(city.donor_role && !member.roles.has(city.donor_role)){ return; }
+      // // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
+      // let member = MAIN.guilds.get(messag).members.get(message.member.id);
+      // if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
+      // else if(discord.donor_role && !member.roles.has(discord.donor_role)){ return; }
 
       // LOAD DATABASE RECORD
-      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
 
         // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
-        if(!user || !user[0]){ MAIN.Save_Sub(message,city.name); }
-        else if(user[0].city != city.name){
+        if(!user || !user[0]){ MAIN.Save_Sub(message); }
+        else if(user[0].discord_id != message.guild.id){
 
           // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
-          return message.reply('You are not able to have subscriptions in two cities at this time.')
+          return message.reply('You are not able to have subscriptions in two Discords at this time.')
             .then(m => m.delete(30000))
             .catch(console.error);
         }
@@ -62,6 +62,7 @@ module.exports.run = async (MAIN, message) => {
           switch(true){
             case message.content.startsWith(prefix+'pause'): command = 'pause'; break;
             case message.content.startsWith(prefix+'resume'): command = 'resume'; break;
+            case message.content.startsWith(prefix+'help'): command = 'help'; break;
             case message.content == 'restart':
               if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
             case message.content.startsWith(prefix+'p'): command = 'pokemon'; break;
@@ -71,7 +72,7 @@ module.exports.run = async (MAIN, message) => {
           }
 
           let cmd = modules.get(command);
-          if(cmd){ return cmd.run(MAIN, message, args, prefix, city); }
+          if(cmd){ return cmd.run(MAIN, message, args, prefix, discord); }
         }
       }); return;
     }

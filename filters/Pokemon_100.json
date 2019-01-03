@@ -1,7 +1,5 @@
 {
 	"Type": "pokemon",
-	"City": "TLH",
-	"Channel_ID": "507626057277505552",
 	"Post_Without_IV": false,
 	"min_iv": 100,
 	"max_iv": 100,

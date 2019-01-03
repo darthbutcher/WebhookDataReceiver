@@ -1,10 +1,7 @@
 {
 	"Type": "quest",
-	"City": "TLH",
-	"Channel_ID": "511701871304638505",
 	"Rewards": [
 		"Ultra Ball",
-		"Super Potion",
 		"Hyper Potion",
 		"Max Potion",
 		"Max Revive",
@@ -15,6 +12,6 @@
 		"Star Piece",
 		"1000 Stardust",
 		"1500 Stardust",
-		"Silver Pinap"
+		"Silver Pinap Berry"
 	]
 }
