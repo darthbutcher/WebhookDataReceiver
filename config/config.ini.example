@@ -11,9 +11,9 @@ PREFIX = '.'
 
 ; DATABASE CREDENTIALS
 [DB]
-host = 173.249.12.160
-username = tallypokemap
-password = MewtwoMachamp
+host = 172.16.12.160
+username = username
+password = password
 port = 3306
 
 ; BOT TOKENS
