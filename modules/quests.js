@@ -202,9 +202,9 @@ async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, mai
     else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
 
     // CHECK SUBSCRIPTION CONFIG
-    // if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
-    //   Subscription.run(MAIN, quest, quest_embed, main_area, sub_area, embed_area, server);
-    // } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
+    if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
+      Subscription.run(MAIN, quest, quest_embed, main_area, sub_area, embed_area, server);
+    } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){
