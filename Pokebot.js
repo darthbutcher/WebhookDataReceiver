@@ -149,7 +149,7 @@ MAIN.Save_Sub = (message,server) => {
     [message.member.id, message.member.user.tag, server.geofence, , , , 'ACTIVE', MAIN.User_Bot, '07:00', message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
     if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
     else{
-      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Added '+message.member.user.tag+' to the pokebot.user database.');
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Added '+message.member.user.tag+' to the pokebot.user database.');
       return message.reply('You did not have a subscription record. One has now been created. Please try the command again.').then(m => m.delete(15000)).catch(console.error);
     }
   });
