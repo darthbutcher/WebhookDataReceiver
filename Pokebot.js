@@ -95,7 +95,7 @@ app.post('/', (webhook, resolve) => {
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
       // DISCORD AND AREA VARIABLES
-      let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {}, embed_area = '';
+      let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {}, embed_area = '', locale = '';
 
       // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
       await MAIN.geofences.features.forEach( async (geofence,index) => {
