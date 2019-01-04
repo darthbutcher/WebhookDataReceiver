@@ -13,10 +13,10 @@ const moment=require('moment');
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, locale) => {
 
   // DEBUG ACK
-  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] Checking Subscriptions for  '+MAIN.pokemon[sighting.pokemon_id].name+' Sighting.'); }
+  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] Checking Subscriptions for '+MAIN.pokemon[sighting.pokemon_id].name+' Sighting.'); }
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
   MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ?", [server.id], function (error, users, fields){
@@ -36,7 +36,7 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
         if(user.status == 'ACTIVE' && user.pokemon){
 
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-          if(user.geofence == 'ALL' || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
+          if(user.geofence == server.geofence || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
 
             // SEND TO USER CHECK FUNCTION
             sub_check(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user);
@@ -61,6 +61,7 @@ async function sub_check(MAIN, internal_value, sighting, time_now, main_area, su
 
   // CHECK EACH USER SUBSCRIPTION
   pokemon.subscriptions.forEach((sub,index) => {
+
     if(sub.name == MAIN.pokemon[sighting.pokemon_id].name || sub.name.startsWith('ALL')){
       if(sub.min_iv.length > 3){
 
@@ -116,15 +117,10 @@ async function sub_check(MAIN, internal_value, sighting, time_now, main_area, su
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
             break;
           }
-          else if(sub.name != MAIN.pokemon[sighting.pokemon_id].name && !sub.name.startsWith('ALL')){
-            if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Name Filter.'); }
-            break;
-          }
           else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user); }
         }
       }
       else{
-
         switch(true){
           case sub.min_iv > internal_value:
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Min % IV Filter.'); }
@@ -156,7 +152,9 @@ async function sub_check(MAIN, internal_value, sighting, time_now, main_area, su
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
               break;
             }
-            else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user); }
+            else{
+              prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user);
+            }
         }
       }
     }
@@ -167,6 +165,7 @@ async function sub_check(MAIN, internal_value, sighting, time_now, main_area, su
 }
 
 async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user){
+
   // FETCH THE MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){
 
@@ -180,9 +179,9 @@ async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area
 
     // DETERMINE MOVE NAMES AND TYPES
     let move_name_1 = MAIN.moves[sighting.move_1].name;
-    let move_type_1 = await MAIN.Get_Detail('type',sighting.move_1);
+    let move_type_1 = await MAIN.Get_Type(sighting.move_1);
     let move_name_2 = MAIN.moves[sighting.move_2].name;
-    let move_type_2 = await MAIN.Get_Detail('type',sighting.move_2);
+    let move_type_2 = await MAIN.Get_Type(sighting.move_2);
 
     // DETERMINE POKEMON NAME AND DETAILS
     let pokemon_type = '';
@@ -196,10 +195,23 @@ async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area
     let pokemon_url = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
 
     // GET GENDER
-    let gender = await MAIN.Get_Detail('gender',sighting.gender);
+    let gender = '';
+    switch(sighting.gender){
+      case 1: gender = ' | ♂Male'; break;
+      case 2: gender = ' | ♀Female'; break;
+    }
 
     // GET WEATHER BOOST
-    let weatherBoost = await MAIN.Get_Detail('weather',sighting.weather);
+    let weather_boost = '';
+    switch(sighting.weather){
+      case 1: weather_boost = ' '+MAIN.emotes.clear+' *Boosted*'; break;
+      case 2: weather_boost = ' '+MAIN.emotes.rain+' *Boosted*'; break;
+      case 3: weather_boost = ' '+MAIN.emotes.partlyCloudy+' *Boosted*'; break;
+      case 4: weather_boost = ' '+MAIN.emotes.cloudy+' *Boosted*'; break;
+      case 5: weather_boost = ' '+MAIN.emotes.windy+' *Boosted*'; break;
+      case 6: weather_boost = ' '+MAIN.emotes.snow+' *Boosted*'; break;
+      case 7: weather_boost = ' '+MAIN.emotes.fog+' *Boosted*'; break;
+    }
 
     // CREATE AND SEND THE EMBED
     let pokemon_embed = new Discord.RichEmbed()
@@ -207,7 +219,7 @@ async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area
       .setThumbnail(pokemon_url)
       .attachFile(attachment)
       .setImage('attachment://Pokemon_Alert.png')
-      .setTitle(name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)'+weatherBoost)
+      .setTitle(name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)'+weather_boost)
       .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight+'\n'+pokemon_type, false)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)');

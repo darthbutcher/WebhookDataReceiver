@@ -101,7 +101,9 @@ app.post('/', (webhook, resolve) => {
       await MAIN.geofences.features.forEach( async (geofence,index) => {
         if(insideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
           await MAIN.Discord.Servers.forEach((bot_discord,index) => {
-            if(geofence.properties.name == bot_discord.geofence){ server = bot_discord;}
+            if(geofence.properties.name == bot_discord.geofence){
+              server = bot_discord; locale = geofence;
+            }
           });
           if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
           else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
@@ -118,13 +120,13 @@ app.post('/', (webhook, resolve) => {
   		switch(data.type){
         // SEND TO POKEMON MODULE
   			case 'pokemon':
-  				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+  				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server, locale); break;
         // SEND TO RAIDS MODULE
   			case 'raid':
-          Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+          Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server, locale); break;
         // SEND TO QUESTS MODULE
   			case 'quest':
-  				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+  				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server, locale); break;
   		}
     }
 	}); return;
@@ -218,38 +220,28 @@ MAIN.Static_Map_Tile = (lat,lon,type) => {
 }
 
 // GET EMOTE
-MAIN.Get_Detail = (category,variable) => {
+MAIN.Get_Type = (variable) => {
   return new Promise(resolve => {
-    switch(category){
-      case 'team':
-        switch(variable){
-          case 1: emote = MAIN.emotes.mystic+' Gym'; break;
-          case 2: emote = MAIN.emotes.valor+' Gym'; break;
-          case 3: emote = MAIN.emotes.instinct+' Gym'; break;
-          default: emote = 'Uncontested Gym';
-        } resolve(emote); break;
-      case 'type':
-        switch(MAIN.moves[variable].type){
-          case 'Normal': emote = MAIN.emotes.normal; break;
-          case 'Grass': emote = MAIN.emotes.grass; break;
-          case 'Fire': emote = MAIN.emotes.fire; break;
-          case 'Water': emote = MAIN.emotes.water; break;
-          case 'Electric': emote = MAIN.emotes.electric; break;
-          case 'Ground': emote = MAIN.emotes.ground; break;
-          case 'Steel': emote = MAIN.emotes.steel; break;
-          case 'Rock': emote = MAIN.emotes.rock; break;
-          case 'Psychic': emote = MAIN.emotes.psychic; break;
-          case 'Poison': emote = MAIN.emotes.poison; break;
-          case 'Fairy': emote = MAIN.emotes.fairy; break;
-          case 'Fighting': emote = MAIN.emotes.fighting; break;
-          case 'Dark': emote = MAIN.emotes.dark; break;
-          case 'Ghost': emote = MAIN.emotes.ghost; break;
-          case 'Bug': emote = MAIN.emotes.bug; break;
-          case 'Dragon': emote = MAIN.emotes.dragon; break;
-          case 'Ice': emote = MAIN.emotes.ice; break;
-          case 'Flying': emote = MAIN.emotes.flying; break;
-        } resolve(emote); break;
-    }
+    switch(MAIN.moves[variable].type){
+      case 'Normal': emote = MAIN.emotes.normal; break;
+      case 'Grass': emote = MAIN.emotes.grass; break;
+      case 'Fire': emote = MAIN.emotes.fire; break;
+      case 'Water': emote = MAIN.emotes.water; break;
+      case 'Electric': emote = MAIN.emotes.electric; break;
+      case 'Ground': emote = MAIN.emotes.ground; break;
+      case 'Steel': emote = MAIN.emotes.steel; break;
+      case 'Rock': emote = MAIN.emotes.rock; break;
+      case 'Psychic': emote = MAIN.emotes.psychic; break;
+      case 'Poison': emote = MAIN.emotes.poison; break;
+      case 'Fairy': emote = MAIN.emotes.fairy; break;
+      case 'Fighting': emote = MAIN.emotes.fighting; break;
+      case 'Dark': emote = MAIN.emotes.dark; break;
+      case 'Ghost': emote = MAIN.emotes.ghost; break;
+      case 'Bug': emote = MAIN.emotes.bug; break;
+      case 'Dragon': emote = MAIN.emotes.dragon; break;
+      case 'Ice': emote = MAIN.emotes.ice; break;
+      case 'Flying': emote = MAIN.emotes.flying; break;
+    } resolve(emote);
   });
 }
 
@@ -388,7 +380,7 @@ async function bot_login(){
   if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokemon Debugging is ENABLED.');
   }
-  if(MAIN.config.DEBUG.Subscription == 'ENABLED'){
+  if(MAIN.config.DEBUG.Subscriptions == 'ENABLED'){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Subscription Debugging is ENABLED.');
   }
   if(MAIN.config.CONSOLE_LOGS == 'ENABLED'){

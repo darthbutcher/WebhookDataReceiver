@@ -13,7 +13,7 @@ const moment = require('moment');
 //#########################################################//
 //#########################################################//
 
-module.exports.run = async (MAIN, quest, quest_embed, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, quest, quest_embed, main_area, sub_area, embed_area, server, locale) => {
 
   // DEBUG ACK
   if(MAIN.debug.Subscriptions=='ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [quests.js] [QUEST] Received '+quest_reward+' Quest.'); }
@@ -34,11 +34,11 @@ module.exports.run = async (MAIN, quest, quest_embed, main_area, sub_area, embed
 
         // LEVEL 1 FILTERS
         // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR DISCORD
-        if(user.status == 'ACTIVE' && user.quests && server.id == user.discord_id){
+        if(user.status == 'ACTIVE' && user.quests){
 
           // LEVEL 2 FILTERS
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-          if(user.geofence == 'ALL' || user_areas.indexOf(area.sub) >= 0 || user_areas.indexOf(area.main) >= 0){
+          if(user.geofence == server.geofence || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
 
             // CONVERT REWARD LIST TO AN ARRAY
             let subs = user.quests.split(',');

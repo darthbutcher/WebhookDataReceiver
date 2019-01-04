@@ -236,15 +236,12 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
       pokemon.subscriptions.push(sub);
     }
     else{
-      console.log('1')
       pokemon = JSON.parse(user[0].pokemon);
       if(!pokemon.subscriptions[0]){
-        console.log('2')
         if(sub.name == 'ALL'){ sub.name = 'ALL-1'; }
         pokemon.subscriptions.push(sub);
       }
       else if(sub.name == 'ALL'){
-        console.log('3')
         let s = 1;
         await MAX_ALL_SUBS.forEach((max_num,index) => {
           pokemon.subscriptions.forEach((subscription,index) => {

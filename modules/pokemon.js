@@ -15,7 +15,7 @@ const insideGeojson = require('point-in-geopolygon');
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, locale) => {
 
   // VARIABLES
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
@@ -52,7 +52,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
               if(filter.min_iv <= internal_value && filter.max_iv >= internal_value && filter.min_level <= sighting.pokemon_level && filter.max_level >= sighting.pokemon_level){
 
                 // SEND POKEMON TO DISCORD
-                send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+                send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale);
               }
               else{
                 // DEBUG
@@ -60,17 +60,17 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
               }
             }
             else if(filter.Post_Without_IV == true){
-              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale);
             }
           }
           else if(filter[MAIN.pokemon[sighting.pokemon_id].name].min_iv <= internal_value && filter.max_iv >= internal_value){
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
             if(sighting.cp > 0){
-              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale);
             }
             else if(filter.Post_Without_IV == true){
-              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale);
             }
           }
           else{
@@ -91,7 +91,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
   }); return;
 }
 
-function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server){
+function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale){
 
   // DEBUG ACK
   if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Received to Send to Discord. '+sighting.encounter_id); }
@@ -108,9 +108,9 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
 
     // DETERMINE MOVE NAMES AND TYPES
     let move_name_1 = MAIN.moves[sighting.move_1].name;
-    let move_type_1 = await MAIN.Get_Detail('type',sighting.move_1);
+    let move_type_1 = await MAIN.Get_Type(sighting.move_1);
     let move_name_2 = MAIN.moves[sighting.move_2].name;
-    let move_type_2 = await MAIN.Get_Detail('type',sighting.move_2);
+    let move_type_2 = await MAIN.Get_Type(sighting.move_2);
 
     // DETERMINE POKEMON NAME AND DETAILS
     let pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
@@ -156,8 +156,8 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
 
 
     // CHECK SUBSCRIPTION CONFIG
-    if(sighting.cp > 0 && MAIN.config.POKEMON.Subscriptions == 'ENABLED'){
-      Subscription.run(MAIN, internal_value, sighting, time_now,  main_area, sub_area, embed_area, server);
+    if(MAIN.config.POKEMON.Subscriptions == 'ENABLED'){
+      Subscription.run(MAIN, internal_value, sighting, time_now,  main_area, sub_area, embed_area, server, locale);
     }
     else{ console.info('[Pokébot] Pokemon ignored due to Disabled Subscription setting.'); }
 
@@ -169,7 +169,7 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
   }); return;
 }
 
-async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server){
+async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, locale){
 
   // FETCH THE MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){

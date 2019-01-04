@@ -22,7 +22,7 @@ fs.readdir('./modules/commands', (err,files) => {
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, message) => {
+module.exports.run = async (MAIN, message, locale) => {
 
   // DEFINE VARIABLES
   let prefix = MAIN.config.PREFIX;
