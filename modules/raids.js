@@ -21,7 +21,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
 
   // FILTER FEED TYPE FOR EGG, BOSS, OR BOTH
   let type = '';
-  if(raid.cp > 0){ type = 'boss'; } else{ type = 'egg'; }
+  if(raid.cp > 0){ type = 'Boss'; } else{ type = 'Egg'; }
 
   // CHECK EACH FEED FILTER
   MAIN.Raid_Channels.forEach( async (raid_channel,index) => {
@@ -35,7 +35,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
     if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
 
-    if(filter.Egg_Or_Boss.toLowerCase() == 'both' || filter.Egg_Or_Boss.toLowerCase() == type){
+    if(filter.Egg_Or_Boss.toLowerCase() == 'both' || filter.Egg_Or_Boss.toLowerCase() == type.toLowerCase()){
 
       // FILTER FOR RAID LEVEL
       if(filter.Raid_Levels.indexOf(raid.level) >= 0){
@@ -110,7 +110,7 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
     let embed_thumb = '', raid_embed = '';
     switch(type){
 
-      case 'egg':
+      case 'Egg':
         // GET EGG IMAGE
         switch(raid.level){
           case 1:
@@ -141,7 +141,7 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
         break;
 
       // RAID IS A BOSS
-      case 'boss':
+      case 'Boss':
 
         // DETERMINE POKEMON NAME AND TYPE
         let pokemonType = '';
