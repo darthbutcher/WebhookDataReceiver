@@ -75,17 +75,17 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
           }
           else{
             // DEBUG
-            if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters. '+sighting.encounter_id); }
+            if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters.'); }
           } return;
         }
         else{
           // DEBUG
-          if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Set to False in the filter. '+sighting.encounter_id); }
+          if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Set to False in the filter.'); }
         }
       }
       else{
         // DEBUG
-        if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Meet Any Area Filters. '+sighting.encounter_id); }
+        if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Meet Any Area Filters. '+pokemon_channel[0]+' | Saw: '+server.geovence+','++main_area+','+sub_area' | Expected: '+pokemon_channel[1].filter); }
       }
     }
   }); return;
