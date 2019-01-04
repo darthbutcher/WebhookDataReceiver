@@ -3,91 +3,74 @@
 ; geofences = geofence name,geofence name,geofence name
 ; filter = filtername.json
 
-; "geofences" can either be an area name set in your geofences.json OR a discord name from your config.
+; "geofences" can either be an area name set in your geofences.json OR the default_geofence of a discord.
+; Separate geofence names with a comma.
 ; "filter" must be the file name of the filter you with to use for that channel.
-; Nothing else is required for a channel, the rest is just for identification purposes if you choose to add it.
 
 [458789990017662986]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level5.json
-discord = Tallahassee
 
 [458790935908843520]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level5_Egg.json
-discord = Tallahassee
 
 [458791546959953920]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Ex_Eligible.json
-discord = Tallahassee
 
 [458791583291146250]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Ex_Eligible_Egg.json
-discord = Tallahassee
 
 [458790613811462144]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level3&4.json
-discord = Tallahassee
 
 [458789953602584599]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level3&4_Egg.json
-discord = Tallahassee
 
 [458790531301113857]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level1&2.json
-discord = Tallahassee
 
 [458790438103416834]
-geofences = TLH
+geofences = Tallahassee
 filter = Raids_Level1&2_Egg.json
-discord = Tallahassee
 
 [520598988874055681]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level5.json
-discord = Gainesville
 
 [520599013972639754]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level5_Egg.json
-discord = Gainesville
 
 [520599047388659723]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Ex_Eligible.json
-discord = Gainesville
 
 [520599077675597825]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Ex_Eligible_Egg.json
-discord = Gainesville
 
 [520599208101806100]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level3&4.json
-discord = Gainesville
 
 [520599251638550528]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level3&4_Egg.json
-discord = Gainesville
 
 [520599298195324930]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level1&2.json
-discord = Gainesville
 
 [520599329527037952]
-geofences = GVL
+geofences = Gainesville
 filter = Raids_Level1&2_Egg.json
-discord = Gainesville
 
 [528910360556863492]
-geofences = TLH
+geofences = Central
 filter = Raids_Level5.json
-discord = Tallahassee

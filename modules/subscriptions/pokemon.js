@@ -13,13 +13,13 @@ const moment=require('moment');
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, internal_value, sighting, area, pokemon_area, discord, time) => {
+module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server) => {
 
   // DEBUG ACK
   if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] Checking Subscriptions for  '+MAIN.pokemon[sighting.pokemon_id].name+' Sighting.'); }
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ?", [discord.id], function (error, users, fields){
+  MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ?", [server.id], function (error, users, fields){
     if(users[0]){
       users.forEach((user,index) => {
 
@@ -27,21 +27,19 @@ module.exports.run = async (MAIN, internal_value, sighting, area, pokemon_area, 
         // let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id);
         // if(!member){ proceed = false; }
         // else if(member.hasPermission('ADMINISTRATOR')){ proceed = true; }
-        // else if(discord.donor_role && !member.roles.has(discord.donor_role)){ proceed = false; }
+        // else if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
 
         // DEFINE VARIABLES
         let user_areas = user.geofence.split(',');
 
-        // LEVEL 1 FILTERS
         // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR DISCORD
         if(user.status == 'ACTIVE' && user.pokemon){
 
-          // LEVEL 2 FILTERS
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-          if(user.geofence == 'ALL' || user_areas.indexOf(area.sub) >= 0 || user_areas.indexOf(area.main) >= 0){
+          if(user.geofence == 'ALL' || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
 
             // SEND TO USER CHECK FUNCTION
-            sub_check(MAIN, internal_value, sighting, user, time, discord, pokemon_area);
+            sub_check(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user);
           }
           else{
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filters.'); }
@@ -52,7 +50,7 @@ module.exports.run = async (MAIN, internal_value, sighting, area, pokemon_area, 
   });
 }
 
-async function sub_check(MAIN, internal_value, sighting, user, time, discord, pokemon_area){
+async function sub_check(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user){
   // CONVERT REWARD LIST TO AN ARRAY
   let pokemon = JSON.parse(user.pokemon);
 
@@ -122,7 +120,7 @@ async function sub_check(MAIN, internal_value, sighting, user, time, discord, po
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Name Filter.'); }
             break;
           }
-          else{ prepare_alert(MAIN, internal_value, sighting, user, time, discord, pokemon_area); }
+          else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user); }
         }
       }
       else{
@@ -158,7 +156,7 @@ async function sub_check(MAIN, internal_value, sighting, user, time, discord, po
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-SUBSCRIPTIONS] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
               break;
             }
-            else{ prepare_alert(MAIN, internal_value, sighting, user, time, discord, pokemon_area); }
+            else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user); }
         }
       }
     }
@@ -168,13 +166,13 @@ async function sub_check(MAIN, internal_value, sighting, user, time, discord, po
   });
 }
 
-async function prepare_alert(MAIN, internal_value, sighting, user, time, discord, pokemon_area){
+async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user){
   // FETCH THE MAP TILE
   MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){
 
     // DEFINE VARIABLES
     let hide_time = await MAIN.Bot_Time(sighting.disappear_time,'1');
-    let hide_minutes = Math.floor((sighting.disappear_time-(time/1000))/60);
+    let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
     let weather = '', area = '';
 
     // ATTACH THE MAP TILE
@@ -212,10 +210,10 @@ async function prepare_alert(MAIN, internal_value, sighting, user, time, discord
       .setTitle(name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)'+weatherBoost)
       .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight+'\n'+pokemon_type, false)
-      .addField(pokemon_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)');
+      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)');
 
     if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a Pokémon DM to '+user.user_name+'.'); }
 
-    MAIN.Send_DM(discord.id, user.user_id, pokemon_embed, user.bot);
+    MAIN.Send_DM(server.id, user.user_id, pokemon_embed, user.bot);
   });
 }

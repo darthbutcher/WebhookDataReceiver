@@ -22,7 +22,7 @@ fs.readdir('./modules/commands', (err,files) => {
 //#############################################################//
 //#############################################################//
 
-module.exports.run = async (MAIN, message, discord) => {
+module.exports.run = async (MAIN, message) => {
 
   // DEFINE VARIABLES
   let prefix = MAIN.config.PREFIX;
@@ -32,8 +32,8 @@ module.exports.run = async (MAIN, message, discord) => {
   if(message.author.bot == true){ return; }
 
   // CHECK EACH DISCORD FOR THE SUB CHANNEL
-  MAIN.Discord.Servers.forEach((discord,index) => {
-    if(message.channel.id == discord.sub_channel){
+  MAIN.Discord.Servers.forEach((server,index) => {
+    if(message.channel.id == server.sub_channel){
 
       // DELETE THE MESSAGE
       message.delete();
@@ -41,40 +41,36 @@ module.exports.run = async (MAIN, message, discord) => {
       // // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
       // let member = MAIN.guilds.get(messag).members.get(message.member.id);
       // if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
-      // else if(discord.donor_role && !member.roles.has(discord.donor_role)){ return; }
+      // else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
       // LOAD DATABASE RECORD
       MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
 
         // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
-        if(!user || !user[0]){ MAIN.Save_Sub(message); }
-        else if(user[0].discord_id != message.guild.id){
-
-          // DO NOT ALLOW SUBSCRIPTIONS IN TWO CITIES (SPOOFERS)
-          return message.reply('You are not able to have subscriptions in two Discords at this time.')
-            .then(m => m.delete(30000))
-            .catch(console.error);
-        }
+        if(!user || !user[0]){ MAIN.Save_Sub(message,server); }
         else{
-          let command = '';
 
           // FIND THE COMMAND AND SEND TO THE MODULE
+          let command = '';
           switch(true){
-            case message.content.startsWith(prefix+'pause'): command = 'pause'; break;
-            case message.content.startsWith(prefix+'resume'): command = 'resume'; break;
-            case message.content.startsWith(prefix+'help'): command = 'help'; break;
+            case message.content == prefix+'pause': command = 'pause'; break;
+            case message.content == prefix+'resume': command = 'resume'; break;
+            case message.content == prefix+'help': command = 'help'; break;
+            case message.content == prefix+'p':
+            case message.content == prefix+'pokemon': command = 'pokemon'; break;
+            case message.content == prefix+'r':
+            case message.content == prefix+'raid': command = 'raid'; break;
+            case message.content == prefix+'q':
+            case message.content == prefix+'quest': command = 'quest'; break;
             case message.content == 'restart':
               if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
-            case message.content.startsWith(prefix+'p'): command = 'pokemon'; break;
-            case message.content.startsWith(prefix+'r'): command = 'raid'; break;
-            case message.content.startsWith(prefix+'q'): command = 'quest'; break;
             default: command = message.content.slice(prefix.length);
           }
 
           let cmd = modules.get(command);
-          if(cmd){ return cmd.run(MAIN, message, args, prefix, discord); }
+          if(cmd){ return cmd.run(MAIN, message, args, prefix, server); }
         }
-      }); return;
+      });
     }
-  });
+  }); return;
 }

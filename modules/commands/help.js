@@ -12,7 +12,7 @@ module.exports.run = async (MAIN, message, args, prefix, discord) => {
     let questHelp=new Discord.RichEmbed().setColor('00ff00')
       .setAuthor('Available Subscription Commands:')
       .setDescription('Type a Command to view category options.');
-    if(MAIN.config.POKEMON.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'pokemon`  |  `'+prefix+'poke`  |  `'+prefix+'p`', 'Initializes Pokemon Subscription Options.', false); }
+    if(MAIN.config.POKEMON.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'pokemon`  |  `'+prefix+'p`', 'Initializes Pokemon Subscription Options.', false); }
     if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'quest` |  `'+prefix+'q` ', 'Initializes Quest Subscription Options.', false); }
     if(MAIN.config.RAID.Subscriptions == 'ENABLED'){ questHelp.addField('`'+prefix+'raid`', 'Initializes Raid Subscription Options.', false); }
     questHelp.addField('`'+prefix+'area`', 'Shows Area subscription options.', false)

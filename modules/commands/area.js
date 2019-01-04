@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const insideGeofence = require('point-in-polygon');
 const insideGeojson = require('point-in-geopolygon');
 
-module.exports.run = async (MAIN, message, args, prefix, discord) => {
+module.exports.run = async (MAIN, message, args, prefix, server) => {
 
   // DECLARE VARIABLES
   let nickname = '', area_array = '', available_areas ='';
@@ -66,7 +66,7 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
       .setAuthor(nickname, message.member.user.displayAvatarURL)
       .setTitle('Area Subscriptions')
       .setDescription('Overall Status: `'+user[0].status+'`')
-      .addField('Your Areas:', area_list, false)
+      .addField('Your Areas:', '**'+area_list+'**', false)
       .setFooter('You can type \'view\', \'add\', or \'remove\'.');
 
     // SEND THE EMBED
@@ -122,8 +122,8 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
     // CHECK IF USER IS ALREADY SUBSCRIBED TO THE AREA OR NOT AND ADD
     if(area_index >= 0){ return message.reply('You are already subscribed to this Area.').then(m => m.delete(10000)).catch(console.error); }
     else{
-      if(sub == 'ALL'){ areas = 'ALL'; }
-      else if(user[0].geofence == 'ALL' || user[0].geofence == 'None'){
+      if(sub == 'all'){ areas = server.default_geofence; }
+      else if(user[0].geofence == server.default_geofence || user[0].geofence == 'None'){
         areas = []; areas.push(sub);
       }
       else{ areas.push(sub); }
@@ -270,7 +270,7 @@ function sub_collector(MAIN, type, nickname, message, requirements, sub, area_ar
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Area would you like to Subscribe to?')
-          .addField('Available Areas:', area_list, false)
+          .addField('Available Areas:', '**'+area_list+'**', false)
           .setFooter(requirements); break;
 
       // REMOVEAL EMBED
@@ -278,7 +278,7 @@ function sub_collector(MAIN, type, nickname, message, requirements, sub, area_ar
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Area do you want to remove?')
-          .addField('Your Quests:', area_list, false)
+          .addField('Your Areas:', '**'+area_list+'**', false)
           .setFooter(requirements); break;
     }
 
@@ -292,7 +292,7 @@ function sub_collector(MAIN, type, nickname, message, requirements, sub, area_ar
           // AREA NAME
           case type.indexOf('Name')>=0:
           case type.indexOf('Remove')>=0:
-            if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); break; }
+            if(message.content.toLowerCase() == 'all'){ collector.stop('all'); break; }
             for(let a = 0; a < area_array.length+1; a++){
               if(a == area_array.length){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Area. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
               else if(message.content.toLowerCase() == area_array[a].toLowerCase()){ collector.stop(area_array[a]); break; }

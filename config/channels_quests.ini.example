@@ -3,26 +3,22 @@
 ; geofences = geofence name,geofence name,geofence name
 ; filter = filtername.json
 
-; "geofences" can either be an area name set in your geofences.json OR a DISCORD NAME from your config.
+; "geofences" can either be an area name set in your geofences.json OR the default_geofence of a discord.
+; Separate geofence names with a comma.
 ; "filter" must be the file name of the filter you with to use for that channel.
-; Nothing else is required for a channel, the rest is just for identification purposes if you choose to add it.
 
 [511303614032248843]
-geofences = TLH
+geofences = Tallahassee
 filter = Quest_Encounters.json
-discord = Tallahassee
 
 [511701871304638505]
-geofences = TLH
+geofences = Tallahassee
 filter = Quest_Items.json
-discord = Tallahassee
 
 [520598795164319745]
-geofences = GVL
+geofences = Gainesville
 filter = Quest_Encounters.json
-discord = Gainesville
 
 [520598686133125121]
-geofences = GVL
+geofences = Gainesville
 filter = Quest_Items.json
-discord = Gainesville

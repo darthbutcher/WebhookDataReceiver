@@ -3,76 +3,66 @@
 ; geofences = geofence name,geofence name,geofence name
 ; filter = filtername.json
 
-; "geofences" can either be an area name set in your geofences.json OR a discord name from your config.
+; "geofences" can either be an area name set in your geofences.json OR the default_geofence of a discord.
+; Separate geofence names with a comma.
 ; "filter" must be the file name of the filter you with to use for that channel.
-; Nothing else is required for a channel, the rest is just for identification purposes if you choose to add it.
 
 [507626057277505552]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_100.json
-discord = Tallahassee
 
 [523329993988898816]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_90-99.json
-discord = Tallahassee
 
 [507626170380976130]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_80-89.json
-discord = Tallahassee
 
 [507626243378905108]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_0.json
-discord = Tallahassee
 
 [515519653204721665]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_Max_Level.json
-discord = Tallahassee
 
 [482619507530268683]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_Uber.json
-discord = Tallahassee
 
 [507600060708683777]
-geofences = TLH
+geofences = Tallahassee
 filter = Pokemon_Candy.json
-discord = Tallahassee
 
 [520598528515506219]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_100.json
-discord = Gainesville
 
 [523343972282794006]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_90-99.json
-discord = Gainesville
 
 [520598556990504970]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_80-89.json
-discord = Gainesville
 
 [520598581493760001]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_0.json
-discord = Gainesville
 
 [520625838417379348]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_Max_Level.json
-discord = Gainesville
 
 [520598612024098860]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_Uber.json
-discord = Gainesville
 
 [520598637009436672]
-geofences = GVL
+geofences = Gainesville
 filter = Pokemon_Candy.json
-discord = Gainesville
+
+[528910360556863492]
+geofences = NorthEast,South
+filter = Pokemon_ALL.json

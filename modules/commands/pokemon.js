@@ -643,7 +643,7 @@ function subscription_cancel(MAIN, nickname, message, prefix, sub){
   });
 }
 
-function subscription_timedout(){
+function subscription_timedout(MAIN, nickname, message, prefix, sub){
   let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle(sub.name+' Subscription Timed Out.')
@@ -662,7 +662,6 @@ function initiate_collector(MAIN, source, message, msg, nickname, prefix){
 
   // FILTER COLLECT EVENT
   collector.on('collect', message => {
-    msg_count++;
     switch(message.content.toLowerCase()){
       case 'add advanced':
       case 'add adv': collector.stop('advanced'); break;
@@ -672,7 +671,7 @@ function initiate_collector(MAIN, source, message, msg, nickname, prefix){
       case 'view': collector.stop('view'); break;
       case 'pause': collector.stop('pause'); break;
       case 'resume': collector.stop('resume'); break;
-      default: if(msg_count == 2){ collector.stop('end'); }
+      default: collector.stop('end');
     }
   });
 

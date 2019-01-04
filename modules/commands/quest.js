@@ -138,7 +138,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
           .setDescription('Overall Status: `'+user[0].status+'`\n'
                          +'Quest Status: `'+user[0].quests_status+'`\n'
                          +'Delivery Time: '+user[0].alert_time)
-          .addField('Your Subscriptions:','**'+user[0].quests.toString().replace(/,/g,'\n**'),false)
+          .addField('Your Subscriptions:','**'+user[0].quests.toString().replace(/,/g,'\n')+'**',false)
           .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');
 
         // SEND THE EMBED

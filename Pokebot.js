@@ -94,17 +94,37 @@ app.post('/', (webhook, resolve) => {
     // IGNORE IF NOT A SPECIFIED OBJECT
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
+      // DISCORD AND AREA VARIABLES
+      let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {}, embed_area = '';
+
+      // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
+      await MAIN.geofences.features.forEach( async (geofence,index) => {
+        if(insideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
+          await MAIN.Discord.Servers.forEach((bot_discord,index) => {
+            if(geofence.properties.name == bot_discord.geofence){ server = bot_discord;}
+          });
+          if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
+          else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
+        }
+      });
+
+      // ASSIGN AREA TO VARIABLES
+      if(geofence_area.sub){ embed_area = geofence_area.sub; sub_area = geofence_area.sub; }
+      else{ embed_area = geofence_area.main; }
+      if(geofence_area.main){ main_area = geofence_area.main; }
+      else{ embed_area = server.name; main_area = server.name; }
+
       // SEND TO OBJECT MODULES
   		switch(data.type){
         // SEND TO POKEMON MODULE
   			case 'pokemon':
-  				Pokemon.run(MAIN, data.message); break;
+  				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
         // SEND TO RAIDS MODULE
   			case 'raid':
-          Raids.run(MAIN, data.message); break;
+          Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
         // SEND TO QUESTS MODULE
   			case 'quest':
-  				Quests.run(MAIN, data.message); break;
+  				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
   		}
     }
 	}); return;
@@ -123,10 +143,10 @@ fs.readdir('./filters', (err,filters) => {
 });
 
 // SAVE A USER IN THE USER TABLE
-MAIN.Save_Sub = (message,area) => {
+MAIN.Save_Sub = (message,server) => {
   if(MAIN.User_Bot == MAIN.BOTS.length-1){ MAIN.User_Bot = 0; } else{ MAIN.User_Bot++; }
   MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [message.member.id, message.member.user.tag, 'ALL', , , , 'ACTIVE', MAIN.User_Bot, '07:00', message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+    [message.member.id, message.member.user.tag, server.geofence, , , , 'ACTIVE', MAIN.User_Bot, '07:00', message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
     if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
     else{
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']Added '+message.member.user.tag+' to the pokebot.user database.');
@@ -389,6 +409,13 @@ async function bot_login(){
     MAIN.Custom_Emotes = false;
     MAIN.emotes = ini.parse(fs.readFileSync('./config/emotes.ini', 'utf-8'));
   }
+  MAIN.Discord.Servers.forEach((server,index) => {
+    MAIN.database.query("SELECT * FROM pokebot.users WHERE geofence = ?", ['ALL'], function (error, users, fields){
+      users.forEach((user,index) => {
+        MAIN.sqlFunction(`UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [server.geofence, user.user_id, server.id], undefined, undefined);
+      });
+    });
+  });
 }
 
 // RESTART FUNCTION

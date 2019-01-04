@@ -9,6 +9,10 @@ LISTENING_PORT = 3333
 ; COMMAND PREFIX
 PREFIX = '.'
 
+; FILTER BY DISCORD OPTION
+; If you have multiple discords that overlap in scan areas, you need to disable this.
+Filter_Discord = ENABLED
+
 ; DATABASE CREDENTIALS
 [DB]
 host = 172.16.12.160
@@ -19,7 +23,6 @@ port = 3306
 ; BOT TOKENS
 ; You can add up to 15 BOT_TOKENS[].
 ; The MAIN token cannot be in the BOT_TOKEN[] section.
-; You do not have to delete unused spots anymore.
 [TOKENS]
 MAIN = MAINTOKEN
 BOT_TOKENS[] = TOKEN
@@ -38,8 +41,9 @@ BOT_TOKENS[] = TOKEN
 BOT_TOKENS[] = TOKEN
 BOT_TOKENS[] = TOKEN
 
-; Enable or Disable Custom Emotes
-; If enabled, you must join and invite your bots to the following servers:
+; CUSTOM EMOTES
+; If enabled, the bot will require External Emojis Permissions for any feed channels.
+; You must also join and invite your bots to the following servers:
 ; https://discord.gg/zqVCfPy - WEATHER, TEAMS, GYMS, TYPES
 ; https://discord.gg/AnECN8U - Legendary boss emojis
 [EMOTES]

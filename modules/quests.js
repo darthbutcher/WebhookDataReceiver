@@ -15,31 +15,10 @@ const insideGeojson = require('point-in-geopolygon');
 //#########################################################//
 //#########################################################//
 
-module.exports.run = async (MAIN, quest) => {
-
-  // DEFINE VARIABLES
-  let main_area = '', sub_area = '', server = '', quest_area = {};
-  let quest_task = '', quest_url = '', quest_reward = '';
-  let simple_reward = '', expireTime = MAIN.Bot_Time(null,'quest');
-
-  // DEFINE THE DISCORD THE OBJECT NEEDS TO BE SENT TO
-  await MAIN.Discord.Servers.forEach((config_discord,index) => {
-    if(insideGeofence([quest.latitude,quest.longitude], config_discord.geofence)){ server = config_discord; }
-  });
-
-  // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
-  await MAIN.geofences.features.forEach((geofence,index) => {
-    if(insideGeojson.polygon(geofence.geometry.coordinates, [quest.longitude,quest.latitude])){
-      if(geofence.properties.sub_area != 'true'){ quest_area.main = geofence.properties.name; }
-      else if(geofence.properties.sub_area == 'false'){  quest_area.sub = geofence.properties.name;  }
-    }
-  });
-
-  if(area.sub){ embed_area = quest_area.sub; }
-  else if(area.main){ embed_area = quest_area.main; }
-  else{ embed_area = server.name; }
+module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server) => {
 
   // DETERMINE THE QUEST REWARD
+  let  quest_reward = '', simple_reward = '';
   switch(quest.rewards[0].type){
     // PLACEHOLDER
     case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
@@ -54,20 +33,16 @@ module.exports.run = async (MAIN, quest) => {
       } break;
 
     // STARDUST REWARD
-    case 3:
-      quest_reward = quest.rewards[0].info.amount+' Stardust'; break;
+    case 3: quest_reward = quest.rewards[0].info.amount+' Stardust'; break;
 
     // PLACEHOLDER
-    case 4:
-      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 4: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
 
     // PLACEHOLDER
-    case 5:
-      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 5: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
 
     // PLACEHOLDER
-    case 6:
-      return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
+    case 6: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING.',quest);
 
     // ENCOUNTER REWARDS
     case 7:
@@ -75,27 +50,60 @@ module.exports.run = async (MAIN, quest) => {
       quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
   }
 
-  // DEBUG
-  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+quest_reward+' Quest. '+quest.pokestop_id); }
+  // CHECK ALL FILTERS
+  MAIN.Quest_Channels.forEach((quest_channel,index) => {
+
+    // DEFINE MORE VARIABLES
+    let geofences = quest_channel[1].geofences.split(',');
+    let channel = MAIN.channels.get(quest_channel[0]);
+    let filter = MAIN.Filters.get(quest_channel[1].filter);
+
+    // THROW ERRORS FOR INVALID DATA
+    if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+quest_channel[0]+' does not appear to exist.'); }
+    if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+quest_channel[0]+' does not appear to exist.'); }
+
+    // ONLY LOOK AT QUEST FILTERS
+    if(filter.Type == 'quest'){
+
+      // AREA FILTER
+
+      if(geofences.indexOf(server.geofence)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
+
+        // SECONDARY FILTERING BASED ON FILTER CONFIG
+        if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
+
+          // PREPARE AND SEND TO DISCORDS
+          send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
+        }
+        else{ // DEBUG
+          if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter); }
+        }
+      }
+      else{ // DEBUG
+        if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Area Filter. '+quest_reward+'|'+quest_channel[1].filter); }
+      }
+    }
+  }); return;
+}
+
+async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server){
 
   // GET STATIC MAP TILE
   MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(imgUrl){
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
-
-    // CHECK FOR EMPTY DATA
-    if(!quest.pokestop_id){ return; }
+    // DECLARE VARIABLES
+    let expireTime = MAIN.Bot_Time(null,'quest');
 
     // GET REWARD ICON
+    let quest_url = '';
     if(quest_reward.indexOf('Encounter')>=0){
       quest_url = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id);
-    }
-    else{
-      quest_url = await MAIN.Get_Icon(quest, quest_reward);
-    }
+    } else{ quest_url = await MAIN.Get_Icon(quest, quest_reward); }
 
     // DETERMINE THE QUEST TASK
+    let quest_task = '';
     switch(true){
 
       // CATCHING SPECIFIC POKEMON
@@ -171,70 +179,36 @@ module.exports.run = async (MAIN, quest) => {
     }
 
     // GET EMBED COLOR BASED ON QUEST DIFFICULTY
+    let embed_color = '';
     switch(true){
-      case quest.template.indexOf('easy') >= 0: embedColor='00ff00'; break;
-      case quest.template.indexOf('moderate') >= 0: embedColor='ffff00'; break;
-      case quest.template.indexOf('hard') >= 0: embedColor='ff0000'; break;
-      default: embedColor='00ccff';
+      case quest.template.indexOf('easy') >= 0: embed_color = '00ff00'; break;
+      case quest.template.indexOf('moderate') >= 0: embed_color = 'ffff00'; break;
+      case quest.template.indexOf('hard') >= 0: embed_color = 'ff0000'; break;
+      default: embed_color = '00ccff';
     }
 
     // CREATE RICH EMBED
     if(!quest_url){ quest_url = quest.url; }
     let quest_embed = new Discord.RichEmbed()
       .attachFile(attachment).setImage('attachment://maptile.jpg')
-      .setColor(embedColor).setThumbnail(quest_url)
+      .setColor(embed_color).setThumbnail(quest_url)
       .addField( quest_reward+'  |  '+embed_area, quest_task, false)
       .addField('Pokéstop:', quest.pokestop_name, false)
       .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)')
       .setFooter('Expires: '+expireTime);
 
-    // SEND THE EMBED
+    // LOGGING
+    if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
+    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
+
+    // CHECK SUBSCRIPTION CONFIG
+    // if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
+    //   Subscription.run(MAIN, quest, quest_embed, main_area, sub_area, embed_area, server);
+    // } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
+
+    // CHECK DISCORD CONFIG
     if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){
-
-      // CHECK ALL FILTERS
-      MAIN.Quest_Channels.forEach((quest_channel,index) => {
-
-        let geofences = quest_channel[1].geofences;
-        let channel = MAIN.channels.get(quest_channel[0]);
-        let filter = MAIN.Filters.get(quest_channel[1].filter);
-
-        // THROW ERRORS FOR INVALID DATA
-        if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+quest_channel[0]+' does not appear to exist.'); }
-        if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+quest_channel[0]+' does not appear to exist.'); }
-
-        if(channel.guild.id == server.id){
-
-          if(filter.Type == 'quest'){
-
-            // SECONDARY FILTERING BASED ON FILTER CONFIG
-            if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
-
-              // LOGGING
-              if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
-              else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
-
-              // SEND TO DISCORD
-              MAIN.Send_Embed(quest_embed, channel.id);
-            }
-            else{
-              if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest Ignored and Did Not Pass The Filter. '+channel.guild.name+'|'+quest_channel[1].filter); }
-            }
-          }
-        }
-        else{
-          if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest Did Not Pass Discord Check. '+channel.guild.id+'|'+server.id); }
-        }
-      });
-    }
-    else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord setting.'); }
-
-    // SEND TO SUBSCRIPTIONS FUNCTION
-    if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
-      Subscription.run(MAIN, quest, quest_embed, area, server);
-    }
-    else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
-
-    // END
-    return;
-  });
+      MAIN.Send_Embed(quest_embed, channel.id);
+    } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.'); }
+  }); return;
 }
