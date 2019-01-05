@@ -25,6 +25,8 @@
       https://discord.gg/AnECN8U - Legendary boss emojis
     If you choose `true` for custom emotes, you will need to edit the emotes.json.example like below:
       - This will be the emotes the bot uses for the embed posts (team emblems and Ex Icon. Images you can upload to your discord server are in the files folder under emotes. To get the emote IDs in you server, type \:youremotename: in discord. This will output something like `<:instinct:499334776189091871>`. Paste those into the emotes.json.example and save as emotes.json.
+  - Discords.json
+      - Each item in this array is a discord that you want your bot to report to. The "geofence" is a geojson format array. Please see example file.
   - Geojson.json
       - Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
       - Go to http://geojson.io/ and draw your geofences. You MUST add a "name" field to each geofence. If you want to use sub areas (smaller detailed geofences within larger geofences), you must add a sub_area field and then true or false as the value.
