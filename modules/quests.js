@@ -15,7 +15,7 @@ const insideGeojson = require('point-in-geopolygon');
 //#########################################################//
 //#########################################################//
 
-module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, locale) => {
+module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server) => {
 
   // DETERMINE THE QUEST REWARD
   let  quest_reward = '', simple_reward = '';
@@ -50,6 +50,11 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
       quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
   }
 
+  // CHECK SUBSCRIPTION CONFIG
+  if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
+    Subscription.run(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
+  } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
+
   // CHECK ALL FILTERS
   MAIN.Quest_Channels.forEach((quest_channel,index) => {
 
@@ -66,14 +71,13 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     if(filter.Type == 'quest'){
 
       // AREA FILTER
-
-      if(geofences.indexOf(server.geofence)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
+      if(geofences.indexOf(server.name)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
 
         // SECONDARY FILTERING BASED ON FILTER CONFIG
         if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
 
           // PREPARE AND SEND TO DISCORDS
-          send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, locale);
+          send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
         }
         else{ // DEBUG
           if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter); }
@@ -86,7 +90,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   }); return;
 }
 
-async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, locale){
+async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server){
 
   // GET STATIC MAP TILE
   MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(imgUrl){
@@ -200,11 +204,6 @@ async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, mai
     // LOGGING
     if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
     else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
-
-    // CHECK SUBSCRIPTION CONFIG
-    if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
-      Subscription.run(MAIN, quest, quest_embed, main_area, sub_area, embed_area, server, locale);
-    } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){

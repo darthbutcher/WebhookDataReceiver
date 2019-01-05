@@ -79,6 +79,8 @@ Rewards[] = Aerodactyl
 Rewards[] = Lapras
 Rewards[] = Electabuzz
 Rewards[] = Misdreavus
+Rewards[] = Omanyte
+Rewards[] = Machop
 
 ; RAIDS SECTION
 ; Subscriptions are disabled by default because the code is incomplete.

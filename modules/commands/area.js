@@ -5,11 +5,14 @@ const insideGeojson = require('point-in-geopolygon');
 module.exports.run = async (MAIN, message, args, prefix, server) => {
 
   // DECLARE VARIABLES
-  let nickname = '', area_array = '', available_areas ='';
+  let nickname = '', area_array = '', available_areas = '';
 
   await MAIN.geofences.features.forEach((geofence,index) => {
-    if(insideGeofence([geofence.geometry.coordinates[0][0][1],geofence.geometry.coordinates[0][0][0]], discord.geofence)){
+    let lon = geofence.geometry.coordinates[0][0][0];
+    let lat = geofence.geometry.coordinates[0][0][1];
+    if(insideGeojson.polygon(server.geofence, [lon,lat])){
       if(geofence.properties.name){ area_array += geofence.properties.name+','; }
+      else{ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Commands] [area.js] You are missing a name from a geofence in /config/geojson.json.')}
     }
   }); area_array = area_array.slice(0,-1);
 
@@ -105,7 +108,7 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
 }
 
 // SUBSCRIPTION CREATE FUNCTION
-async function subscription_create(MAIN, message, nickname, prefix, area_array){
+async function subscription_create(MAIN, message, nickname, prefix, area_array, server){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
@@ -122,11 +125,12 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array){
     // CHECK IF USER IS ALREADY SUBSCRIBED TO THE AREA OR NOT AND ADD
     if(area_index >= 0){ return message.reply('You are already subscribed to this Area.').then(m => m.delete(10000)).catch(console.error); }
     else{
-      if(sub == 'all'){ areas = server.default_geofence; }
-      else if(user[0].geofence == server.default_geofence || user[0].geofence == 'None'){
-        areas = []; areas.push(sub);
+      switch(true){
+        case sub == 'all': areas = server.name; break;
+        case user[0].geofence == server.name:
+        case user[0].geofence == 'None': areas = []; areas.push(sub); break;
+        default: areas.push(sub);
       }
-      else{ areas.push(sub); }
     }
 
     // CONVERT TO STRING

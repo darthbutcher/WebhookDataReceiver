@@ -15,7 +15,12 @@ const insideGeojson = require('point-in-geopolygon');
 //####################################################//
 //####################################################//
 
-module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server, locale) => {
+module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server) => {
+
+  // CHECK SUBSCRIPTION CONFIG
+  if(MAIN.config.RAID.Subscriptions == 'ENABLED'){
+    Subscription.run(MAIN, raid, main_area, sub_area, embed_area, server);
+  } //else{ console.info('[Pokébot] Raid ignored due to Disabled Subscription setting.'); }
 
   if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Received a Raid.'); }
 
@@ -31,24 +36,27 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
     let channel = MAIN.channels.get(raid_channel[0]);
     let filter = MAIN.Filters.get(raid_channel[1].filter);
 
-    // THROW ERRORS FOR INVALID DATA
+    // THROW ERRORS AND BREAK FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
-    if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
+    else if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
 
-    if(filter.Egg_Or_Boss.toLowerCase() == 'both' || filter.Egg_Or_Boss.toLowerCase() == type.toLowerCase()){
+    // CHECK RAID TYPE
+    else if(filter.Egg_Or_Boss.toLowerCase() == 'both' || filter.Egg_Or_Boss.toLowerCase() == type.toLowerCase()){
 
       // FILTER FOR RAID LEVEL
       if(filter.Raid_Levels.indexOf(raid.level) >= 0){
 
         // AREA FILTER
-        if(geofences.indexOf(server.geofence)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
+        if(geofences.indexOf(server.name)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
 
           // CHECK FOR EX ELIGIBLE REQUIREMENT
           if(filter.Ex_Eligible == undefined || filter.Ex_Eligible == false){
-            send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, locale);
+            if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
+            send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server);
           }
           else if(filter.Ex_Eligible == raid.sponsor_id){
-            send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, locale);
+            if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
+            send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server);
           }
         }
         else{
@@ -65,7 +73,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
   });
 }
 
-function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, locale){
+function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server){
 
   // VARIABLES
   let time_now = new Date().getTime(), hatch_time = MAIN.Bot_Time(raid.start,'1');
@@ -74,6 +82,8 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
   let end_mins = Math.floor((raid.end-(time_now/1000))/60);
 
   MAIN.Static_Map_Tile(raid.latitude,raid.longitude,'raid').then(async function(imgUrl){
+
+    if(MAIN.debug.Raids == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Map Tile for '+type+' Retrieved.'); }
 
     // ATTACH THE MAP TILE
     let attachment = new Discord.Attachment(imgUrl, 'Raid_Alert.png');
@@ -128,11 +138,6 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
           .attachFile(attachment)
           .setImage('attachment://Raid_Alert.png');
 
-        // CHECK SUBSCRIPTION CONFIG
-        if(MAIN.config.RAID.Subscriptions == 'ENABLED'){
-          Subscription.run(MAIN, raid, raid_embed, main_area, sub_area, server, locale);
-        } //else{ console.info('[Pokébot] Raid ignored due to Disabled Subscription setting.'); }
-
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
           if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Level '+raid.level+' Raid '+type+' to '+channel.guild.name+' ('+channel.id+').'); }
@@ -171,11 +176,6 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .attachFile(attachment)
           .setImage('attachment://Raid_Alert.png');
-
-        // CHECK SUBSCRIPTION CONFIG
-        if(MAIN.config.RAID.Subscriptions == 'ENABLED'){
-          Subscription.run(MAIN, raid, raid_embed, main_area, sub_area, server, locale);
-        } //else{ console.info('[Pokébot] Raid ignored due to Disabled Subscription setting.'); }
 
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
