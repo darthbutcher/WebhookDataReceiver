@@ -404,13 +404,6 @@ async function bot_login(){
     MAIN.Custom_Emotes = false;
     MAIN.emotes = ini.parse(fs.readFileSync('./config/emotes.ini', 'utf-8'));
   }
-  MAIN.Discord.Servers.forEach((server,index) => {
-    MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ?", [server.id], function (error, users, fields){
-      users.forEach((user,index) => {
-        MAIN.sqlFunction(`UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [server.name, user.user_id, server.id], undefined, undefined);
-      });
-    });
-  });
 }
 
 // RESTART FUNCTION
