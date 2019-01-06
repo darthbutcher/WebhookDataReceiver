@@ -257,11 +257,11 @@ function sub_collector(MAIN, type, nickname, message, requirements, sub, area_ar
     const filter = cMessage => cMessage.member.id == message.member.id;
     const collector = message.channel.createMessageCollector(filter, { time: 120000 });
 
-    let user_areas = sub.split(','), area_list = '';
+    let user_areas = sub.toLowerCase().split(','), area_list = '';
     area_array = area_array.split(',');
     // CREATE REWARD LIST AND ADD CHECK FOR SUBSCRIBED REWARDS
     area_array.forEach((area,index) => {
-      if(user_areas.indexOf(area) >= 0){
+      if(user_areas.indexOf(area.toLowerCase()) >= 0){
         area_list += area+' '+MAIN.emotes.checkYes+'\n';
       }
       else{ area_list += area+'\n'; }

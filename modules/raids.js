@@ -140,7 +140,7 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
 
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
-          if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Level '+raid.level+' Raid '+type+' to '+channel.guild.name+' ('+channel.id+').'); }
+          if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Level '+raid.level+' '+type+' to '+channel.guild.name+' ('+channel.id+').'); }
           MAIN.Send_Embed(raid_embed, channel.id);
         } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
         break;
@@ -149,10 +149,10 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
       case 'Boss':
 
         // DETERMINE POKEMON NAME AND TYPE
-        let pokemonType = '';
-        let pokemonName = MAIN.pokemon[raid.pokemon_id].name;
-        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {  pokemonType += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
-        pokemonType = pokemonType.slice(0,-3);
+        let pokemon_type = '';
+        let pokemon_name = MAIN.pokemon[raid.pokemon_id].name;
+        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {  pokemon_type += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
+        pokemon_type = pokemon_type.slice(0,-3);
 
         // DETERMINE MOVE NAMES AND TYPES
         let move_name_1 = MAIN.moves[raid.move_1].name;
@@ -169,9 +169,9 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
 
         // CREATE THE RAID EMBED
         raid_embed = new Discord.RichEmbed().setThumbnail(raid_url).setColor(embed_color)
-          .setTitle('**'+pokemonName+'** has taken over a Gym!')
+          .setTitle('**'+pokemon_name+'** has taken over a Gym!')
           .setDescription(move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2)
-          .addField(gym_name+' | '+embed_area, pokemonType+'\nWeaknesses:', false)
+          .addField(gym_name+' | '+embed_area, pokemon_type+'\nWeaknesses:', false)
           .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)', 'Level '+raid.level+' | '+defending_team+raid_sponsor, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .attachFile(attachment)
@@ -179,7 +179,7 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
 
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
-          if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Level '+raid.level+' Raid '+type+' to '+channel.guild.name+' ('+channel.id+').'); }
+          if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a '+pokemon_name+' Raid '+type+' to '+channel.guild.name+' ('+channel.id+').'); }
           MAIN.Send_Embed(raid_embed, channel.id);
         } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
         break;

@@ -161,7 +161,7 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Pokémon to '+channel.guild.name+' ('+channel.id+').'); }
+      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a '+pokemon_name+' to '+channel.guild.name+' ('+channel.id+').'); }
       MAIN.Send_Embed(pokemon_embed, channel.id);
     }
   }); return;
