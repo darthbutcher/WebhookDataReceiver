@@ -31,7 +31,7 @@
       - Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
       - Go to http://geojson.io/ and draw your geofences. You MUST add a "name" field to each geofence. If you want to use sub areas (smaller detailed geofences within larger geofences), you must add a sub_area field and then true or false as the value.
   - config.ini
-      - Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 15 bot tokens can be used at this time. If you have less than 15, delete the other example numbers or you will get invalid credential errors when starting the script.
+      - Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 15 bot tokens can be used at this time. If you have less than 15, delete the other example numbers or you will get invalid credential errors when starting the script. YOU MUST PROVIDE A MAIN TOKEN AND AT LEAST ONE DIFFERENT TOKEN FOR BOT_TOKENS. The Main token handles users, while the other tokens are the workers that perform DMs and channel posts. One Bot_Token is fine if you just have channel feeds, but you will need to add at least one more for DMs. 
   - discords.json
       - You need to add each Discord you plan on serving. Pokebot is multi-discord capable.
 
