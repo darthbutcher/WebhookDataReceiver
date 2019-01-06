@@ -68,7 +68,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server)
       }
     }
     else{
-      if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Did Not Discord Filter for '+raid_channel[0]+'. Expected: '+filter.Type+', Saw: '+type); }
+      if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Did Not Discord Filter for '+raid_channel[0]+'. Expected: '+filter.Egg_Or_Boss+', Saw: '+type); }
     }
   });
 }
