@@ -47,9 +47,9 @@ module.exports.run = async (MAIN, message, args, prefix, server) => {
       // DELETE ORIGINAL MESSAGE
       msg.delete();
       switch(reason){
-        case 'add': subscription_create(MAIN, message, nickname, prefix, area_array); break;
-        case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array); break;
-        case 'view': subscription_view(MAIN, message, nickname, prefix, area_array); break;
+        case 'add': subscription_create(MAIN, message, nickname, prefix, area_array, server); break;
+        case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array, server); break;
+        case 'view': subscription_view(MAIN, message, nickname, prefix, area_array, server); break;
         default: return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
       }
     });
@@ -57,7 +57,7 @@ module.exports.run = async (MAIN, message, args, prefix, server) => {
 }
 
 // AREA VIEW FUNCTION
-async function subscription_view(MAIN, message, nickname, prefix, area_array){
+async function subscription_view(MAIN, message, nickname, prefix, area_array, server){
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
 
     let area_list = '';
@@ -97,9 +97,9 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array){
         msg.delete();
 
         switch(reason){
-          case 'add': subscription_create(MAIN, message, nickname, prefix, area_array); break;
-          case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array); break;
-          case 'view': subscription_view(MAIN, message, nickname, prefix, area_array); break;
+          case 'add': subscription_create(MAIN, message, nickname, prefix, area_array, server); break;
+          case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array, server); break;
+          case 'view': subscription_view(MAIN, message, nickname, prefix, area_array, server); break;
           case 'end': return;
         }
       });
@@ -114,7 +114,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array, 
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
-    let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array);
+    let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'area` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
@@ -168,9 +168,9 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array, 
             // DELETE ORIGINAL MESSAGE
             msg.delete();
             switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix, area_array); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix, area_array); break;
+              case 'add': subscription_create(MAIN, message, nickname, prefix, area_array, server); break;
+              case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array, server); break;
+              case 'view': subscription_view(MAIN, message, nickname, prefix, area_array, server); break;
               case 'end': return;
             }
           });
@@ -181,13 +181,13 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array, 
 }
 
 // SUBSCRIPTION REMOVE FUNCTION
-async function subscription_remove(MAIN, message, nickname, prefix, area_array){
+async function subscription_remove(MAIN, message, nickname, prefix, area_array, server){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
-    let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array);
+    let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'area` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
@@ -233,9 +233,9 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array){
             // DELETE ORIGINAL MESSAGE
             msg.delete();
             switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix, area_array); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix, area_array); break;
+              case 'add': subscription_create(MAIN, message, nickname, prefix, area_array, server); break;
+              case 'remove': subscription_remove(MAIN, message, nickname, prefix, area_array, server); break;
+              case 'view': subscription_view(MAIN, message, nickname, prefix, area_array, server); break;
               case 'end': return;
             }
           });
@@ -246,7 +246,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array){
 }
 
 // SUB COLLECTOR FUNCTION
-function sub_collector(MAIN, type, nickname, message, requirements, sub, area_array){
+function sub_collector(MAIN, type, nickname, message, requirements, sub, area_array, server){
   return new Promise(function(resolve, reject) {
 
 
