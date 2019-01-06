@@ -97,38 +97,37 @@ app.post('/', (webhook, resolve) => {
       // DISCORD AND AREA VARIABLES
       let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {}, embed_area = '';
 
-      await MAIN.Discord.Servers.forEach((discord,index) => {
-        if(insideGeojson.polygon(discord.geofence, [data.message.longitude,data.message.latitude])){
-          server = discord;
+      MAIN.Discord.Servers.forEach( async (server,index) => {
+        if(insideGeojson.polygon(server.geofence, [data.message.longitude,data.message.latitude])){
+
+          // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
+          await MAIN.geofences.features.forEach( async (geofence,index) => {
+            if(insideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
+              if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
+              else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
+            }
+          });
+
+          // ASSIGN AREA TO VARIABLES
+          if(geofence_area.sub){ embed_area = geofence_area.sub; sub_area = geofence_area.sub; }
+          else{ embed_area = geofence_area.main; }
+          if(geofence_area.main){ main_area = geofence_area.main; }
+          else{ embed_area = server.name; main_area = server.name; }
+
+          // SEND TO OBJECT MODULES
+      		switch(data.type){
+            // SEND TO POKEMON MODULE
+      			case 'pokemon':
+      				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+            // SEND TO RAIDS MODULE
+      			case 'raid':
+              Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+            // SEND TO QUESTS MODULE
+      			case 'quest':
+      				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+      		}
         }
       });
-
-      // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
-      await MAIN.geofences.features.forEach( async (geofence,index) => {
-        if(insideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
-          if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
-          else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
-        }
-      });
-
-      // ASSIGN AREA TO VARIABLES
-      if(geofence_area.sub){ embed_area = geofence_area.sub; sub_area = geofence_area.sub; }
-      else{ embed_area = geofence_area.main; }
-      if(geofence_area.main){ main_area = geofence_area.main; }
-      else{ embed_area = server.name; main_area = server.name; }
-
-      // SEND TO OBJECT MODULES
-  		switch(data.type){
-        // SEND TO POKEMON MODULE
-  			case 'pokemon':
-  				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
-        // SEND TO RAIDS MODULE
-  			case 'raid':
-          Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
-        // SEND TO QUESTS MODULE
-  			case 'quest':
-  				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
-  		}
     }
 	}); return;
 });
