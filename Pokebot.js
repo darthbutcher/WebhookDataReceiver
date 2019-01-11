@@ -3,6 +3,7 @@ const fs = require('fs');
 const ini = require('ini');
 const mysql = require('mysql');
 const moment = require('moment');
+const ontime = require('ontime');
 const express = require('express');
 const Discord = require('discord.js');
 const StaticMaps = require('staticmaps');
@@ -441,12 +442,9 @@ async function bot_login(){
   }
 }
 
-ontime({
-	cycle: MAIN.config.QUEST.Reset_Time
-}, function(ot) {
+ontime({ cycle: MAIN.config.QUEST.Reset_Time }, function(ot) {
 	MAIN.Discord.Servers.forEach(function(server) {
-		for(var i = 0; i < server.research_channels.length; i++)
-		{
+		for(var i = 0; i < server.research_channels.length; i++){
 			ClearChannel(server.research_channels[i]);
 		}
 	});
