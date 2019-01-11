@@ -1,15 +1,3 @@
-const Discord = require('discord.js');
-const moment = require('moment');
-const fs = require('fs');
-
-const modules = new Discord.Collection();
-fs.readdir('./modules/commands', (err,files) => {
-  let commandFiles = files.filter(f => f.split('.').pop()==='js');
-  commandFiles.forEach((f,i) => {
-    let command = require('./commands/'+f); modules.set(f.slice(0,-3), command);
-  });
-});
-
 //#############################################################//
 //#############################################################//
 //    _____ ____  __  __ __  __          _   _ _____   _____   //
@@ -26,10 +14,14 @@ module.exports.run = async (MAIN, message) => {
 
   // DEFINE VARIABLES
   let prefix = MAIN.config.PREFIX;
-  let args = message.content.toLowerCase().split(' ').slice(1);
 
   // CHECK IF THE MESSAGE IS FROM A BOT
   if(message.author.bot == true){ return; }
+  switch(message.channel.type){
+    case  'dm':
+    default:
+
+  }
 
   // CHECK EACH DISCORD FOR THE SUB CHANNEL
   MAIN.Discord.Servers.forEach((server,index) => {
@@ -44,10 +36,12 @@ module.exports.run = async (MAIN, message) => {
       // else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
       // LOAD DATABASE RECORD
-      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
-
+      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
         // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
         if(!user || !user[0]){ MAIN.Save_Sub(message,server); }
+        else if(user[0].discord_id != message.guild.id){
+          return message.reply('You cannot have a subscription in multiple discords that this bot resides.')
+        }
         else{
 
           // FIND THE COMMAND AND SEND TO THE MODULE
@@ -64,11 +58,13 @@ module.exports.run = async (MAIN, message) => {
             case message.content == prefix+'quest': command = 'quest'; break;
             case message.content == 'restart':
               if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
+            case message.content == 'reload':
+              MAIN.start('reload'); break;
             default: command = message.content.slice(prefix.length);
           }
 
-          let cmd = modules.get(command);
-          if(cmd){ return cmd.run(MAIN, message, args, prefix, server); }
+          let cmd = MAIN.Commands.get(command);
+          if(cmd){ return cmd.run(MAIN, message, prefix, server); }
         }
       });
     }

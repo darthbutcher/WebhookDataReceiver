@@ -1,8 +1,3 @@
-const Discord = require('discord.js');
-const Subscription = require('./subscriptions/quests.js');
-const insideGeofence = require('point-in-polygon');
-const insideGeojson = require('point-in-geopolygon');
-
 //#########################################################//
 //#########################################################//
 //#####    ____  _    _ ______  _____ _______ _____   #####//
@@ -14,6 +9,11 @@ const insideGeojson = require('point-in-geopolygon');
 //#####            QUEST PARSING AND FEEDS            #####//
 //#########################################################//
 //#########################################################//
+
+const Discord = require('discord.js');
+const Subscription = require('./subscriptions/quests.js');
+const insideGeofence = require('point-in-polygon');
+const insideGeojson = require('point-in-geopolygon');
 
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server) => {
 
@@ -49,6 +49,8 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
       simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
       quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
   }
+
+  if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+quest_reward+' Quest for '+server.name+'.'); }
 
   // CHECK SUBSCRIPTION CONFIG
   if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){

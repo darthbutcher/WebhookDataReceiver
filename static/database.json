@@ -1,5 +1,5 @@
 {
-  "LATEST": 6,
+  "LATEST": 7,
   "1": [{
       "sql": "",
       "data": "",
@@ -82,6 +82,19 @@
       "data": "",
       "gLog": "Update Applied to pokebot.quest_alerts",
       "bLog": "[Pokébot] Failed to Update pokebot.quest_alerts"
+    }
+  ],
+  "7": [{
+      "sql": "ALTER TABLE pokebot.info ADD COLUMN user_next_bot INT;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.info",
+      "bLog": "[Pokébot] Failed to Update pokebot.info"
+    },
+    {
+      "sql": "UPDATE pokebot.info SET user_next_bot = 0;",
+      "data": "",
+      "gLog": "Update Applied to pokebot.info",
+      "bLog": "[Pokébot] Failed to Update pokebot.info"
     }
   ]
 }

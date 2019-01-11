@@ -1,6 +1,3 @@
-const Discord=require('discord.js');
-const moment=require('moment');
-
 //#############################################################//
 //#############################################################//
 //#####   _____   ____  _  ________ __  __  ____  _   _   #####//
@@ -13,6 +10,8 @@ const moment=require('moment');
 //#############################################################//
 //#############################################################//
 
+const Discord = require('discord.js');
+
 module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server) => {
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
@@ -21,16 +20,18 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
       users.forEach((user,index) => {
 
         // FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
-        // let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id);
-        // if(!member){ proceed = false; }
-        // else if(member.hasPermission('ADMINISTRATOR')){ proceed = true; }
-        // else if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
+        let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
+        switch(true){
+          case !member: proceed = false; break;
+          case member.hasPermission('ADMINISTRATOR'): proceed = true; break;
+          default: if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
+        }
 
         // DEFINE VARIABLES
         let user_areas = user.geofence.split(',');
 
         // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR DISCORD
-        if(user.pokemon){
+        if(user.pokemon && proceed == true){
 
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
           if(user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){

@@ -5,17 +5,10 @@ const mysql = require('mysql');
 const moment = require('moment');
 const express = require('express');
 const Discord = require('discord.js');
+const StaticMaps = require('staticmaps');
 const bodyParser = require('body-parser');
 const insideGeofence = require('point-in-polygon');
 const insideGeojson = require('point-in-geopolygon');
-
-// LOAD MODULES
-const StaticMaps = require('staticmaps');
-const Raids = require('./modules/raids.js');
-const Emojis = require('./modules/emojis.js');
-const Quests = require('./modules/quests.js');
-const Pokemon = require('./modules/pokemon.js');
-const Commands = require('./modules/commands.js');
 
 // EVENTS TO DISABLE TO SAVE MEMORY AND CPU
 var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','channelUpdate','clientUserGuildSettingsUpdate','clientUserSettingsUpdate',
@@ -47,18 +40,63 @@ MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 
 // LOAD RAID FEED CHANNELS
 const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', 'utf-8'));
-MAIN.Raid_Channels = [];
-for (var key in raid_channels){ MAIN.Raid_Channels.push([key, raid_channels[key]]); }
+function load_raid_channels(){
+  MAIN.Raid_Channels = [];
+  for (var key in raid_channels){ MAIN.Raid_Channels.push([key, raid_channels[key]]); }
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Raid Channels.');
+}
 
 // LOAD POKEMON FEED CHANNELS
 const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.ini', 'utf-8'));
-MAIN.Pokemon_Channels = [];
-for (var key in pokemon_channels){ MAIN.Pokemon_Channels.push([key, pokemon_channels[key]]); }
+function load_pokemon_channels(){
+  MAIN.Pokemon_Channels = [];
+  for (var key in pokemon_channels){ MAIN.Pokemon_Channels.push([key, pokemon_channels[key]]); }
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Pokémon Channels');
+}
 
 // LOAD QUEST FEED CHANNELS
 const quest_channels = ini.parse(fs.readFileSync('./config/channels_quests.ini', 'utf-8'));
-MAIN.Quest_Channels = [];
-for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
+function load_quest_channels(){
+  MAIN.Quest_Channels = [];
+  for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Quest Channels.');
+}
+
+// DEFINE AND LOAD MODULES
+var Raids, Emojis, Quests, Pokemon, Commands;
+function load_modules(){
+  Raids = require('./modules/raids.js');
+  Emojis = require('./modules/emojis.js');
+  Quests = require('./modules/quests.js');
+  Pokemon = require('./modules/pokemon.js');
+  Commands = require('./modules/commands.js');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded 5 Modules.');
+}
+
+// LOAD Commands
+MAIN.Commands = new Discord.Collection();
+function load_commands(){
+  fs.readdir('./modules/commands', (err,files) => {
+    let command_files = files.filter(f => f.split('.').pop()==='js'), command_count = 0;
+    command_files.forEach((f,i) => {
+      delete require.cache[require.resolve('./modules/commands/'+f)]; command_count++;
+      let command = require('./modules/commands/'+f); MAIN.Commands.set(f.slice(0,-3), command);
+    });
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+command_count+' Command Files.')
+  });
+}
+
+// LOAD FILTERS
+MAIN.Filters = new Discord.Collection();
+function load_filters(){
+  fs.readdir('./filters', (err,filters) => {
+    let filter_files = filters.filter(f => f.split('.').pop()==='json'), filter_count = 0;
+    filter_files.forEach((f,i) => {
+      delete require.cache[require.resolve('./filters/'+f)]; filter_count++;
+      let filter = require('./filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
+    }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+filter_count+' Filters.');
+  });
+}
 
 // DATABASE CONNECTION
 MAIN.database = mysql.createConnection({
@@ -118,13 +156,13 @@ app.post('/', (webhook, resolve) => {
       		switch(data.type){
             // SEND TO POKEMON MODULE
       			case 'pokemon':
-      				Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+              Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
             // SEND TO RAIDS MODULE
       			case 'raid':
               Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
             // SEND TO QUESTS MODULE
       			case 'quest':
-      				Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+              Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
       		}
         }
       });
@@ -135,26 +173,20 @@ app.post('/', (webhook, resolve) => {
 // SEND MESSAGE TO COMMAND MODULE
 MAIN.on('message', message => { return Commands.run(MAIN, message); });
 
-MAIN.Filters = new Discord.Collection();
-fs.readdir('./filters', (err,filters) => {
-  let filter_files = filters.filter(f => f.split('.').pop()==='json'), filter_count=0;
-  filter_files.forEach((f,i) => {
-    delete require.cache[require.resolve('./filters/'+f)]; filter_count++;
-    let filter = require('./filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
-  }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+filter_count+' Filters.');
-});
-
-
 // SAVE A USER IN THE USER TABLE
 MAIN.Save_Sub = (message,server) => {
-  if(MAIN.User_Bot == MAIN.BOTS.length-1){ MAIN.User_Bot = 0; } else{ MAIN.User_Bot++; }
-  MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [message.member.id, message.member.user.tag, server.name, , , , 'ACTIVE', MAIN.User_Bot, '08:00', message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
-    if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
-    else{
-      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Added '+message.member.user.tag+' to the pokebot.user database.');
-      return message.reply('You did not have a subscription record. One has now been created. Please try the command again.').then(m => m.delete(15000)).catch(console.error);
-    }
+  MAIN.database.query(`SELECT * FROM pokebot.info`, function (error, info, fields) {
+    let next_bot = info[0].user_next_bot;
+    if(next_bot == MAIN.BOTS.length-1){ next_bot = 0; } else{ next_bot++; }
+    MAIN.database.query(`INSERT INTO pokebot.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [message.member.id, message.member.user.tag, server.name, , , , 'ACTIVE', next_bot, MAIN.config.QUEST.Default_Delivery, message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+      if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
+      else{
+        MAIN.sqlFunction('UPDATE pokebot.info SET user_next_bot = ?',[next_bot],undefined,undefined);
+        console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Added '+message.member.user.tag+' to the pokebot.user database.');
+        return message.reply('You did not have a subscription record. One has now been created. Please try the command again.').then(m => m.delete(15000)).catch(console.error);
+      }
+    });
   });
 }
 
@@ -391,7 +423,7 @@ async function bot_login(){
   await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
 
   // SET ACTIVE BOOLEAN TO TRUE AND BOT POOL TO ZERO
-  MAIN.Active = true; MAIN.Next_Bot = 0; MAIN.User_Bot = 0;
+  MAIN.Active = true; MAIN.Next_Bot = 0;
 
   // CHECK FOR CUSTOM EMOTES (CHUCKLESLOVE MERGE)
   if(MAIN.config.EMOTES.Custom == false){
@@ -409,7 +441,19 @@ async function bot_login(){
 function pokebotRestart(){ process.exit(1); }
 
 // CRANK UP THE BOT
-async function start(){
+MAIN.start = async (type) => {
+  await load_modules();
+  await load_commands();
+  await load_raid_channels();
+  await load_quest_channels();
+  await load_pokemon_channels();
+  await load_filters();
   await update_database();
-  await bot_login();
-} start();
+  switch(type){
+    case 'startup':
+      await bot_login(); break;
+    case 'reload':
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot has re-loaded.'); break;
+  }
+}
+MAIN.start('startup');

@@ -1,6 +1,6 @@
 const Discord=require('discord.js');
 
-module.exports.run = async (MAIN, message, args, prefix, discord) => {
+module.exports.run = async (MAIN, message, prefix, discord) => {
 
   // DECLARE VARIABLES
   let nickname = '';
@@ -8,56 +8,40 @@ module.exports.run = async (MAIN, message, args, prefix, discord) => {
   // GET USER NICKNAME
   if(message.member.nickname){ nickname = message.member.nickname; } else{ nickname = message.member.user.username; }
 
-  let requestAction = new Discord.RichEmbed()
+  let request_action = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Quest Subscriptions?')
-    .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
+    .setDescription('`view`  »  View your Subscritions.\n'
+                   +'`add`  »  Add a Reward to your Subscriptions.\n'
+                   +'`remove`  »  Remove a Reward from your Subscriptions.\n'
+                   +'`pause` or `resume`  »  Pause/Resume Quest Subscriptions.')
+    .setFooter('Type the action, no command prefix required.');
 
-  message.channel.send(requestAction).catch(console.error).then( msg => {
-
-    // DEFINE COLLECTOR AND FILTER
-    const filter = cMessage => cMessage.member.id==message.member.id;
-    const collector = message.channel.createMessageCollector(filter, { time: 60000 });
-
-    // FILTER COLLECT EVENT
-    collector.on('collect', message => {
-      switch(message.content.toLowerCase()){
-        case 'add': collector.stop('add'); break;
-        case 'remove': collector.stop('remove'); break;
-        case 'view': collector.stop('view'); break;
-        case 'pause': collector.stop('pause'); break;
-        case 'resume': collector.stop('resume'); break;
-        case 'time': collector.stop('time'); break;
-        default: message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
-      }
-    });
-
-    // COLLECTOR HAS BEEN ENDED
-    collector.on('end', (collected,reason) => {
-
-      // DELETE ORIGINAL MESSAGE
-      msg.delete();
-      switch(reason){
-        case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-        case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-        case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-        case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-        case 'resume':
-        case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-        default: return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
-      }
-    });
+  message.channel.send(request_action).catch(console.error).then( msg => {
+    return initiate_collector(MAIN, 'start', message, msg, nickname, prefix);
   });
 }
 
-// PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
+// PAUSE OR RESUME QUEST SUBSCRIPTIOONS
 function subscription_status(MAIN, message, nickname, reason, prefix){
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
     if(user[0].quest_paused == 'ACTIVE' && reason == 'resume'){
-      return message.reply('Your Quest subscriptions are already `ACTIVE`.').then(m => m.delete(5000)).catch(console.error);
+      let already_active = new Discord.RichEmbed().setColor('ff0000')
+        .setAuthor(nickname, message.member.user.displayAvatarURL)
+        .setTitle('Your Quest Subscriptions are already ACTIVE!')
+        .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');;
+      message.channel.send(already_active).catch(console.error).then( msg => {
+        return initiate_collector(MAIN, 'status', message, msg, nickname, prefix);
+      });
     }
     else if(user[0].quest_paused == 'PAUSED' && reason == 'pause'){
-      return message.reply('You Quest subscriptions are already `PAUSED`.').then(m => m.delete(5000)).catch(console.error);
+      let already_paused = new Discord.RichEmbed().setColor('ff0000')
+        .setAuthor(nickname, message.member.user.displayAvatarURL)
+        .setTitle('Your Quest Subscriptions are already PAUSED!')
+        .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');;
+      message.channel.send(already_paused).catch(console.error).then( msg => {
+        return initiate_collector(MAIN, 'status', message, msg, nickname, prefix);
+      });
     }
     else{
       if(reason == 'pause'){ change = 'PAUSED'; }
@@ -68,8 +52,11 @@ function subscription_status(MAIN, message, nickname, reason, prefix){
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
             .setAuthor(nickname, message.member.user.displayAvatarURL)
             .setTitle('Your Quest Subscriptions have been set to `'+change+'`!')
-            .setFooter('Saved to the Pokébot Database.');
-          return message.channel.send(subscription_success).then(m => m.delete(5000)).catch(console.error);
+            .setDescription('Saved to the Pokébot Database.')
+            .setFooter('You can type \'view\', \'time\' \'add\', or \'remove\'.');;
+          message.channel.send(subscription_success).catch(console.error).then( msg => {
+            return initiate_collector(MAIN, 'status', message, msg, nickname, prefix);
+          });
         }
       });
     }
@@ -96,37 +83,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
 
         // SEND THE EMBED
         message.channel.send(no_subscriptions).catch(console.error).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-              case 'time': collector.stop('time'); break;
-            }
-          });
-
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix);
         });
       }
       else{
@@ -143,37 +100,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
 
         // SEND THE EMBED
         message.channel.send(quest_subs).catch(console.error).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-              case 'time': collector.stop('time'); break;
-            }
-          });
-
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix);
         });
       }
     }
@@ -186,9 +113,9 @@ async function subscription_time(MAIN, message, nickname, prefix){
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
-    // RETRIEVE POKEMON NAME FROM USER
+    // RETRIEVE QUEST NAME FROM USER
     let sub = await sub_collector(MAIN, 'Time', nickname, message, user[0].alert_time, 'Must be in 00:00 24-Hour format and between 00:00-23:00.', undefined);
-    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
+    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'quest` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub.toLowerCase() == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
     // UPDATE THE USER'S RECORD
     MAIN.database.query("UPDATE pokebot.users SET alert_time = ? WHERE user_id = ? AND discord_id = ?", [sub,message.member.id, message.guild.id], function (error, user, fields) {
@@ -200,37 +127,7 @@ async function subscription_time(MAIN, message, nickname, prefix){
           .setDescription('`'+sub+'` Saved to the Pokébot Database.')
           .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
         message.channel.send(subscription_success).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-              case 'time': collector.stop('time'); break;
-            }
-          });
-
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'time', message, msg, nickname, prefix);
         });
       }
     });
@@ -246,9 +143,9 @@ async function subscription_create(MAIN, message, nickname, prefix){
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
-    // RETRIEVE POKEMON NAME FROM USER
+    // RETRIEVE QUEST NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, user[0].quests, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Reward.', undefined);
-    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
+    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'quest` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
     // DEFINED VARIABLES
@@ -279,37 +176,7 @@ async function subscription_create(MAIN, message, nickname, prefix){
           .setDescription('Saved to the Pokébot Database.')
           .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
         message.channel.send(subscription_success).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-              default:
-                message.reply('`'+message.content+'` is not a valid option.').then(m => m.delete(5000)).catch(console.error);
-            }
-          });
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'cancel': return;
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'create', message, msg, nickname, prefix);
         });
       }
     });
@@ -322,9 +189,9 @@ async function subscription_remove(MAIN, message, nickname, prefix){
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
 
-    // RETRIEVE POKEMON NAME FROM USER
+    // RETRIEVE QUEST NAME FROM USER
     let sub = await sub_collector(MAIN, 'Remove', nickname, message, user[0].quests, 'Names are not case-sensitive.', undefined);
-    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'pokemon` to restart.').then(m => m.delete(5000)).catch(console.error); }
+    if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'quest` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
     // DEFINED VARIABLES
@@ -344,38 +211,13 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 
       // SEND THE EMBED
       message.channel.send(no_subscriptions).catch(console.error).then( msg => {
-
-        // DEFINE COLLECTOR AND FILTER
-        const filter = cMessage => cMessage.member.id==message.member.id;
-        const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-        // FILTER COLLECT EVENT
-        collector.on('collect', message => {
-          switch(message.content.toLowerCase()){
-            case 'add': collector.stop('add'); break;
-            case 'remove': collector.stop('remove'); break;
-            case 'view': collector.stop('view'); break;
-            case 'pause': collector.stop('pause'); break;
-            case 'resume': collector.stop('resume'); break;
-            case 'time': collector.stop('time'); break;
-          }
-        });
-
-        // COLLECTOR HAS BEEN ENDED
-        collector.on('end', (collected,reason) => {
-
-          // DELETE ORIGINAL MESSAGE
-          msg.delete();
-          switch(reason){
-            case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-            case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-            case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-            case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-            case 'resume':
-            case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-          }
-        });
+        return initiate_collector(MAIN, 'remove', message, msg, nickname, prefix);
       });
+    }
+    else if(sub == 'ALL'){
+      let sub = await sub_collector(MAIN, 'Confirm-Remove', nickname, message, user[0].quests, 'Type \'Yes\' or \'No\'', undefined);
+      if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'quest` to restart.').then(m => m.delete(5000)).catch(console.error); }
+      else{ quests = ''; }
     }
     else{
       if(index < 0){
@@ -388,37 +230,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 
         // SEND THE EMBED
         message.channel.send(no_quest).catch(console.error).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-              case 'time': collector.stop('time'); break;
-            }
-          });
-
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'time': subscription_time(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'remove', message, msg, nickname, prefix);
         });
       }
       else{ quests.splice(index,1); }
@@ -440,35 +252,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
           .setFooter('You can type \'view\', \'time\' \'add\', \'remove\', \'pause\' or \'resume\'.');
 
         message.channel.send(subscription_success).then( msg => {
-
-          // DEFINE COLLECTOR AND FILTER
-          const filter = cMessage => cMessage.member.id==message.member.id;
-          const collector = message.channel.createMessageCollector(filter, { time: 30000 });
-
-          // FILTER COLLECT EVENT
-          collector.on('collect', message => {
-            switch(message.content.toLowerCase()){
-              case 'add': collector.stop('add'); break;
-              case 'remove': collector.stop('remove'); break;
-              case 'view': collector.stop('view'); break;
-              case 'pause': collector.stop('pause'); break;
-              case 'resume': collector.stop('resume'); break;
-            }
-          });
-          // COLLECTOR HAS BEEN ENDED
-          collector.on('end', (collected,reason) => {
-
-            // DELETE ORIGINAL MESSAGE
-            msg.delete();
-            switch(reason){
-              case 'cancel': return;
-              case 'add': subscription_create(MAIN, message, nickname, prefix); break;
-              case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
-              case 'view': subscription_view(MAIN, message, nickname, prefix); break;
-              case 'resume':
-              case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
-            }
-          });
+          return initiate_collector(MAIN, 'remove', message, msg, nickname, prefix);
         });
       }
     });
@@ -476,8 +260,8 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 }
 
 // SUB COLLECTOR FUNCTION
-function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
-  return new Promise(function(resolve, reject) {
+async function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
+  return new Promise( async function(resolve, reject) {
 
     // DELCARE VARIABLES
     let timeout = true, instruction = '', reward_list = '', user_rewards = '';
@@ -488,18 +272,13 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
 
     switch(type){
 
-      // POKEMON NAME EMBED
+      // QUEST NAME EMBED
       case 'Name':
-      if(user_quests){
-        user_rewards = user_quests.split(',');
-      }
-      else{ user_rewards = 'None';  }
-
+        if(user_quests){ user_rewards = user_quests.split(','); }
+        else{ user_rewards = 'None';  }
         // CREATE REWARD LIST AND ADD CHECK FOR SUBSCRIBED REWARDS
-        MAIN.config.QUEST.Rewards.forEach((reward,index) => {
-          if(user_rewards.indexOf(reward) > 0){
-            reward_list += reward+' '+MAIN.emotes.checkYes+'\n';
-          }
+        await MAIN.config.QUEST.Rewards.forEach((reward,index) => {
+          if(user_rewards.indexOf(reward) >= 0){ reward_list += reward+' '+MAIN.emotes.checkYes+'\n'; }
           else{ reward_list += reward+'\n'; }
         });
         if(!reward_list){ reward_list = user_rewards; }
@@ -509,9 +288,16 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
           .addField('Available Quest Rewards:', reward_list, false)
           .setFooter(requirements); break;
 
+      // CONFIRM REMOVEAL OF ALL REWARDS
+      case 'Confirm-Remove':
+        instruction = new Discord.RichEmbed()
+          .setAuthor(nickname, message.member.user.displayAvatarURL)
+          .setTitle('Are you sure you want to Remove ALL of your subscriptions?')
+          .setFooter(requirements); break;
+
       // REMOVEAL EMBED
       case 'Remove':
-      let sub_list = user_quests.split(',').toString().replace(/,/g,'\n');
+        let sub_list = user_quests.split(',').toString().replace(/,/g,'\n');
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Quest do you want to remove?')
@@ -540,7 +326,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
           // CANCEL SUB
           case message.content.toLowerCase() == 'cancel': collector.stop('cancel'); break;
 
-          // POKEMON NAME
+          // QUEST NAME
           case type.indexOf('Name')>=0:
           case type.indexOf('Remove')>=0:
             if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); break; }
@@ -548,7 +334,7 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
               if(r == MAIN.config.QUEST.Rewards.length+1){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Quest reward. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
               else if(MAIN.config.QUEST.Rewards[r] && message.content.toLowerCase() == MAIN.config.QUEST.Rewards[r].toLowerCase()){
                 collector.stop(MAIN.config.QUEST.Rewards[r]); break;
-              }
+              }f
             } break;
 
           case type.indexOf('Time')>=0:
@@ -580,5 +366,44 @@ function sub_collector(MAIN,type,nickname,message,user_quests,requirements,sub){
         resolve(reason);
       });
     });
+  });
+}
+
+function initiate_collector(MAIN, source, message, msg, nickname, prefix){
+
+  // DEFINE COLLECTOR AND FILTER
+  const filter = cMessage => cMessage.member.id==message.member.id;
+  const collector = message.channel.createMessageCollector(filter, { time: 60000 });
+
+  // FILTER COLLECT EVENT
+  collector.on('collect', message => {
+    switch(message.content.toLowerCase()){
+      case 'add': collector.stop('add'); break;
+      case 'remove': collector.stop('remove'); break;
+      case 'view': collector.stop('view'); break;
+      case 'pause': collector.stop('pause'); break;
+      case 'resume': collector.stop('resume'); break;
+      case 'time': collector.stop('settime'); break;
+      default: collector.stop('end');
+    }
+  });
+
+  // COLLECTOR HAS BEEN ENDED
+  collector.on('end', (collected,reason) => {
+
+    // DELETE ORIGINAL MESSAGE
+    msg.delete();
+    switch(reason){
+      case 'add': subscription_create(MAIN, message, nickname, prefix); break;
+      case 'remove': subscription_remove(MAIN, message, nickname, prefix); break;
+      case 'view': subscription_view(MAIN, message, nickname, prefix); break;
+      case 'settime': subscription_time(MAIN, message, nickname, prefix); break;
+      case 'resume':
+      case 'pause': subscription_status(MAIN, message, nickname, reason, prefix); break;
+      default:
+      if(source == 'start'){
+        message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
+      }
+    } return;
   });
 }

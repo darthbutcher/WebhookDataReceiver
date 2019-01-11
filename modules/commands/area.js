@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const insideGeofence = require('point-in-polygon');
 const insideGeojson = require('point-in-geopolygon');
 
-module.exports.run = async (MAIN, message, args, prefix, server) => {
+module.exports.run = async (MAIN, message, prefix, server) => {
 
   // DECLARE VARIABLES
   let nickname = '', area_array = '', available_areas = '';
@@ -196,7 +196,8 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array, 
     let area_index = areas.indexOf(sub);
 
     // CHECK IF USER IS ALREADY SUBSCRIBED TO THE AREA OR NOT AND ADD
-    if(area_index < 0){ return message.reply('You are not subscribed to this Area.').then(m => m.delete(10000)).catch(console.error); }
+    if(sub == 'all'){ areas = 'None'; }
+    else if(area_index < 0){ return message.reply('You are not subscribed to this Area.').then(m => m.delete(10000)).catch(console.error); }
     else{ areas.splice(area_index,1); }
 
     if(areas.length == 0){ areas = 'None'; }

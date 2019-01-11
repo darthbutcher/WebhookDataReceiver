@@ -1,8 +1,3 @@
-const Discord = require('discord.js');
-const Subscription = require('./subscriptions/pokemon.js');
-const insideGeofence = require('point-in-polygon');
-const insideGeojson = require('point-in-geopolygon');
-
 //#############################################################//
 //#############################################################//
 //#####   _____   ____  _  ________ __  __  ____  _   _   #####//
@@ -14,6 +9,11 @@ const insideGeojson = require('point-in-geopolygon');
 //#####                  POKEMON FEEDS                    #####//
 //#############################################################//
 //#############################################################//
+
+const Discord = require('discord.js');
+const Subscription = require('./subscriptions/pokemon.js');
+const insideGeofence = require('point-in-polygon');
+const insideGeojson = require('point-in-geopolygon');
 
 module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server) => {
 

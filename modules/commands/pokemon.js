@@ -2,7 +2,7 @@ const Discord=require('discord.js');
 
 MAX_ALL_SUBS = [ '1', '2', '3', '4', '5' ];
 
-module.exports.run = async (MAIN, message, args, prefix, discord) => {
+module.exports.run = async (MAIN, message, prefix, discord) => {
 
   // DECLARE VARIABLES
   let nickname = '';
@@ -14,11 +14,11 @@ module.exports.run = async (MAIN, message, args, prefix, discord) => {
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Pokémon Subscriptions?')
     .setDescription('`view`  »  View your Subscritions.\n'
-                    +'`add`  »  Create a Simple Subscription.\n'
-                    +'`add adv`  »  Create an Advanced Subscription.\n'
-                    +'`remove`  »  Remove a Subscription.\n'
-                    +'`edit`  »  Edit a Subscription.\n'
-                    +'`pause` or `resume`  »  Pause/Resume Pokemon Subscriptions.')
+                   +'`add`  »  Create a Simple Subscription.\n'
+                   +'`add adv`  »  Create an Advanced Subscription.\n'
+                   +'`remove`  »  Remove a pokemon Subscription.\n'
+                   +'`edit`  »  Edit a Subscription.\n'
+                   +'`pause` or `resume`  »  Pause/Resume Pokemon Subscriptions.')
     .setFooter('Type the action, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {

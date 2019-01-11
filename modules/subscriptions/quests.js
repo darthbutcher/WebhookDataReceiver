@@ -1,6 +1,3 @@
-const Discord = require('discord.js');
-const moment = require('moment');
-
 //#########################################################//
 //#########################################################//
 //#####    ____  _    _ ______  _____ _______ _____   #####//
@@ -12,6 +9,9 @@ const moment = require('moment');
 //#####              QUEST SUBSCRIPTIONS              #####//
 //#########################################################//
 //#########################################################//
+
+const Discord = require('discord.js');
+const moment = require('moment');
 
 module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server) => {
 

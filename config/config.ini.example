@@ -56,6 +56,7 @@ Custom = true
 [QUEST]
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
+Default_Delivery = 08:00
 Rewards[] = Ultra Ball
 Rewards[] = Hyper Potion
 Rewards[] = Max Potion

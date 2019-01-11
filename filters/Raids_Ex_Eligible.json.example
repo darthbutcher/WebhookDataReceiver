@@ -1,6 +1,6 @@
 {
   "Type": "raid",
-  "Egg_Or_Boss": "boss",
+  "Egg_Or_Boss_Or_Both": "boss",
   "Raid_Levels": [ 1, 2, 3, 4, 5 ],
-  "Ex_Eligible": true
+  "Ex_Eligible_Only": true
 }
