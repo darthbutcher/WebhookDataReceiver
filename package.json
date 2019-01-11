@@ -766,6 +766,7 @@
       "resolved": "https://registry.npmjs.org/once/-/once-1.4.0.tgz",
       "version": "1.4.0"
     },
+    "ontime": "0.0.6",
     "os-homedir": {
       "integrity": "sha1-/7xJiDNuDoM94MFox+8VISGqf7M=",
       "resolved": "http://registry.npmjs.org/os-homedir/-/os-homedir-1.0.2.tgz",
