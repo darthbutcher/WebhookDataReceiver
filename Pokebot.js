@@ -444,9 +444,11 @@ async function bot_login(){
 
 ontime({ cycle: MAIN.config.QUEST.Reset_Time }, function(ot) {
 	MAIN.Discord.Servers.forEach(function(server) {
-		for(var i = 0; i < server.research_channels.length; i++){
-			ClearChannel(server.research_channels[i]);
-		}
+    if(server.research_channels){
+  		for(var i = 0; i < server.research_channels.length; i++){
+  			ClearChannel(server.research_channels[i]);
+  		}
+    }
 	});
 });
 
