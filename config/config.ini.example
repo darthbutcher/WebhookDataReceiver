@@ -54,8 +54,10 @@ Custom = true
 ; The reward names must match the reward names found in /static/en.json
 ; You can comment our rewards without removing them using a ';'
 [QUEST]
+
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
+Reset_Time = '23:55:00'
 Default_Delivery = 08:00
 Rewards[] = Ultra Ball
 Rewards[] = Hyper Potion
