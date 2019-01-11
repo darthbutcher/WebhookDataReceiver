@@ -28,15 +28,17 @@ const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE
 const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
 // CACHE DATA FROM JSONS
-MAIN.proto = require('./static/en.json');
-MAIN.moves = require('./static/moves.json');
-MAIN.db = require('./static/database.json');
-MAIN.types = require('./static/types.json');
-MAIN.pokemon = require('./static/pokemon.json');
-MAIN.rewards = require('./static/rewards.json');
-MAIN.Discord = require('./config/discords.json');
-MAIN.geofences = require('./config/geojson.json');
-MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
+function load_files(){
+  MAIN.proto = require('./static/en.json');
+  MAIN.moves = require('./static/moves.json');
+  MAIN.db = require('./static/database.json');
+  MAIN.types = require('./static/types.json');
+  MAIN.pokemon = require('./static/pokemon.json');
+  MAIN.rewards = require('./static/rewards.json');
+  MAIN.Discord = require('./config/discords.json');
+  MAIN.geofences = require('./config/geojson.json');
+  MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
+}
 
 // LOAD RAID FEED CHANNELS
 const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', 'utf-8'));
@@ -442,6 +444,7 @@ function pokebotRestart(){ process.exit(1); }
 
 // CRANK UP THE BOT
 MAIN.start = async (type) => {
+  await load_files();
   await load_modules();
   await load_commands();
   await load_raid_channels();
