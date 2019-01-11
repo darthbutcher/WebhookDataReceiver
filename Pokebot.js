@@ -27,6 +27,8 @@ const JULIET = new Discord.Client({ disabledEvents: eventsToDisable }); const KI
 const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE=new Discord.Client({ disabledEvents: eventsToDisable });
 const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
+MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
+
 // CACHE DATA FROM JSONS
 function load_files(){
   MAIN.proto = require('./static/en.json');
@@ -437,6 +439,35 @@ async function bot_login(){
     MAIN.Custom_Emotes = false;
     MAIN.emotes = ini.parse(fs.readFileSync('./config/emotes.ini', 'utf-8'));
   }
+}
+
+ontime({
+	cycle: MAIN.config.QUEST.Reset_Time
+}, function(ot) {
+	MAIN.Discord.Servers.forEach(function(server) {
+		for(var i = 0; i < server.research_channels.length; i++)
+		{
+			ClearChannel(server.research_channels[i]);
+		}
+	});
+});
+
+function ClearChannel(channelID){
+  return new Promise(function(resolve) {
+    let channel = MAIN.channels.get(channelID);
+    if(!channel) { resolve(false); console.error("Could not find a channel with ID: "+channelID); return;}
+    channel.fetchMessages({limit:99}).then(messages => {
+      channel.bulkDelete(messages).then(deleted => {
+        if(messages.size > 0){
+          ClearChannel(channelID).then(result => { resolve(true); return; });
+        }
+        else{
+          console.log("Cleared messages from channel: "+channel.name);
+          resolve(true); return;
+        }
+      }).catch(console.error);
+    });
+  });
 }
 
 // RESTART FUNCTION
