@@ -54,14 +54,28 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             if(sighting.cp > 0){
 
               // CHECK THE MIN AND MAX IV AND LEVEL SET FOR THE ENTIRE FEED
-              if(filter.min_iv <= internal_value && filter.max_iv >= internal_value && filter.min_level <= sighting.pokemon_level && filter.max_level >= sighting.pokemon_level){
+              if(filter.min_iv <= internal_value && filter.max_iv >= internal_value){
 
-                // SEND POKEMON TO DISCORD
-                send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+                if(filter.min_level <= sighting.pokemon_level && filter.max_level >= sighting.pokemon_level){
+
+                  if(filter.min_cp <= sighting.cp && filter.max_cp >= sighting.cp){
+
+                    // SEND POKEMON TO DISCORD
+                    send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+                  }
+                  else{
+                    // DEBUG
+                    if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass CP Filters. '+sighting.encounter_id); }
+                  }
+                }
+                else{
+                  // DEBUG
+                  if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Level Filters. '+sighting.encounter_id); }
+                }
               }
               else{
                 // DEBUG
-                if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters. '+sighting.encounter_id); }
+                if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass IV Filters. '+sighting.encounter_id); }
               }
             }
             else if(filter.Post_Without_IV == true){

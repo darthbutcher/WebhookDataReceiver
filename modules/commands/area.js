@@ -22,7 +22,11 @@ module.exports.run = async (MAIN, message, prefix, server) => {
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Area Subscriptions?')
-    .setFooter('You can type \'view\', \'add\', or \'remove\'.');
+    .setDescription('`view`  »  View your Subscriptions.\n'
+                   +'`add`  »  Add a Subscriptions.\n'
+                   +'`remove`  »  Remove a Subscriptions.\n'
+                   +'`pause` or `resume`  »  Pause/Resume Raid Subscriptions.')
+    .setFooter('Type the action, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
 

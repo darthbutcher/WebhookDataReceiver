@@ -5,6 +5,8 @@
 	"max_iv": 89,
 	"min_level": 0,
 	"max_level": 35,
+	"min_cp": 0,
+	"max_cp": 10000,
 	"Bulbasaur": {"min_iv":"80"},
 	"Ivysaur": {"min_iv":"80"},
 	"Venusaur": {"min_iv":"80"},

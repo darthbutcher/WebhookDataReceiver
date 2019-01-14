@@ -5,6 +5,8 @@
 	"max_iv": 99,
 	"min_level": 0,
 	"max_level": 35,
+	"min_cp": 0,
+	"max_cp": 10000,
 	"Bulbasaur": "False",
 	"Ivysaur": "False",
 	"Venusaur": "True",

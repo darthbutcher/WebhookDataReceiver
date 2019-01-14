@@ -198,7 +198,14 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     // RETRIEVE GENDER FROM USER
     sub.gender = await sub_collector(MAIN,'Gender',nickname,message,sub.name,'Please respond with \'Male\' or \'Female\' or type \'All\'.',sub);
     if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }  }
+    else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+
+    // RETRIEVE AREA CONFIMATION FROM USER
+    sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
+    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
+    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+
+  }
   else {
 
     // DEFINE SUB TYPE AND OTHER VARIABLES
@@ -218,6 +225,11 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
     if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
     else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+
+    // RETRIEVE AREA CONFIRMATION FROM USER
+    sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
+    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
+    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
   }
 
   // RETRIEVE CONFIRMATION FROM USER
@@ -230,7 +242,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     let pokemon = '';
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].pokemon){
-      if(sub.name == 'ALL'){ sub.name == 'ALL-1'; }
+      if(sub.name == 'All'){ sub.name == 'All-1'; }
       pokemon = {};
       pokemon.subscriptions = [];
       pokemon.subscriptions.push(sub);
@@ -238,10 +250,10 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     else{
       pokemon = JSON.parse(user[0].pokemon);
       if(!pokemon.subscriptions[0]){
-        if(sub.name == 'ALL'){ sub.name = 'ALL-1'; }
+        if(sub.name == 'All'){ sub.name = 'All-1'; }
         pokemon.subscriptions.push(sub);
       }
-      else if(sub.name == 'ALL'){
+      else if(sub.name == 'All'){
         let s = 1;
         await MAX_ALL_SUBS.forEach((max_num,index) => {
           pokemon.subscriptions.forEach((subscription,index) => {
@@ -460,10 +472,16 @@ async function subscription_modify(MAIN, message, nickname, prefix){
           if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
           else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
 
+          // CONFIRM AREAS
+          sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
+          if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
+          else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+
           // RETRIEVE CONFIRMATION FROM USER
           let confirm = await sub_collector(MAIN,'Confirm-Add',nickname,message,sub.name,'Type \'Yes\' or \'No\'. Subscription will be saved.',sub);
           if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
           else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+
 
           // ADD THE NEW SUBSCRIPTION
           pokemon.subscriptions.push(sub);
@@ -518,7 +536,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
       case 'Confirm-Add':
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
-          .setTitle('Does all of this look correct?\nName: `'+sub.name+'`\nMin CP: `'+sub.min_cp+'`\nMax CP: `'+sub.max_cp+'`\nMin IV: `'+sub.min_iv+'`\nMax IV: `'+sub.max_iv+'`\nMin Lvl: `'+sub.min_lvl+'`\nMax Lvl: `'+sub.max_lvl+'`\nGender: `'+sub.gender+'`')
+          .setTitle('Does all of this look correct?\nName: `'+sub.name+'`\nMin CP: `'+sub.min_cp+'`\nMax CP: `'+sub.max_cp+'`\nMin IV: `'+sub.min_iv+'`\nMax IV: `'+sub.max_iv+'`\nMin Lvl: `'+sub.min_lvl+'`\nMax Lvl: `'+sub.max_lvl+'`\nGender: `'+sub.gender+'`\nFilter By Areas: `'+sub.areas+'`')
           .setFooter(requirements); break;
 
       case 'Confirm-Remove':
@@ -542,6 +560,15 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           .setTitle('What Pokémon do you want to modify?')
           .setFooter(requirements); break;
 
+      // AREA EMBED
+      case 'Area Filter':
+        instruction = new Discord.RichEmbed()
+          .setAuthor(nickname, message.member.user.displayAvatarURL)
+          .setTitle('Do you want to get notifications for '+pokemon+' filtered by your subscribed Areas?')
+          .setDescription('If you choose **Yes**, your notifications for this Pokémon will be filtered based on your areas. If you choose **No**, you will get notifications for this pokemon in ALL areas for the city.')
+          .setFooter(requirements); break;
+
+
       // DEFAULT EMBED
       default:
         instruction = new Discord.RichEmbed()
@@ -564,6 +591,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           case message.content.toLowerCase() == 'cancel': collector.stop('cancel'); break;
 
           // GET CONFIRMATION
+          case type.indexOf('Area Filter')>=0:
           case type.indexOf('Confirm-Add')>=0:
           case type.indexOf('Confirm-Remove')>=0:
             if(message.content.toLowerCase() == 'yes'){ collector.stop('Yes'); }
@@ -575,12 +603,12 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           case type.indexOf('Modify')>=0:
           case type.indexOf('Remove')>=0:
             switch(message.content.toLowerCase()){
-              case 'all': collector.stop('ALL'); break;
-              case 'all-1': collector.stop('ALL-1'); break;
-              case 'all-2': collector.stop('ALL-2'); break;
-              case 'all-3': collector.stop('ALL-3'); break;
-              case 'all-4': collector.stop('ALL-4'); break;
-              case 'all-5': collector.stop('ALL-5'); break;
+              case 'all': collector.stop('All'); break;
+              case 'all-1': collector.stop('All-1'); break;
+              case 'all-2': collector.stop('All-2'); break;
+              case 'all-3': collector.stop('All-3'); break;
+              case 'all-4': collector.stop('All-4'); break;
+              case 'all-5': collector.stop('All-5'); break;
               default:
                 for(let p = 1; p < 723; p++){
                   if(p == 722){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Pokémon name. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); }

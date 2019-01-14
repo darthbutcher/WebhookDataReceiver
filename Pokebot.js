@@ -396,20 +396,20 @@ async function bot_login(){
   let token = MAIN.config.TOKENS;
   await MAIN.login(token.MAIN);
   if(token.BOT_TOKENS[0] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(ALPHA); ALPHA.login(token.BOT_TOKENS[0]); }
-  if(token.BOT_TOKENS[1] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(BRAVO); BRAVO.login(token.BOT_TOKENS[1]); }
-  if(token.BOT_TOKENS[2] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(token.BOT_TOKENS[2]); }
-  if(token.BOT_TOKENS[3] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(DELTA); DELTA.login(token.BOT_TOKENS[3]); }
-  if(token.BOT_TOKENS[4] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(ECHO); ECHO.login(token.BOT_TOKENS[4]); }
-  if(token.BOT_TOKENS[5] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(token.BOT_TOKENS[5]); }
-  if(token.BOT_TOKENS[6] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(GULF); GULF.login(token.BOT_TOKENS[6]); }
-  if(token.BOT_TOKENS[7] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(HOTEL); HOTEL.login(token.BOT_TOKENS[7]); }
-  if(token.BOT_TOKENS[8] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(INDIA); INDIA.login(token.BOT_TOKENS[8]); }
-  if(token.BOT_TOKENS[9] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(JULIET); JULIET.login(token.BOT_TOKENS[9]); }
-  if(token.BOT_TOKENS[10] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(KILO); KILO.login(token.BOT_TOKENS[10]); }
-  if(token.BOT_TOKENS[11] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(LIMA); LIMA.login(token.BOT_TOKENS[11]); }
-  if(token.BOT_TOKENS[12] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(MIKE); MIKE.login(token.BOT_TOKENS[12]); }
-  if(token.BOT_TOKENS[13] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(token.BOT_TOKENS[13]); }
-  if(token.BOT_TOKENS[14] && token.BOT_TOKENS[0] != 'TOKEN'){ await MAIN.BOTS.push(OSCAR); OSCAR.login(token.BOT_TOKENS[14]); }
+  if(token.BOT_TOKENS[1] && token.BOT_TOKENS[1] != 'TOKEN'){ await MAIN.BOTS.push(BRAVO); BRAVO.login(token.BOT_TOKENS[1]); }
+  if(token.BOT_TOKENS[2] && token.BOT_TOKENS[2] != 'TOKEN'){ await MAIN.BOTS.push(CHARLIE); CHARLIE.login(token.BOT_TOKENS[2]); }
+  if(token.BOT_TOKENS[3] && token.BOT_TOKENS[3] != 'TOKEN'){ await MAIN.BOTS.push(DELTA); DELTA.login(token.BOT_TOKENS[3]); }
+  if(token.BOT_TOKENS[4] && token.BOT_TOKENS[4] != 'TOKEN'){ await MAIN.BOTS.push(ECHO); ECHO.login(token.BOT_TOKENS[4]); }
+  if(token.BOT_TOKENS[5] && token.BOT_TOKENS[5] != 'TOKEN'){ await MAIN.BOTS.push(FOXTROT); FOXTROT.login(token.BOT_TOKENS[5]); }
+  if(token.BOT_TOKENS[6] && token.BOT_TOKENS[6] != 'TOKEN'){ await MAIN.BOTS.push(GULF); GULF.login(token.BOT_TOKENS[6]); }
+  if(token.BOT_TOKENS[7] && token.BOT_TOKENS[7] != 'TOKEN'){ await MAIN.BOTS.push(HOTEL); HOTEL.login(token.BOT_TOKENS[7]); }
+  if(token.BOT_TOKENS[8] && token.BOT_TOKENS[8] != 'TOKEN'){ await MAIN.BOTS.push(INDIA); INDIA.login(token.BOT_TOKENS[8]); }
+  if(token.BOT_TOKENS[9] && token.BOT_TOKENS[9] != 'TOKEN'){ await MAIN.BOTS.push(JULIET); JULIET.login(token.BOT_TOKENS[9]); }
+  if(token.BOT_TOKENS[10] && token.BOT_TOKENS[10] != 'TOKEN'){ await MAIN.BOTS.push(KILO); KILO.login(token.BOT_TOKENS[10]); }
+  if(token.BOT_TOKENS[11] && token.BOT_TOKENS[11] != 'TOKEN'){ await MAIN.BOTS.push(LIMA); LIMA.login(token.BOT_TOKENS[11]); }
+  if(token.BOT_TOKENS[12] && token.BOT_TOKENS[12] != 'TOKEN'){ await MAIN.BOTS.push(MIKE); MIKE.login(token.BOT_TOKENS[12]); }
+  if(token.BOT_TOKENS[13] && token.BOT_TOKENS[13] != 'TOKEN'){ await MAIN.BOTS.push(NOVEMBER); NOVEMBER.login(token.BOT_TOKENS[13]); }
+  if(token.BOT_TOKENS[14] && token.BOT_TOKENS[14] != 'TOKEN'){ await MAIN.BOTS.push(OSCAR); OSCAR.login(token.BOT_TOKENS[14]); }
   if(MAIN.config.DEBUG.Quests == 'ENABLED'){
     await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Quest Debugging is ENABLED.');
   }
