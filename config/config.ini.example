@@ -5,6 +5,7 @@ CONSOLE_LOGS = ENABLED
 ; Listening Port that the Bot listens on.
 ; You will need to add http://bot_host_ip:3333/ in RDM.
 LISTENING_PORT = 3333
+HOST_IP = 213.19.23.123
 
 ; COMMAND PREFIX
 PREFIX = '.'
