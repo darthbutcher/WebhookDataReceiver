@@ -32,11 +32,11 @@ feeds/*.txt
 
 node_modules
 
-static/quest_tiles/*.png
+static/images/quest_tiles/*.png
 
-static/raid_tiles/*.png
+static/images/raid_tiles/*.png
 
-static/pokemon_tiles/*.png
+static/images/pokemon_tiles/*.png
 
 *.DS_Store
 

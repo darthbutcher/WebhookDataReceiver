@@ -57,7 +57,7 @@ module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area,
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] '+quest_reward+' Did Not Pass '+user.user_name+'\'s Area Filters. '+user.geofence+' | '+server.name+','+main_area+','+sub_area); }
           }
         }
-      });
+      }); return;
     }
   });
 }
@@ -184,11 +184,14 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
       quest_embed = JSON.stringify(quest_embed);
 
       // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
-      MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      return MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         [user.user_id, user.user_name, quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
           if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
           else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
       });
-    } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.'); }
+    }
+    else{
+      return console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.');
+    }
   }); return;
 }

@@ -48,6 +48,113 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     case 7:
       simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
       quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
+      if(quest.rewards[0].info.shiny == true){
+        simple_reward = 'Shiny '+simple_reward;
+        quest_reward = 'Shiny '+quest_reward;
+      }
+  }
+
+  // DETERMINE THE QUEST TASK
+  let quest_task = '';
+  switch(true){
+
+    // CATCHING SPECIFIC POKEMON
+    case quest.template.indexOf('catch')>=0:
+      if(quest.conditions && quest.conditions[0]){
+        if(quest.conditions[0].info && quest.conditions[0].info.pokemon_type_ids){
+          quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
+        } else{
+          quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.';
+        }
+      } else{
+        quest_task = 'Catch '+quest.target+' Pokémon.';
+      } break;
+
+    // LANDING SPECIFIC THROWS
+    case quest.template.indexOf('land') >= 0:
+      let curveball = '';
+      if(quest.template.indexOf('curve') >= 0){ curveball = ' Curveball'; }
+      if(quest.template.indexOf('inarow') >= 0){
+        quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+curveball+' Throw(s) in a Row.';
+      } else{
+        quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+curveball+' Throw(s).';
+      }
+
+    // COMPLETE RAIDS
+    case quest.template.indexOf('raid') >= 0:
+      if(!quest.conditions[0]){ quest_task = 'Battle in '+quest.target+' Raid.'; }
+      else if(quest.conditions[0].type == 6){ quest_task = 'Battle in '+quest.target+' Raid(s).'; }
+      else{ quest_task = 'Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
+
+    // SEND GIFTS TO FRIENDS
+    case quest.template.indexOf('gifts') >= 0:
+      quest_task = 'Send '+quest.target+' Gift(s) to Friends.'; break;
+
+    // GYM BATTLING
+    case quest.template.indexOf('gym_easy') >= 0:
+    case quest.template.indexOf('gym_try') >= 0:
+      quest_task = 'Battle '+quest.target+' Time(s) in a Gym.'; break;
+    case quest.template.indexOf('gym_win') >= 0:
+      quest_task = 'Win '+quest.target+' Gym Battle(s).'; break;
+
+    // CATCH WITH PINAP
+    case quest.template.indexOf('berry_pinap') >= 0:
+      quest_task = 'Catch '+quest.target+' Pokémon With a Pinap Berry.'; break;
+
+    // CATCH WITH RAZZ
+    case quest.template.indexOf('berry_razz') >= 0:
+      quest_task = 'Catch '+quest.target+' Pokémon With a Razz Berry.'; break;
+
+    // CATCH WITH ANY BERRY
+    case quest.template.indexOf('berry_easy') >= 0:
+      quest_task = 'Catch '+quest.target+' Pokémon With a Razz Berry.'; break;
+    case quest.template.indexOf('challenge_berry_moderate') >= 0:
+      quest_task = 'Catch '+quest.target+' Pokémon With Any Berry.'; break;
+
+    // HATCH EGGS
+    case quest.template.indexOf('hatch') >= 0:
+      if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
+      else{ quest_task = 'Hatch '+quest.target+' Egg.'; } break;
+
+    // SPIN POKESTOPS
+    case quest.template.indexOf('spin') >= 0:
+      quest_task = 'Spin '+quest.target+' Pokéstops.'; break;
+
+    // EVOLVE POKEMON
+    case quest.template.indexOf('evolve_specific_plural') >= 0:
+      let quest_pokemon = '';
+      for(let p = 0; p < quest.conditions[0].info.pokemon_ids.length; p++){
+        quest_pokemon = MAIN.pokemon[quest.conditions[0].info.pokemon_ids[p]].name+', ';
+      }
+      quest_pokemon = quest_pokemon.slice(0,-2);
+      quest_task = 'Evolve a '+quest_pokemon; break;
+    case quest.template.indexOf('evolve_item') >= 0:
+      quest_task = 'Evolve '+quest.target+' Pokémon with an Evolution Item.'; break;
+    case quest.template.indexOf('evolve') >= 0:
+      quest_task = 'Evolve '+quest.target+' Pokémon.'; break;
+
+    // BUDDY TASKS
+    case quest.template.indexOf('buddy') >= 0:
+      quest_task = 'Get '+quest.target+' Candy from Walking a Pokémon Buddy.'; break;
+
+    // POWER UP POKEMON
+    case quest.template.indexOf('powerup') >= 0:
+      quest_task = 'Power Up '+quest.target+' Pokémon.'; break;
+
+    // TRADE POKEMON
+    case quest.template.indexOf('trade') >= 0:
+      quest_task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
+    // TRANSFER POKEMON
+    case quest.template.indexOf('transfer') >= 0:
+      quest_task = 'Transfer '+quest.target+' Pokémon.'; break;
+
+    // USE SPECIFIC CHARGE MOVES
+    case quest.template.indexOf('charge') >= 0:
+      if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
+      else{ quest_task = 'Use a Super Effective Charge Move '+quest.target+' Time.'; } break;
+
+    // CATCH MISSING QUESTS
+    default: return console.error('NO CASE FOR THIS QUEST ('+quest.pokestop_id+')', quest);
   }
 
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] Received '+quest_reward+' Quest for '+server.name+'.'); }
@@ -75,14 +182,14 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
       // AREA FILTER
       if(geofences.indexOf(server.name)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
 
-        // SECONDARY FILTERING BASED ON FILTER CONFIG
-        if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
+          if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
 
-          // PREPARE AND SEND TO DISCORDS
-          send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
-        }
-        else{ // DEBUG
-          if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter); }
+            // PREPARE AND SEND TO DISCORDS
+            send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
+          }
+          else{ // DEBUG
+            if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter);
+          }
         }
       }
       else{ // DEBUG
@@ -92,97 +199,24 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   }); return;
 }
 
-async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server){
+async function send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server){
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(imgUrl){
+  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(img_url){
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
+    // let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
+
     // DECLARE VARIABLES
     let expireTime = MAIN.Bot_Time(null,'quest');
 
     // GET REWARD ICON
     let quest_url = '';
-    if(quest_reward.indexOf('Encounter')>=0){
-      quest_url = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id);
-    } else{ quest_url = await MAIN.Get_Icon(quest, quest_reward); }
-
-    // DETERMINE THE QUEST TASK
-    let quest_task = '';
-    switch(true){
-
-      // CATCHING SPECIFIC POKEMON
-      case quest.template.indexOf('catch')>=0:
-        if(quest.conditions && quest.conditions[0]){
-          if(quest.conditions[0].info && quest.conditions[0].info.pokemon_type_ids){
-            quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
-          } else{ quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.'; }
-        } else{ quest_task = 'Catch '+quest.target+' Pokémon.'; } break;
-
-      // LANDING SPECIFIC THROWS
-      case quest.template.indexOf('great') >= 0:
-      case quest.template.indexOf('curveball') >= 0:
-      case quest.template.indexOf('excellent') >= 0:
-      case quest.template.indexOf('land') >= 0:
-        if(quest.conditions[1]){ quest_task = 'Throw '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[1].type]+'(s).'; }
-        else if(quest.target > 1){ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throws in a Row.'; }
-        else{ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throw.'; } break;
-
-      // COMPLETE RAIDS
-      case quest.template.indexOf('raid') >= 0:
-        if(!quest.conditions[0]){ quest_task='Battle in '+quest.target+' Raid.'; }
-        else if(quest.conditions[0].type == 6){ quest_task = 'Battle in '+quest.target+' Raid(s).'; }
-        else{ quest_task='Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
-
-      // SEND GIFTS TO FRIENDS
-      case quest.template.indexOf('gifts') >= 0:
-        quest_task = 'Send '+quest.target+' Gift(s).'; break;
-
-      // GYM BATTLING
-      case quest.template.indexOf('gym') >= 0:
-        if(quest.target > 1){ quest_task = 'Battle '+quest.target+' Times in a Gym.'; }
-        else{ quest_task = 'Battle '+quest.target+' Time in a Gym.'; } break;
-
-      // BERRY GYM POKEMON
-      case quest.template.indexOf('berry') >= 0:
-        quest_task = 'Berry Pokémon '+quest.target+' Time(s) in a Gym.'; break;
-
-      // HATCH EGGS
-      case quest.template.indexOf('hatch') >= 0:
-        if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
-        else{ quest_task = 'Hatch '+quest.target+' Egg.'; } break;
-
-      // SPIN POKESTOPS
-      case quest.template.indexOf('spin') >= 0:
-        quest_task = 'Spin '+quest.target+' Pokéstops.'; break;
-
-      // EVOLVE POKEMON
-      case quest.template.indexOf('evolve') >= 0:
-        quest_task = 'Evolve '+quest.target+' Pokémon.'; break;
-
-      // BUDDY TASKS
-      case quest.template.indexOf('buddy') >= 0:
-        quest_task = 'Get '+quest.target+' Buddy Walking Candy.'; break;
-
-      // POWER UP POKEMON
-      case quest.template.indexOf('powerup') >= 0:
-        quest_task = 'Power Up '+quest.target+' Pokémon.'; break;
-
-      // TRADE POKEMON
-      case quest.template.indexOf('trade') >= 0:
-        quest_task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
-
-      // TRANSFER POKEMON
-      case quest.template.indexOf('transfer') >= 0:
-        quest_task = 'Transfer '+quest.target+' Pokémon.'; break;
-
-      // USE SPECIFIC CHARGE MOVES
-      case quest.template.indexOf('charge') >= 0:
-        if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
-        else{ quest_task = 'Use a Super Effective Charge Move '+quest.target+' Time.'; } break;
-      default: return console.error('NO CASE FOR THIS QUEST ('+quest.pokestop_id+')', quest);
+    if(quest_reward.indexOf('Encounter') >= 0){
+      if(quest.rewards[0].info && quest.rewards[0].info.shiny == true){ quest_url = await MAIN.Get_Sprite('shiny', quest.rewards[0].info.pokemon_id); }
+      else{ quest_url = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id); }
     }
+    else{ quest_url = await MAIN.Get_Icon(quest, quest_reward); }
 
     // GET EMBED COLOR BASED ON QUEST DIFFICULTY
     let embed_color = '';
@@ -196,16 +230,17 @@ async function send_quest(MAIN, quest, channel, quest_reward, simple_reward, mai
     // CREATE RICH EMBED
     if(!quest_url){ quest_url = quest.url; }
     let quest_embed = new Discord.RichEmbed()
-      .attachFile(attachment).setImage('attachment://maptile.jpg')
       .setColor(embed_color).setThumbnail(quest_url)
       .addField( quest_reward+'  |  '+embed_area, quest_task, false)
       .addField('Pokéstop:', quest.pokestop_name, false)
       .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)')
-      .setFooter('Expires: '+expireTime);
+      .setFooter('Expires: '+expireTime)
+      .setImage(img_url);
+      //.attachFile(attachment).setImage('attachment://maptile.jpg');
 
     // LOGGING
     if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
-    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
+    else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] [quests.js] Sent a '+quest_reward+' Quest for '+channel.guild.name+' ('+channel.id+').'); }
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){

@@ -36,10 +36,10 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
     // THROW ERRORS FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); }
-    if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+pokemon_channel[0]+' does not appear to exist.'); }
+    else if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+pokemon_channel[0]+' does not appear to exist.'); }
 
-    // CHECK FEED TYPE
-    if(filter.Type == 'pokemon'){
+    // CHECK FILTER TYPE
+    else if(filter.Type == 'pokemon'){
 
       // AREA FILTER
       if(geofences.indexOf(server.name)>=0 || geofences.indexOf(main_area)>=0 || geofences.indexOf(sub_area)>=0){
@@ -53,11 +53,13 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED
             if(sighting.cp > 0){
 
-              // CHECK THE MIN AND MAX IV AND LEVEL SET FOR THE ENTIRE FEED
+              // CHECK THE MIN AND MAX IV
               if(filter.min_iv <= internal_value && filter.max_iv >= internal_value){
 
+                // CHECK MIN AND MAX LEVEL
                 if(filter.min_level <= sighting.pokemon_level && filter.max_level >= sighting.pokemon_level){
 
+                  // CHECK MIN AND MAX CP
                   if(filter.min_cp <= sighting.cp && filter.max_cp >= sighting.cp){
 
                     // SEND POKEMON TO DISCORD
@@ -85,17 +87,17 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
           else if(filter[MAIN.pokemon[sighting.pokemon_id].name].min_iv <= internal_value && filter.max_iv >= internal_value){
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
-            if(sighting.cp > 0){
-              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
-            }
-            else if(filter.Post_Without_IV == true){
+            if(filter.Post_Without_IV == true){
               send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+            }
+            else if(sighting.cp > 0){
+              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
             }
           }
           else{
             // DEBUG
             if(MAIN.debug.Pokemon=='ENABLED'){ console.info('[DEBUG] [pokemon.js] Pokemon Did Not Pass Any Filters.'); }
-          } return;
+          }
         }
         else{
           // DEBUG
@@ -104,7 +106,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       }
       else{
         // DEBUG
-        if(MAIN.debug.Pokemon=='ENABLED') { console.info('[DEBUG] [pokemon.js] Pokemon Did Not Meet Any Area Filters. '+pokemon_channel[0]+' | Saw: '+server.geofence+','+main_area+','+sub_area+' | Expected: '+pokemon_channel[1].geofences); }
+        if(MAIN.debug.Pokemon=='ENABLED') { console.info('[DEBUG] [pokemon.js] Pokemon Did Not Meet Any Area Filters. '+pokemon_channel[0]+' | Saw: '+server.name+','+main_area+','+sub_area+' | Expected: '+pokemon_channel[1].geofences); }
       }
     }
   }); return;
@@ -116,14 +118,14 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
   if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [pokemon.js] Encounter Received to Send to Discord. '+sighting.encounter_id); }
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){
+  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon','feed').then(async function(img_url){
 
     // DEFINE VARIABLES
     let hide_time = await MAIN.Bot_Time(sighting.disappear_time,'1');
     let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(img_url, 'Pokemon_Alert.png');
+    // let attachment = new Discord.Attachment(img_url, 'Pokemon_Alert.png');
 
     // DETERMINE MOVE NAMES AND TYPES
     let move_name_1 = MAIN.moves[sighting.move_1].name;
@@ -166,17 +168,18 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
 
     // CREATE AND SEND THE EMBED
     let pokemon_embed = new Discord.RichEmbed()
-      .attachFile(attachment).setImage('attachment://Pokemon_Alert.png')
       .setColor('00ccff').setThumbnail(pokemon_url)
-      .setTitle(pokemon_name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)'+weather_boost)
+      .addField(pokemon_name+' ('+internal_value+'%)'+weather_boost, 'Atk: '+sighting.individual_attack+' / Def: '+sighting.individual_defense+' / Sta: '+sighting.individual_stamina+' | '+pokemon_type, false)
       .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight+'\n'+pokemon_type, false)
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)');
+      .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight, false)
 
+      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
+      .setImage(img_url);
+      //.attachFile(attachment).setImage('attachment://Pokemon_Alert.png')
     // CHECK DISCORD CONFIG
     if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a '+pokemon_name+' to '+channel.guild.name+' ('+channel.id+').'); }
-      MAIN.Send_Embed(pokemon_embed, channel.id);
+      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] [pokemon.js] Sent a '+pokemon_name+' to '+channel.guild.name+' ('+channel.id+').'); }
+      return MAIN.Send_Embed(pokemon_embed, channel.id);
     }
   }); return;
 }
@@ -184,14 +187,14 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
 async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server){
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){
+  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(img_url){
 
     // DEFINE VARIABLES
     let hide_time = await MAIN.Bot_Time(sighting.disappear_time,'1');
     let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
 
     // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(img_url, 'Pokemon_Alert.png');
+    // let attachment = new Discord.Attachment(img_url, 'Pokemon_Alert.png');
 
     // DETERMINE POKEMON NAME
     let name = MAIN.pokemon[sighting.pokemon_id].name;
@@ -227,16 +230,17 @@ async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub
 
     // CREATE AND SEND THE EMBED
     let pokemon_embed = new Discord.RichEmbed()
-      .attachFile(attachment).setImage('attachment://Pokemon_Alert.png')
       .setColor('00ccff').setThumbnail(pokemon_url)
       .setTitle('A Wild **'+name+'** has Appeared!')
       .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', embed_area+weather_boost+'\n'+pokemon_type, false)
-      .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)');
+      .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
+      .setImage(img_url);
+      //.attachFile(attachment).setImage('attachment://Pokemon_Alert.png');
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] Sent a Pokémon to '+channel.guild.name+' ('+channel.id+').'); }
-      MAIN.Send_Embed(pokemon_embed, channel.id);
+      if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] [pokemon.js] Sent a Pokémon to '+channel.guild.name+' ('+channel.id+').'); }
+      return MAIN.Send_Embed(pokemon_embed, channel.id);
     }
   }); return;
 }

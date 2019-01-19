@@ -334,7 +334,7 @@ async function sub_collector(MAIN,type,nickname,message,user_quests,requirements
               if(r == MAIN.config.QUEST.Rewards.length+1){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Quest reward. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); break; }
               else if(MAIN.config.QUEST.Rewards[r] && message.content.toLowerCase() == MAIN.config.QUEST.Rewards[r].toLowerCase()){
                 collector.stop(MAIN.config.QUEST.Rewards[r]); break;
-              }f
+              }
             } break;
 
           case type.indexOf('Time')>=0:

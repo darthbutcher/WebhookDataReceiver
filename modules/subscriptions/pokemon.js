@@ -152,18 +152,10 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Name Filter.'); }
             }
           });
-
-
-
         }
-      });
+      }); return;
     }
   });
-}
-
-async function sub_check(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, pokemon, user){
-
-
 }
 
 async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user){
@@ -227,6 +219,6 @@ async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area
 
     if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+name+' DM to '+user.user_name+'.'); }
 
-    MAIN.Send_DM(server.id, user.user_id, pokemon_embed, user.bot);
+    return MAIN.Send_DM(server.id, user.user_id, pokemon_embed, user.bot);
   });
 }
