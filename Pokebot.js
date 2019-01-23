@@ -240,7 +240,7 @@ MAIN.Get_Sprite = (form, id) => {
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_Embed = (embed, channelID) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
-	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { pokebotRestart(); console.error(embed,error); });
+	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { console.error(error); pokebotRestart(); });
 }
 
 // CHOOSE NEXT BOT AND SEND EMBED
