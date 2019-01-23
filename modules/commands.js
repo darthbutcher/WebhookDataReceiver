@@ -36,36 +36,30 @@ module.exports.run = async (MAIN, message) => {
       // else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
       // LOAD DATABASE RECORD
-      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ?", [message.member.id], function (error, user, fields) {
+      MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? && discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
         // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
-        if(!user || !user[0]){ MAIN.Save_Sub(message,server); }
-        else if(user[0].discord_id != message.guild.id){
-          return message.reply('You cannot have a subscription in multiple discords that this bot resides.')
+        if(!user || !user[0]){ await MAIN.Save_Sub(message,server); }
+        // FIND THE COMMAND AND SEND TO THE MODULE
+        let command = '';
+        switch(true){
+          case message.content == prefix+'pause': command = 'pause'; break;
+          case message.content == prefix+'resume': command = 'resume'; break;
+          case message.content == prefix+'help': command = 'help'; break;
+          case message.content == prefix+'p':
+          case message.content == prefix+'pokemon': command = 'pokemon'; break;
+          case message.content == prefix+'r':
+          case message.content == prefix+'raid': command = 'raid'; break;
+          case message.content == prefix+'q':
+          case message.content == prefix+'quest': command = 'quest'; break;
+          case message.content == 'restart':
+            if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
+          case message.content == 'reload':
+            MAIN.start('reload'); break;
+          default: command = message.content.slice(prefix.length);
         }
-        else{
 
-          // FIND THE COMMAND AND SEND TO THE MODULE
-          let command = '';
-          switch(true){
-            case message.content == prefix+'pause': command = 'pause'; break;
-            case message.content == prefix+'resume': command = 'resume'; break;
-            case message.content == prefix+'help': command = 'help'; break;
-            case message.content == prefix+'p':
-            case message.content == prefix+'pokemon': command = 'pokemon'; break;
-            case message.content == prefix+'r':
-            case message.content == prefix+'raid': command = 'raid'; break;
-            case message.content == prefix+'q':
-            case message.content == prefix+'quest': command = 'quest'; break;
-            case message.content == 'restart':
-              if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
-            case message.content == 'reload':
-              MAIN.start('reload'); break;
-            default: command = message.content.slice(prefix.length);
-          }
-
-          let cmd = MAIN.Commands.get(command);
-          if(cmd){ return cmd.run(MAIN, message, prefix, server); }
-        }
+        let cmd = MAIN.Commands.get(command);
+        if(cmd){ return cmd.run(MAIN, message, prefix, server); }
       });
     }
   }); return;

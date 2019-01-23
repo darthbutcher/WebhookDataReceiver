@@ -29,6 +29,7 @@ const LIMA = new Discord.Client({ disabledEvents: eventsToDisable }); const MIKE
 const NOVEMBER = new Discord.Client({ disabledEvents: eventsToDisable }); const OSCAR=new Discord.Client({ disabledEvents: eventsToDisable });
 
 MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
+MAIN.Discord = require('./config/discords.json');
 
 // CACHE DATA FROM JSONS
 function load_files(){
@@ -49,7 +50,7 @@ const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', '
 function load_raid_channels(){
   MAIN.Raid_Channels = [];
   for (var key in raid_channels){ MAIN.Raid_Channels.push([key, raid_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Raid Channels.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Raid Channels.');
 }
 
 // LOAD POKEMON FEED CHANNELS
@@ -57,7 +58,7 @@ const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.in
 function load_pokemon_channels(){
   MAIN.Pokemon_Channels = [];
   for (var key in pokemon_channels){ MAIN.Pokemon_Channels.push([key, pokemon_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Pokémon Channels');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Pokémon Channels');
 }
 
 // LOAD QUEST FEED CHANNELS
@@ -65,7 +66,7 @@ const quest_channels = ini.parse(fs.readFileSync('./config/channels_quests.ini',
 function load_quest_channels(){
   MAIN.Quest_Channels = [];
   for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded Quest Channels.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Quest Channels.');
 }
 
 // DEFINE AND LOAD MODULES
@@ -76,7 +77,7 @@ function load_modules(){
   Quests = require('./modules/quests.js');
   Pokemon = require('./modules/pokemon.js');
   Commands = require('./modules/commands.js');
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded 5 Modules.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded 5 Modules.');
 }
 
 // LOAD Commands
@@ -87,7 +88,7 @@ function load_commands(){
     command_files.forEach((f,i) => {
       delete require.cache[require.resolve('./modules/commands/'+f)]; command_count++;
       let command = require('./modules/commands/'+f); MAIN.Commands.set(f.slice(0,-3), command);
-    }); return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+command_count+' Command Files.')
+    }); return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+command_count+' Command Files.')
   });
 }
 
@@ -99,7 +100,7 @@ function load_filters(){
     filter_files.forEach((f,i) => {
       delete require.cache[require.resolve('./filters/'+f)]; filter_count++;
       let filter = require('./filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
-    }); return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Loaded '+filter_count+' Filters.');
+    }); return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+filter_count+' Filters.');
   });
 }
 
@@ -130,23 +131,28 @@ app.use(express.static('static'));
 app.use(bodyParser.urlencoded({limit: '500mb', extended: true}));
 
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
-app.post('/', (webhook, resolve) => {
-  let PAYLOAD = webhook.body;
+app.post('/', async (webhook, resolve) => {
+
+  let PAYLOAD = webhook.body, discord_match = false, proper_data = false;
 
   // IGNORE IF BOT HAS NOT BEEN FINISHED STARTUP
   if(MAIN.Active != true){ return; }
 
   // SEPARATE EACH PAYLOAD AND SORT
-  PAYLOAD.forEach( async (data,index) => {
+  await PAYLOAD.forEach( async (data,index) => {
 
     // IGNORE IF NOT A SPECIFIED OBJECT
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
       // DISCORD AND AREA VARIABLES
-      let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {}, embed_area = '';
+      let main_area = 'N/A', sub_area = 'N/A', server = 'N/A', geofence_area = {},
+      embed_area = '';   proper_data = true;
 
       MAIN.Discord.Servers.forEach( async (server,index) => {
+
         if(insideGeojson.polygon(server.geofence, [data.message.longitude,data.message.latitude])){
+
+          discord_match = true;
 
           // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
           await MAIN.geofences.features.forEach( async (geofence,index) => {
@@ -177,7 +183,10 @@ app.post('/', (webhook, resolve) => {
         }
       });
     }
-	}); return;
+	});
+  // DEBUG
+  if(discord_match == false && proper_data == true){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] None of the items contained in the RDM payload matched your discords.json geofences. This error is thrown for multiple reasons. You could be scanning an area outside of your discords.json geofences, your geofences within discords.json are in not in geojson format, or not big enough for your area.',PAYLOAD); }
+  return;
 });
 
 // SEND MESSAGE TO COMMAND MODULE
@@ -193,21 +202,25 @@ MAIN.Save_Sub = (message,server) => {
       if(error){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO pokebot.users',error); }
       else{
         MAIN.sqlFunction('UPDATE pokebot.info SET user_next_bot = ?',[next_bot],undefined,undefined);
-        console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Added '+message.member.user.tag+' to the pokebot.user database.');
-        return message.reply('You did not have a subscription record. One has now been created. Please try the command again.').then(m => m.delete(15000)).catch(console.error);
+        return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Added '+message.member.user.tag+' to the pokebot.user database.');
       }
     });
   }); return;
 }
 
 // RETURN TIME FUNCTION
-MAIN.Bot_Time = (time,type) => {
+MAIN.Bot_Time = (time,type,offset) => {
 	let now=new Date().getTime();
-	if(type==1){ return moment.unix(time).format('h:mm A'); }
-	if(type==2){ return moment(now).format('HHmm'); }
-	if(type==3){ return moment(time).format('HHmm'); }
-  if(type=='quest'){ return moment(now).format('dddd, MMMM Do')+' @ Midnight'; }
-  if(type=='stamp'){ return moment(now).format('HH:mmA'); }
+	if(type == 1){
+    if(!offset){ return moment.unix(time).format('h:mm A'); }
+    else if(offset.indexOf('+') >= 0){ return moment.unix(time).add(offset.slice(1), 'hour').format('h:mm A');  }
+    else if(offset.indexOf('-') >= 0){ return moment.unix(time).subtract(offset.slice(1), 'hour').format('h:mm A');  }
+    else{ return moment.unix(time).format('h:mm A'); }
+  }
+	if(type == 2){ return moment(now).format('HHmm'); }
+	if(type == 3){ return moment(time).format('HHmm'); }
+  if(type == 'quest'){ return moment(now).format('dddd, MMMM Do')+' @ Midnight'; }
+  if(type == 'stamp'){ return moment(now).format('HH:mmA'); }
 }
 
 // OBTAIN POKEMON SPRITE
@@ -301,7 +314,6 @@ setInterval(function() {
           let quest = JSON.parse(alert.quest);
           MAIN.BOTS[alert.bot].guilds.get(alert.discord_id).fetchMember(alert.user_id).then( TARGET => {
             let quest_embed = JSON.parse(alert.embed);
-            let attachment = new Discord.Attachment(quest_embed.file.attachment, quest_embed.file.name);
             let alert_embed = new Discord.RichEmbed()
               .setColor(quest_embed.color)
               .setThumbnail(quest_embed.thumbnail.url)
@@ -309,8 +321,6 @@ setInterval(function() {
               .addField(quest_embed.fields[1].name, quest_embed.fields[1].value, false)
               .addField(quest_embed.fields[2].name, quest_embed.fields[2].value, false)
               .setImage(quest_embed.image.url)
-              .attachFile(attachment)
-              .setImage('attachment://'+quest_embed.file.name)
               .setFooter(quest_embed.footer.text);
             TARGET.send(alert_embed).catch( error => {
               console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+']'+TARGET.user.tag+' ('+alert.user_id+') , Cannot send this user a message.',error);
@@ -318,7 +328,7 @@ setInterval(function() {
           });
         }, 2000*index);
       });
-      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts.');
+      console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts out.');
       MAIN.database.query("DELETE FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
@@ -383,163 +393,163 @@ async function update_database(){
 
 // SET ALL TO INVISIBLE ON READY
 MAIN.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Main is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Main is logged in.');
 });
 ALPHA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Alpha is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha is logged in.');
   ALPHA.user.setPresence({ status: 'invisible' });
 });
 BRAVO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Bravo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo is logged in.');
   BRAVO.user.setPresence({ status: 'invisible' });
 });
 CHARLIE.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Charlie is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie is logged in.');
   CHARLIE.user.setPresence({ status: 'invisible' });
 });
 DELTA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Delta is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta is logged in.');
   DELTA.user.setPresence({ status: 'invisible' });
 });
 ECHO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Echo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo is logged in.');
   ECHO.user.setPresence({ status: 'invisible' });
 });
 FOXTROT.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Foxtrot is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot is logged in.');
   FOXTROT.user.setPresence({ status: 'invisible' });
 });
 GULF.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Gulf is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf is logged in.');
   GULF.user.setPresence({ status: 'invisible' });
 });
 HOTEL.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Hotel is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel is logged in.');
   HOTEL.user.setPresence({ status: 'invisible' });
 });
 INDIA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] India is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India is logged in.');
   INDIA.user.setPresence({ status: 'invisible' });
 });
 JULIET.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Juliet is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet is logged in.');
   JULIET.user.setPresence({ status: 'invisible' });
 });
 KILO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Kilo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Kilo is logged in.');
   KILO.user.setPresence({ status: 'invisible' });
 });
 LIMA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Lima is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Lima is logged in.');
   LIMA.user.setPresence({ status: 'invisible' });
 });
 MIKE.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Mike is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Mike is logged in.');
   MIKE.user.setPresence({ status: 'invisible' });
 });
 NOVEMBER.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] November is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] November is logged in.');
   NOVEMBER.user.setPresence({ status: 'invisible' });
 });
 OSCAR.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Oscar is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Oscar is logged in.');
   OSCAR.user.setPresence({ status: 'invisible' });
 });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY
 async function bot_login(){
   let token = MAIN.config.TOKENS;
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Main...');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Main...');
   await MAIN.login(token.MAIN);
   if(token.BOT_TOKENS[0] && token.BOT_TOKENS[0] != 'TOKEN'){
     await MAIN.BOTS.push(ALPHA);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Alpha...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Alpha...');
     await ALPHA.login(token.BOT_TOKENS[0]);
   }
   if(token.BOT_TOKENS[1] && token.BOT_TOKENS[1] != 'TOKEN'){
     MAIN.BOTS.push(BRAVO);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Bravo...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Bravo...');
     await BRAVO.login(token.BOT_TOKENS[1]);
   }
   if(token.BOT_TOKENS[2] && token.BOT_TOKENS[2] != 'TOKEN'){
     MAIN.BOTS.push(CHARLIE);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Charlie...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Charlie...');
     await CHARLIE.login(token.BOT_TOKENS[2]);
   }
   if(token.BOT_TOKENS[3] && token.BOT_TOKENS[3] != 'TOKEN'){
     MAIN.BOTS.push(DELTA);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Delta...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Delta...');
     await DELTA.login(token.BOT_TOKENS[3]);
   }
   if(token.BOT_TOKENS[4] && token.BOT_TOKENS[4] != 'TOKEN'){
     MAIN.BOTS.push(ECHO);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Echo...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Echo...');
     await ECHO.login(token.BOT_TOKENS[4]);
   }
   if(token.BOT_TOKENS[5] && token.BOT_TOKENS[5] != 'TOKEN'){
     MAIN.BOTS.push(FOXTROT);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Foxtrot...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Foxtrot...');
     await FOXTROT.login(token.BOT_TOKENS[5]);
   }
   if(token.BOT_TOKENS[6] && token.BOT_TOKENS[6] != 'TOKEN'){
     MAIN.BOTS.push(GULF);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Gulf...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Gulf...');
     await GULF.login(token.BOT_TOKENS[6]); }
   if(token.BOT_TOKENS[7] && token.BOT_TOKENS[7] != 'TOKEN'){
     MAIN.BOTS.push(HOTEL);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Hotel...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Hotel...');
     await HOTEL.login(token.BOT_TOKENS[7]);
   }
   if(token.BOT_TOKENS[8] && token.BOT_TOKENS[8] != 'TOKEN'){
     MAIN.BOTS.push(INDIA);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in India...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in India...');
     await INDIA.login(token.BOT_TOKENS[8]);
   }
   if(token.BOT_TOKENS[9] && token.BOT_TOKENS[9] != 'TOKEN'){
     MAIN.BOTS.push(JULIET);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Juliet...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Juliet...');
     await JULIET.login(token.BOT_TOKENS[9]);
   }
   if(token.BOT_TOKENS[10] && token.BOT_TOKENS[10] != 'TOKEN'){
     MAIN.BOTS.push(KILO);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Kilo...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Kilo...');
     await KILO.login(token.BOT_TOKENS[10]);
   }
   if(token.BOT_TOKENS[11] && token.BOT_TOKENS[11] != 'TOKEN'){
     MAIN.BOTS.push(LIMA);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Lima...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Lima...');
     await LIMA.login(token.BOT_TOKENS[11]);
   }
   if(token.BOT_TOKENS[12] && token.BOT_TOKENS[12] != 'TOKEN'){
     MAIN.BOTS.push(MIKE);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Mike...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Mike...');
     await MIKE.login(token.BOT_TOKENS[12]);
   }
   if(token.BOT_TOKENS[13] && token.BOT_TOKENS[13] != 'TOKEN'){
     MAIN.BOTS.push(NOVEMBER);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in November...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in November...');
     await NOVEMBER.login(token.BOT_TOKENS[13]);
   }
   if(token.BOT_TOKENS[14] && token.BOT_TOKENS[14] != 'TOKEN'){
     MAIN.BOTS.push(OSCAR);
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Logging in Oscar...');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Logging in Oscar...');
     await OSCAR.login(token.BOT_TOKENS[14]); }
   if(MAIN.config.DEBUG.Quests == 'ENABLED'){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Quest Debugging is ENABLED.');
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Quest Debugging is ENABLED.');
   }
   if(MAIN.config.DEBUG.Raids == 'ENABLED'){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Raid Debugging is ENABLED.');
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Raid Debugging is ENABLED.');
   }
   if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokemon Debugging is ENABLED.');
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Pokemon Debugging is ENABLED.');
   }
   if(MAIN.config.DEBUG.Subscriptions == 'ENABLED'){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Subscription Debugging is ENABLED.');
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Subscription Debugging is ENABLED.');
   }
   if(MAIN.config.CONSOLE_LOGS == 'ENABLED'){
-    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Console Logging is ENABLED');
+    await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Console Logging is ENABLED');
   }
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot is Ready.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Pokébot is Ready.');
 
   // SET ACTIVE BOOLEAN TO TRUE AND BOT POOL TO ZERO
   MAIN.Active = true; MAIN.Next_Bot = 0;
@@ -556,33 +566,44 @@ async function bot_login(){
   } return;
 }
 
-// ontime({ cycle: MAIN.config.QUEST.Reset_Time }, function(ot) {
-// 	MAIN.Discord.Servers.forEach(function(server) {
-//     if(server.research_channels){
-//   		for(var i = 0; i < server.research_channels.length; i++){
-//   			ClearChannel(server.research_channels[i]);
-//   		}
-//     }
-// 	});
-// });
+var ontime_servers = [], ontime_times = [];
+MAIN.Discord.Servers.forEach(function(server){
+  if(server.research_channels){
+    ontime_times.push(server.quest_reset_time);
+    ontime_servers.push(server);
+  }
+});
 
-// function ClearChannel(channelID){
-//   return new Promise(function(resolve) {
-//     let channel = MAIN.channels.get(channelID);
-//     if(!channel) { resolve(false); console.error("Could not find a channel with ID: "+channelID); return;}
-//     channel.fetchMessages({limit:99}).then(messages => {
-//       channel.bulkDelete(messages).then(deleted => {
-//         if(messages.size > 0){
-//           ClearChannel(channelID).then(result => { resolve(true); return; });
-//         }
-//         else{
-//           console.log("Cleared messages from channel: "+channel.name);
-//           resolve(true); return;
-//         }
-//       }).catch(console.error);
-//     });
-//   });
-// }
+ontime({ cycle: ontime_times }, function(ot) {
+  let now = moment().format('HH:mm')+':00';
+	ontime_servers.forEach(function(server){
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime quest purge has started for '+server.name);
+    console.log(now+' '+server.quest_reset_time);
+    if(now == server.quest_reset_time){
+  		for(var i = 0; i < server.research_channels.length; i++){
+  			ClearChannel(server.research_channels[i]);
+  		}
+    }
+	}); ot.done();
+});
+
+function ClearChannel(channelID){
+  return new Promise(function(resolve) {
+    let channel = MAIN.channels.get(channelID);
+    if(!channel) { resolve(false); console.error("Could not find a channel with ID: "+channelID); return;}
+    channel.fetchMessages({limit:99}).then(messages => {
+      channel.bulkDelete(messages).then(deleted => {
+        if(messages.size > 0){
+          ClearChannel(channelID).then(result => { resolve(true); return; });
+        }
+        else{
+          console.log("Cleared messages from channel: "+channel.name);
+          resolve(true); return;
+        }
+      }).catch(console.error);
+    });
+  });
+}
 
 // RESTART FUNCTION
 function pokebotRestart(){ process.exit(1); }
@@ -596,12 +617,14 @@ MAIN.start = async (type) => {
   await load_quest_channels();
   await load_pokemon_channels();
   await load_filters();
-  await update_database();
   switch(type){
     case 'startup':
       await bot_login(); break;
     case 'reload':
-      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Pokébot has re-loaded.'); break;
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Re-Load] Pokébot has re-loaded.'); break;
   }
+
+  // START FUNCTIONS FOR EACH DISCORD
+
 }
 MAIN.start('startup');

@@ -65,12 +65,10 @@ module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area,
 async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user){
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(imgUrl){
+  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(img_url){
 
-    // ATTACH THE MAP TILE
-    let attachment = new Discord.Attachment(imgUrl, 'maptile.jpg');
     // DECLARE VARIABLES
-    let expireTime = MAIN.Bot_Time(null,'quest');
+    let expireTime = MAIN.Bot_Time(null, 'quest', server.hour_offset);
 
     // GET REWARD ICON
     let quest_url = '';
@@ -166,12 +164,12 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
     // CREATE RICH EMBED
     if(!quest_url){ quest_url = quest.url; }
     let quest_embed = new Discord.RichEmbed()
-      .attachFile(attachment).setImage('attachment://maptile.jpg')
       .setColor(embed_color).setThumbnail(quest_url)
       .addField( quest_reward+'  |  '+embed_area, quest_task, false)
       .addField('Pokéstop:', quest.pokestop_name, false)
       .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)')
-      .setFooter('Expires: '+expireTime);
+      .setFooter('Expires: '+expireTime)
+      .setImage(img_url);
 
     // CHECK DISCORD CONFIG
     if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
@@ -185,7 +183,7 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
 
       // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
       return MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-        [user.user_id, user.user_name, quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
+        [user.user_id, user.user_name.replace(/[\W]+/g,''), quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
           if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
           else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
       });

@@ -76,17 +76,13 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server)
 function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, server){
 
   // VARIABLES
-  let time_now = new Date().getTime(), hatch_time = MAIN.Bot_Time(raid.start,'1');
-  let end_time = MAIN.Bot_Time(raid.end,'1');
+  let time_now = new Date().getTime();
+  let hatch_time = MAIN.Bot_Time(raid.start, '1', server.hour_offset);
+  let end_time = MAIN.Bot_Time(raid.end, '1', server.hour_offset);
   let hatch_mins = Math.floor((raid.start-(time_now/1000))/60);
   let end_mins = Math.floor((raid.end-(time_now/1000))/60);
 
   MAIN.Static_Map_Tile(raid.latitude,raid.longitude,'raid').then(async function(img_url){
-
-    if(MAIN.debug.Raids == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Modules] [raids.js] Map Tile for '+type+' Retrieved.'); }
-
-    // ATTACH THE MAP TILE
-    //let attachment = new Discord.Attachment(img_url, 'Raid_Alert.png');
 
     // DETERMINE GYM CONTROL
     let defending_team = '';
@@ -136,7 +132,6 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
           .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)', 'Level '+raid.level+' | '+defending_team+raid_sponsor, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .setImage(img_url);
-          //.attachFile(attachment).setImage('attachment://Raid_Alert.png');
 
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
@@ -178,7 +173,6 @@ function send_raid(MAIN, channel, raid, type, main_area, sub_area, embed_area, s
           .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)', 'Level '+raid.level+' | '+defending_team+raid_sponsor, false)
           .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false)
           .setImage(img_url);
-          //.attachFile(attachment).setImage('attachment://Raid_Alert.png');
 
         // CHECK DISCORD CONFIG
         if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){

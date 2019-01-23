@@ -5,6 +5,7 @@ CONSOLE_LOGS = ENABLED
 ; Listening Port that the Bot listens on.
 ; You will need to add http://bot_host_ip:3333/ in RDM.
 LISTENING_PORT = 3333
+; THIS MUST BE A PUBLIC IP ADDRESS WITH PROPER PORT FORWARDING
 HOST_IP = 213.19.23.123
 
 ; COMMAND PREFIX
@@ -46,7 +47,7 @@ BOT_TOKENS[] = TOKEN
 ; If enabled, the bot will require External Emojis Permissions for any feed channels.
 ; You must also join and invite your bots to the following servers:
 ; https://discord.gg/zqVCfPy - WEATHER, TEAMS, GYMS, TYPES
-; https://discord.gg/AnECN8U - Legendary boss emojis
+; https://discord.gg/cw8BzYn - Legendary boss emojis
 [EMOTES]
 Custom = true
 
@@ -55,10 +56,8 @@ Custom = true
 ; The reward names must match the reward names found in /static/en.json
 ; You can comment our rewards without removing them using a ';'
 [QUEST]
-
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
-Reset_Time = '23:55:00'
 Default_Delivery = 08:00
 Rewards[] = Ultra Ball
 Rewards[] = Hyper Potion
