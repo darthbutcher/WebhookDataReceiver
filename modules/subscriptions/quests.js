@@ -13,7 +13,7 @@
 const Discord = require('discord.js');
 const moment = require('moment');
 
-module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone) => {
 
   if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] Received '+quest_reward+' Quest for '+server.name+'.'); }
 
@@ -45,7 +45,7 @@ module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area,
 
               // PREPARE ALERT TO SEND TO USER
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] Preparing '+quest_reward+' Quest for DM.'); }
-              send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user);
+              send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user, timezone);
             }
             else{
               // DEBUG
@@ -62,13 +62,13 @@ module.exports.run = async (MAIN, quest, quest_reward, simple_reward, main_area,
   });
 }
 
-async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user){
+async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user, timezone){
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(img_url){
+  MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest').then(async function(img_url){
 
     // DECLARE VARIABLES
-    let expireTime = MAIN.Bot_Time(null, 'quest', server.hour_offset);
+    let expireTime = MAIN.Bot_Time(null, 'quest', timezone);
 
     // GET REWARD ICON
     let quest_url = '';

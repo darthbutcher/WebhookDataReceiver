@@ -1,15 +1,16 @@
 // MODULE REQUIREMENTS
 const fs = require('fs');
 const ini = require('ini');
-const mysql = require('mysql');
-const moment = require('moment');
-const ontime = require('ontime');
-const express = require('express');
+const MySQL = require('mysql');
+const GeoTz = require('geo-tz');
+const Ontime = require('ontime');
+const Express = require('express');
 const Discord = require('discord.js');
+const moment = require('moment-timezone');
 const StaticMaps = require('staticmaps');
-const bodyParser = require('body-parser');
-const insideGeofence = require('point-in-polygon');
-const insideGeojson = require('point-in-geopolygon');
+const BodyParser = require('body-parser');
+const InsideGeofence = require('point-in-polygon');
+const InsideGeojson = require('point-in-geopolygon');
 
 // EVENTS TO DISABLE TO SAVE MEMORY AND CPU
 var eventsToDisable = ['channelCreate','channelDelete','channelPinsUpdate','channelUpdate','clientUserGuildSettingsUpdate','clientUserSettingsUpdate',
@@ -50,7 +51,7 @@ const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', '
 function load_raid_channels(){
   MAIN.Raid_Channels = [];
   for (var key in raid_channels){ MAIN.Raid_Channels.push([key, raid_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Raid Channels.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+MAIN.Raid_Channels.length+' Raid Channels.');
 }
 
 // LOAD POKEMON FEED CHANNELS
@@ -58,7 +59,7 @@ const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.in
 function load_pokemon_channels(){
   MAIN.Pokemon_Channels = [];
   for (var key in pokemon_channels){ MAIN.Pokemon_Channels.push([key, pokemon_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Pokémon Channels');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+MAIN.Pokemon_Channels.length+' Pokémon Channels');
 }
 
 // LOAD QUEST FEED CHANNELS
@@ -66,7 +67,7 @@ const quest_channels = ini.parse(fs.readFileSync('./config/channels_quests.ini',
 function load_quest_channels(){
   MAIN.Quest_Channels = [];
   for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded Quest Channels.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+MAIN.Quest_Channels.length+' Quest Channels.');
 }
 
 // DEFINE AND LOAD MODULES
@@ -105,7 +106,7 @@ function load_filters(){
 }
 
 // DATABASE CONNECTION
-MAIN.database = mysql.createConnection({
+MAIN.database = MySQL.createConnection({
   host: MAIN.config.DB.host,
   user: MAIN.config.DB.username,
   password: MAIN.config.DB.password,
@@ -120,15 +121,15 @@ MAIN.logging = MAIN.config.CONSOLE_LOGS;
 MAIN.debug = MAIN.config.DEBUG;
 
 // CREATE SERVER
-const app = express().use(bodyParser.json());
+const app = Express().use(BodyParser.json());
 
 // LISTEN FOR PAYLOADS
 app.listen(MAIN.config.LISTENING_PORT, () => console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Now listening for payloads on port '+MAIN.config.LISTENING_PORT+'.'));
 
 // START IMAGE SERVER
-app.use(express.static('static'));
+app.use(Express.static('static'));
 
-app.use(bodyParser.urlencoded({limit: '500mb', extended: true}));
+app.use(BodyParser.urlencoded({limit: '500mb', extended: true}));
 
 // ACCEPT AND SEND PAYLOADS TO ITS PARSE FUNCTION
 app.post('/', async (webhook, resolve) => {
@@ -150,13 +151,13 @@ app.post('/', async (webhook, resolve) => {
 
       MAIN.Discord.Servers.forEach( async (server,index) => {
 
-        if(insideGeojson.polygon(server.geofence, [data.message.longitude,data.message.latitude])){
+        if(InsideGeojson.polygon(server.geofence, [data.message.longitude,data.message.latitude])){
 
-          discord_match = true;
+          let timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0])[0]; discord_match = true;
 
           // DEFINE THE GEOFENCE THE OBJECT IS WITHIN
           await MAIN.geofences.features.forEach( async (geofence,index) => {
-            if(insideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
+            if(InsideGeojson.polygon(geofence.geometry.coordinates, [data.message.longitude,data.message.latitude])){
               if(geofence.properties.sub_area != 'true'){ geofence_area.main = geofence.properties.name; }
               else if(geofence.properties.sub_area == 'false'){  geofence_area.sub = geofence.properties.name;  }
             }
@@ -172,13 +173,13 @@ app.post('/', async (webhook, resolve) => {
       		switch(data.type){
             // SEND TO POKEMON MODULE
       			case 'pokemon':
-              Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+              Pokemon.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
             // SEND TO RAIDS MODULE
       			case 'raid':
-              Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+              Raids.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
             // SEND TO QUESTS MODULE
       			case 'quest':
-              Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server); break;
+              Quests.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
       		}
         }
       });
@@ -209,17 +210,12 @@ MAIN.Save_Sub = (message,server) => {
 }
 
 // RETURN TIME FUNCTION
-MAIN.Bot_Time = (time,type,offset) => {
+MAIN.Bot_Time = (time,type,timezone) => {
 	let now=new Date().getTime();
-	if(type == 1){
-    if(!offset){ return moment.unix(time).format('h:mm A'); }
-    else if(offset.indexOf('+') >= 0){ return moment.unix(time).add(offset.slice(1), 'hour').format('h:mm A');  }
-    else if(offset.indexOf('-') >= 0){ return moment.unix(time).subtract(offset.slice(1), 'hour').format('h:mm A');  }
-    else{ return moment.unix(time).format('h:mm A'); }
-  }
-	if(type == 2){ return moment(now).format('HHmm'); }
-	if(type == 3){ return moment(time).format('HHmm'); }
-  if(type == 'quest'){ return moment(now).format('dddd, MMMM Do')+' @ Midnight'; }
+	if(type == 1){ return moment.unix(time).tz(timezone).format('h:mm A');  }
+	if(type == 2){ return moment(now).tz(timezone).format('HHmm'); }
+	if(type == 3){ return moment(time).tz(timezone).format('HHmm'); }
+  if(type == 'quest'){ return moment(now).tz(timezone).format('dddd, MMMM Do')+' @ Midnight'; }
   if(type == 'stamp'){ return moment(now).format('HH:mmA'); }
 }
 
@@ -238,9 +234,9 @@ MAIN.Get_Sprite = (form, id) => {
 }
 
 // CHOOSE NEXT BOT AND SEND EMBED
-MAIN.Send_Embed = (embed, channelID) => {
+MAIN.Send_Embed = (embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
-	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channelID).send(embed).catch( error => { console.error(error); pokebotRestart(); });
+	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(embed).catch( error => { console.error('['+channel_id+']',error); pokebotRestart(); });
 }
 
 // CHOOSE NEXT BOT AND SEND EMBED
@@ -328,7 +324,7 @@ setInterval(function() {
           });
         }, 2000*index);
       });
-      console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts out.');
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts out.');
       MAIN.database.query("DELETE FROM pokebot.quest_alerts WHERE alert_time < "+timeNow, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
@@ -354,7 +350,7 @@ MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
 }
 
 // PERFORM AN UPDATE FOR EACH VERSION UP TO LATEST
-async function updateEachVersion(version){
+async function update_each_version(version){
   return new Promise(async (resolve) => {
     for(let u = version; u <= MAIN.db.LATEST; u++){
       if(u == MAIN.db.LATEST){ resolve('DONE'); }
@@ -380,11 +376,11 @@ async function update_database(){
     await MAIN.database.query(`SELECT * FROM pokebot.info`, async function (error, row, fields) {
       if(!row || !row[0]){
         await MAIN.sqlFunction(`INSERT INTO pokebot.info (db_version) VALUES (?)`,[1], undefined,'[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO INSERT INTO THE pokebot.info TABLE.')
-          .then(async (db) => { let version = await updateEachVersion(1); resolve(version); });
+          .then(async (db) => { let version = await update_each_version(1); resolve(version); });
       }
       else if(row[0].db_version < MAIN.db.LATEST){
         await console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database Update Found. Updating...');
-        let version = await updateEachVersion(row[0].db_version); resolve(version);
+        let version = await update_each_version(row[0].db_version); resolve(version);
       }
       else{ resolve(false); }
     }); return;
@@ -568,36 +564,41 @@ async function bot_login(){
 
 var ontime_servers = [], ontime_times = [];
 MAIN.Discord.Servers.forEach(function(server){
-  if(server.research_channels){
-    ontime_times.push(server.quest_reset_time);
-    ontime_servers.push(server);
+  if(server.channels_to_purge && server.purge_channels == 'ENABLED'){
+    let server_purge = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
+    server_purge = moment.tz(server_purge, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
+    server_purge = moment.tz(server_purge, MAIN.config.TIMEZONE).format('HH:mm:ss');
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Channel Purge set for '+server.name+' at '+server_purge);
+    ontime_times.push(server_purge); ontime_servers.push(server);
   }
 });
 
-ontime({ cycle: ontime_times }, function(ot) {
+Ontime({ cycle: ontime_times }, function(ot) {
   let now = moment().format('HH:mm')+':00';
 	ontime_servers.forEach(function(server){
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime quest purge has started for '+server.name);
-    console.log(now+' '+server.quest_reset_time);
-    if(now == server.quest_reset_time){
-  		for(var i = 0; i < server.research_channels.length; i++){
-  			ClearChannel(server.research_channels[i]);
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime channel purge has started for '+server.name);
+    let purge_time = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
+    purge_time = moment.tz(purge_time, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
+    purge_time = moment.tz(purge_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
+    if(now == purge_time){
+  		for(var i = 0; i < server.channels_to_purge.length; i++){
+  			clear_channel(server.channels_to_purge[i]);
   		}
     }
 	}); ot.done();
 });
 
-function ClearChannel(channelID){
+function clear_channel(channel_id){
   return new Promise(function(resolve) {
-    let channel = MAIN.channels.get(channelID);
-    if(!channel) { resolve(false); console.error("Could not find a channel with ID: "+channelID); return;}
+    let channel = MAIN.channels.get(channel_id);
+    if(!channel) { resolve(false); console.error("Could not find a channel with ID: "+channel_id); return;}
     channel.fetchMessages({limit:99}).then(messages => {
       channel.bulkDelete(messages).then(deleted => {
         if(messages.size > 0){
-          ClearChannel(channelID).then(result => { resolve(true); return; });
+          clear_channel(channel_id).then(result => { resolve(true); return; });
         }
         else{
-          console.log("Cleared messages from channel: "+channel.name);
+          console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Purged all messages in '+channel.name+' ('+channel.id+')');
           resolve(true); return;
         }
       }).catch(console.error);
@@ -605,26 +606,38 @@ function ClearChannel(channelID){
   });
 }
 
+// CHECK DATABASE FOR UPGRADED OR REMOVED POKESTOPS
+let check_time = moment();
+check_time = moment.tz(check_time, 'America/Los_Angeles').set({hour:23,minute:00,second:0,millisecond:0});
+check_time = moment.tz(check_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
+Ontime({ cycle: check_time }, function(ot) {
+  if(MAIN.config.DB.Remove_Upgraded_Pokestops == 'ENABLED'){
+    MAIN.sqlFunction('DELETE FROM rdmdb.pokestop USING rdmdb.pokestop INNER JOIN rdmdb.gym WHERE rdmdb.pokestop.id = rdmdb.gym.id',undefined,undefined,undefined);
+  }
+  if(MAIN.config.DB.Remove_Unseen_Pokestops == 'ENABLED'){
+    let now = moment().format('X')-90000;
+    MAIN.sqlFunction('DELETE FROM rdmdb.pokestop WHERE updated < '+now,undefined,undefined,undefined);
+  } ot.done();
+});
+
 // RESTART FUNCTION
 function pokebotRestart(){ process.exit(1); }
 
 // CRANK UP THE BOT
 MAIN.start = async (type) => {
   await load_files();
+  await load_filters();
   await load_modules();
   await load_commands();
+  await update_database();
   await load_raid_channels();
   await load_quest_channels();
   await load_pokemon_channels();
-  await load_filters();
   switch(type){
     case 'startup':
       await bot_login(); break;
     case 'reload':
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Re-Load] Pokébot has re-loaded.'); break;
   }
-
-  // START FUNCTIONS FOR EACH DISCORD
-
 }
 MAIN.start('startup');

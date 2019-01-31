@@ -12,7 +12,7 @@
 
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, timezone) => {
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
   MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ? AND status = ?", [server.id, 'ACTIVE'], function (error, users, fields){
@@ -103,7 +103,7 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
                       if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
                       break;
                     }
-                    else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user); }
+                    else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone); }
                   }
                 }
                 else{
@@ -139,7 +139,7 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
                         break;
                       }
                       else{
-                        prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user);
+                        prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone);
                       }
                   }
                 }
@@ -158,13 +158,13 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
   });
 }
 
-async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user){
+async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone){
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon').then(async function(img_url){
+  MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon').then(async function(img_url){
 
     // DEFINE VARIABLES
-    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', server.hour_offset);
+    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
     let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
 
     // DETERMINE MOVE NAMES AND TYPES

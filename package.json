@@ -450,6 +450,7 @@
       "resolved": "https://registry.npmjs.org/gauge/-/gauge-2.7.4.tgz",
       "version": "2.7.4"
     },
+    "geo-tz": "^5.0.1",
     "getpass": {
       "integrity": "sha1-Xv+OPmhNVprkyysSgmBOi6YhSfo=",
       "requires": {

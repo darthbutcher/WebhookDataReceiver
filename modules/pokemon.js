@@ -15,7 +15,7 @@ const Subscription = require('./subscriptions/pokemon.js');
 const insideGeofence = require('point-in-polygon');
 const insideGeojson = require('point-in-geopolygon');
 
-module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
 
   // VARIABLES
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
@@ -23,7 +23,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
   // CHECK SUBSCRIPTION CONFIG
   if(MAIN.config.POKEMON.Subscriptions == 'ENABLED' && sighting.cp > 0){
-    Subscription.run(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server);
+    Subscription.run(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, timezone);
   }
 
   // CHECK ALL FILTERS
@@ -52,7 +52,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
             if(filter.Post_Without_IV == true){
-              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone);
             }
             else if(sighting.cp > 0){
               // CHECK THE MIN AND MAX IV
@@ -65,7 +65,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                   if(filter.min_cp <= sighting.cp && filter.max_cp >= sighting.cp){
 
                     // SEND POKEMON TO DISCORD
-                    send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+                    send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone);
                   }
                   else{
                     // DEBUG
@@ -87,10 +87,10 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
             // CHECK IF THE POKEMON HAS BEEN IV SCANNED OR TO POST WITHOUT IV
             if(filter.Post_Without_IV == true){
-              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone);
             }
             else if(sighting.cp > 0){
-              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server);
+              send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone);
             }
           }
           else{
@@ -111,13 +111,13 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
   }); return;
 }
 
-function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server){
+function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone){
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude,'pokemon','feed').then(async function(img_url){
+  MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon').then(async function(img_url){
 
     // DEFINE VARIABLES
-    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', server.hour_offset);
+    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
     let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
 
     // DETERMINE MOVE NAMES AND TYPES
@@ -165,7 +165,6 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
       .addField(pokemon_name+' ('+internal_value+'%)'+weather_boost, 'Atk: '+sighting.individual_attack+' / Def: '+sighting.individual_defense+' / Sta: '+sighting.individual_stamina+' | '+pokemon_type, false)
       .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight, false)
-
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
       .setImage(img_url);
 
@@ -177,13 +176,13 @@ function send_pokemon(MAIN, internal_value, sighting, channel, time_now, main_ar
   }); return;
 }
 
-async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server){
+async function send_without_iv(MAIN, sighting, channel, time_now, main_area, sub_area, embed_area, server, timezone){
 
   // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude,sighting.longitude).then(async function(img_url){
+  MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon').then(async function(img_url){
 
     // DEFINE VARIABLES
-    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', server.hour_offset);
+    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
     let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
 
     // DETERMINE POKEMON NAME

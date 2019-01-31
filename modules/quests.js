@@ -15,7 +15,7 @@ const Subscription = require('./subscriptions/quests.js');
 const insideGeofence = require('point-in-polygon');
 const insideGeojson = require('point-in-geopolygon');
 
-module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server) => {
+module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
 
   // DETERMINE THE QUEST REWARD
   let  quest_reward = '', simple_reward = '';
@@ -161,7 +161,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
 
   // CHECK SUBSCRIPTION CONFIG
   if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
-    Subscription.run(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
+    Subscription.run(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone);
   } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Subscription setting.'); }
 
   // CHECK ALL FILTERS
@@ -185,7 +185,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
           if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
 
             // PREPARE AND SEND TO DISCORDS
-            send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server);
+            send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone);
           }
           else{ // DEBUG
             if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter);
@@ -199,13 +199,13 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   }); return;
 }
 
-async function send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server){
+async function send_quest(MAIN, quest, channel, quest_task, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone){
 
   // GET STATIC MAP TILE
-  MAIN.Static_Map_Tile(quest.latitude,quest.longitude,'quest').then(async function(img_url){
+  MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest').then(async function(img_url){
 
     // DECLARE VARIABLES
-    let expire_time = MAIN.Bot_Time(null, 'quest', server.hour_offset);
+    let expire_time = MAIN.Bot_Time(null, 'quest', timezone);
 
     // GET REWARD ICON
     let quest_url = '';
