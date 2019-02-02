@@ -2,10 +2,10 @@
   "Servers": [{
       "name": "Tallahassee",
       "id": "266738315380785152",
-      "quest_purge": "ENABLED",
       "sub_channel": "492517376177471488",
       "donor_role": "277658037982986240",
-      "research_channels":["511701871304638505","511303614032248843"],
+      "purge_channels": "ENABLED",
+      "channels_to_purge":["511701871304638505","511303614032248843"],
       "geofence": [
         [
           [ -84.469899, 30.660166 ],
@@ -23,10 +23,10 @@
     {
       "name": "Gainesville",
       "id": "520254085148966912",
-      "quest_purge": "ENABLED",
       "sub_channel": "520604206206287883",
-      "donor_role": "",
-      "research_channels":["536673792529924106","536673820182839296"],
+      "donor_role": "520607689001271299",
+      "purge_channels": "ENABLED",
+      "channels_to_purge":["536673792529924106","536673820182839296"],
       "geofence": [
         [
           [ -82.601263, 29.792224 ],
@@ -39,11 +39,11 @@
     },
     {
       "name": "Montgomery",
-      "id": "535092023196385291",
-      "quest_purge": "ENABLED",
-      "sub_channel": "535179516386213900",
-      "donor_role": "",
-      "research_channels":["535167843432529921","535167873077739530"],
+      "id": "313858836580532225",
+      "sub_channel": "540354517166718977",
+      "donor_role": "540354558103126033",
+      "purge_channels": "ENABLED",
+      "channels_to_purge":["540354458165444608","540354431712100373"],
       "geofence": [
         [
           [ -86.387994, 32.448659 ],
@@ -56,11 +56,11 @@
     },
     {
       "name": "San Gabriel Valley",
-      "id": "535185283046703105",
-      "quest_purge": "ENABLED",
-      "sub_channel": "535192018754732053",
-      "donor_role": "",
-      "research_channels":["535192085272461322","535192088841814036"],
+      "id": "534480862490656768",
+      "sub_channel": "540379896124407808",
+      "donor_role": "536725148380954629",
+      "purge_channels": "ENABLED",
+      "channels_to_purge":["540376172974964766","540376191518113792"],
       "geofence": [
         [
           [ -118.173792, 34.051018 ],
@@ -72,12 +72,29 @@
       ]
     },
     {
-      "name": "New York",
-      "id": "",
-      "quest_purge": "DISABLED",
+      "name": "Columbus",
+      "id": "382701760688422913",
       "sub_channel": "",
       "donor_role": "",
-      "research_channels":[],
+      "purge_channels": "DISABLED",
+      "channels_to_purge":["",""],
+      "geofence": [
+        [
+          [-85.155877,32.372617],
+          [-85.158318,32.632005],
+          [-84.803662,32.631942],
+          [-84.802025,32.364769],
+          [-85.155877,32.372617]
+        ]
+      ]
+    },
+    {
+      "name": "New York",
+      "id": "",
+      "sub_channel": "",
+      "donor_role": "",
+      "purge_channels": "DISABLED",
+      "channels_to_purge":[],
       "geofence": [
         [
           [ -74.117117, 40.662502 ],
@@ -91,10 +108,10 @@
     {
       "name": "Test",
       "id": "420902528641662976",
-      "quest_purge": "DISABLED",
       "sub_channel": "527865177144819732",
       "donor_role": "",
-      "research_channels":[],
+      "purge_channels": "DISABLED",
+      "channels_to_purge":[],
       "geofence": [
         [
           [ -37.366390228271484, 31.271948634919863 ],

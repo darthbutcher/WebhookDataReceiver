@@ -61,6 +61,7 @@ Custom = true
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
 Default_Delivery = 08:00
+; These is the Reward List that dictates what users can subscribe to for DMs
 Rewards[] = Ultra Ball
 Rewards[] = Hyper Potion
 Rewards[] = Max Potion
