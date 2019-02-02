@@ -111,7 +111,7 @@ MAIN.database = MySQL.createConnection({
   user: MAIN.config.DB.username,
   password: MAIN.config.DB.password,
   port: MAIN.config.DB.port
-}); MAIN.database.connect();
+}); //MAIN.database.connect();
 
 // GLOBAL VARIABLES
 MAIN.BOTS = [];
@@ -563,29 +563,31 @@ async function bot_login(){
 }
 
 var ontime_servers = [], ontime_times = [];
-MAIN.Discord.Servers.forEach(function(server){
-  if(server.channels_to_purge && server.purge_channels == 'ENABLED'){
+if(server.purge_channels == 'ENABLED'){
+  MAIN.Discord.Servers.forEach(function(server){
     let server_purge = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
     server_purge = moment.tz(server_purge, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
     server_purge = moment.tz(server_purge, MAIN.config.TIMEZONE).format('HH:mm:ss');
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Channel Purge set for '+server.name+' at '+server_purge);
+    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Channel purge set for '+server.name+' at '+server_purge);
     ontime_times.push(server_purge); ontime_servers.push(server);
-  }
-});
+  });
+} else{ ontime_times = '00:00:00'; }
 
 Ontime({ cycle: ontime_times }, function(ot) {
-  let now = moment().format('HH:mm')+':00';
-	ontime_servers.forEach(function(server){
-    console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime channel purge has started for '+server.name);
-    let purge_time = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
-    purge_time = moment.tz(purge_time, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
-    purge_time = moment.tz(purge_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
-    if(now == purge_time){
-  		for(var i = 0; i < server.channels_to_purge.length; i++){
-  			clear_channel(server.channels_to_purge[i]);
-  		}
-    }
-	}); ot.done();
+  if(server.purge_channels == 'ENABLED'){
+    let now = moment().format('HH:mm')+':00';
+  	ontime_servers.forEach(function(server){
+      console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime channel purge has started for '+server.name);
+      let purge_time = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
+      purge_time = moment.tz(purge_time, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
+      purge_time = moment.tz(purge_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
+      if(now == purge_time){
+    		for(var i = 0; i < server.channels_to_purge.length; i++){
+    			clear_channel(server.channels_to_purge[i]);
+    		}
+      }
+  	});
+  } ot.done();
 });
 
 function clear_channel(channel_id){
@@ -613,10 +615,12 @@ check_time = moment.tz(check_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
 Ontime({ cycle: check_time }, function(ot) {
   if(MAIN.config.DB.Remove_Upgraded_Pokestops == 'ENABLED'){
     MAIN.sqlFunction('DELETE FROM rdmdb.pokestop USING rdmdb.pokestop INNER JOIN rdmdb.gym WHERE rdmdb.pokestop.id = rdmdb.gym.id',undefined,undefined,undefined);
+    console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ran Query to remove Upgraded Pokestops.');
   }
   if(MAIN.config.DB.Remove_Unseen_Pokestops == 'ENABLED'){
     let now = moment().format('X')-90000;
     MAIN.sqlFunction('DELETE FROM rdmdb.pokestop WHERE updated < '+now,undefined,undefined,undefined);
+    console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ran Query to remove Stale Pokestops.');
   } ot.done();
 });
 
