@@ -563,20 +563,21 @@ async function bot_login(){
 }
 
 var ontime_servers = [], ontime_times = [];
-if(server.purge_channels == 'ENABLED'){
-  MAIN.Discord.Servers.forEach(function(server){
-    let server_purge = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
-    server_purge = moment.tz(server_purge, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
-    server_purge = moment.tz(server_purge, MAIN.config.TIMEZONE).format('HH:mm:ss');
+MAIN.Discord.Servers.forEach(function(server){
+  let server_purge = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
+  server_purge = moment.tz(server_purge, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
+  server_purge = moment.tz(server_purge, MAIN.config.TIMEZONE).format('HH:mm:ss');
+  if(server.purge_channels == 'ENABLED'){
     console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Channel purge set for '+server.name+' at '+server_purge);
-    ontime_times.push(server_purge); ontime_servers.push(server);
-  });
-} else{ ontime_times = '00:00:00'; }
+  }
+  ontime_times.push(server_purge); ontime_servers.push(server);
+});
+
 
 Ontime({ cycle: ontime_times }, function(ot) {
-  if(server.purge_channels == 'ENABLED'){
-    let now = moment().format('HH:mm')+':00';
-  	ontime_servers.forEach(function(server){
+  let now = moment().format('HH:mm')+':00';
+	ontime_servers.forEach(function(server){
+    if(server.purge_channels == 'ENABLED'){
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ontime channel purge has started for '+server.name);
       let purge_time = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
       purge_time = moment.tz(purge_time, timezone[0]).set({hour:23,minute:50,second:0,millisecond:0});
@@ -586,8 +587,8 @@ Ontime({ cycle: ontime_times }, function(ot) {
     			clear_channel(server.channels_to_purge[i]);
     		}
       }
-  	});
-  } ot.done();
+    }
+	}); ot.done();
 });
 
 function clear_channel(channel_id){
