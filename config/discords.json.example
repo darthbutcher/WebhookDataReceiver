@@ -2,10 +2,11 @@
   "Servers": [{
       "name": "Tallahassee",
       "id": "266738315380785152",
-      "sub_channel": "492517376177471488",
+      "geojson_file": "tallahassee.json",
       "donor_role": "277658037982986240",
+      "command_channels": "492517376177471488",
       "purge_channels": "ENABLED",
-      "channels_to_purge":["511701871304638505","511303614032248843"],
+      "channels_to_purge": ["537460180451983371","537460213956214785","522251205334794260"],
       "geofence": [
         [
           [ -84.469899, 30.660166 ],
@@ -23,10 +24,11 @@
     {
       "name": "Gainesville",
       "id": "520254085148966912",
-      "sub_channel": "520604206206287883",
+      "geojson_file": "",
       "donor_role": "520607689001271299",
+      "command_channels": "520604206206287883",
       "purge_channels": "ENABLED",
-      "channels_to_purge":["536673792529924106","536673820182839296"],
+      "channels_to_purge": ["536673792529924106","536673820182839296"],
       "geofence": [
         [
           [ -82.601263, 29.792224 ],
@@ -40,10 +42,11 @@
     {
       "name": "Montgomery",
       "id": "313858836580532225",
-      "sub_channel": "540354517166718977",
+      "geojson_file": "",
       "donor_role": "540354558103126033",
+      "command_channels": "540354517166718977",
       "purge_channels": "ENABLED",
-      "channels_to_purge":["540354458165444608","540354431712100373"],
+      "channels_to_purge": ["540354431712100373","540354458165444608"],
       "geofence": [
         [
           [ -86.387994, 32.448659 ],
@@ -55,46 +58,30 @@
       ]
     },
     {
-      "name": "San Gabriel Valley",
-      "id": "534480862490656768",
-      "sub_channel": "540379896124407808",
-      "donor_role": "536725148380954629",
-      "purge_channels": "ENABLED",
-      "channels_to_purge":["540376172974964766","540376191518113792"],
-      "geofence": [
-        [
-          [ -118.173792, 34.051018 ],
-          [ -118.169546, 34.204512 ],
-          [ -117.928535, 34.205379 ],
-          [ -117.93198, 34.032451 ],
-          [ -118.173792, 34.051018 ]
-        ]
-      ]
-    },
-    {
       "name": "Columbus",
-      "id": "382701760688422913",
-      "sub_channel": "",
+      "id": "535185283046703105",
+      "geojson_file": "columbus.json",
       "donor_role": "",
-      "purge_channels": "DISABLED",
-      "channels_to_purge":["",""],
+      "command_channels": "535192018754732053",
+      "purge_channels": "ENABLED",
+      "channels_to_purge": ["535192085272461322","535192088841814036"],
       "geofence": [
         [
-          [-85.155877,32.372617],
-          [-85.158318,32.632005],
-          [-84.803662,32.631942],
-          [-84.802025,32.364769],
-          [-85.155877,32.372617]
+          [-84.017819,32.617343],
+          [-84.015543,32.391045],
+          [-85.088234,32.397848],
+          [-85.098051,32.609177],
+          [-84.017819,32.617343]
         ]
       ]
     },
     {
-      "name": "New York",
+      "name": "New York Leveling",
       "id": "",
-      "sub_channel": "",
+      "command_channels": "",
       "donor_role": "",
       "purge_channels": "DISABLED",
-      "channels_to_purge":[],
+      "channels_to_purge": [],
       "geofence": [
         [
           [ -74.117117, 40.662502 ],
@@ -108,10 +95,10 @@
     {
       "name": "Test",
       "id": "420902528641662976",
-      "sub_channel": "527865177144819732",
+      "command_channels": "527865177144819732",
       "donor_role": "",
       "purge_channels": "DISABLED",
-      "channels_to_purge":[],
+      "channels_to_purge": [],
       "geofence": [
         [
           [ -37.366390228271484, 31.271948634919863 ],

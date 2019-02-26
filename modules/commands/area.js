@@ -7,13 +7,10 @@ module.exports.run = async (MAIN, message, prefix, server) => {
   // DECLARE VARIABLES
   let nickname = '', area_array = '', available_areas = '';
 
-  await MAIN.geofences.features.forEach((geofence,index) => {
-    let lon = geofence.geometry.coordinates[0][0][0];
-    let lat = geofence.geometry.coordinates[0][0][1];
-    if(insideGeojson.polygon(server.geofence, [lon,lat])){
-      if(geofence.properties.name){ area_array += geofence.properties.name+','; }
-      else{ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Commands] [area.js] You are missing a name from a geofence in /config/geojson.json.')}
-    }
+  let geofence = await MAIN.Geofences.get(server.geojson_file);
+
+  await geofence.features.forEach((geofence,index) => {
+    area_array += geofence.properties.name+',';
   }); area_array = area_array.slice(0,-1);
 
   // GET USER NICKNAME

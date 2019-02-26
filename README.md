@@ -1,10 +1,10 @@
 # Pokebot
 
+## This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user.
+
 ## Join my discord server: https://discord.gg/NnujtZ4
 
-### This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user.
-
-## This project is in Beta. So you will see errors at some point.
+### ReadMe may be out of date. I just do not have time to keep up with it on every update. See example files for specific explanations. This project is in Beta. So you will see errors at some point.
 
 # Installation:
 ### 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
@@ -26,14 +26,12 @@
     If you choose `true` for custom emotes, you will need to edit the emotes.json.example like below:
       - This will be the emotes the bot uses for the embed posts (team emblems and Ex Icon. Images you can upload to your discord server are in the files folder under emotes. To get the emote IDs in you server, type \:youremotename: in discord. This will output something like `<:instinct:499334776189091871>`. Paste those into the emotes.json.example and save as emotes.json.
   - Discords.json
-      - Each item in this array is a discord that you want your bot to report to. The "geofence" is a geojson format array. Please see example file.
+      - You need to add each Discord you plan on serving. Pokebot is multi-discord capable. The geofence should encompass the whole area that the discord covers. Must be in geojson format.
   - Geojson.json
       - Geofences of areas to label your pokemon/raid/quest posts with and for users to subscribe to alerts with.
-      - Go to http://geojson.io/ and draw your geofences. You MUST add a "name" field to each geofence. If you want to use sub areas (smaller detailed geofences within larger geofences), you must add a sub_area field and then true or false as the value.
+      - Go to http://geojson.io/ and draw your geofences. You MUST add a "name" field to each geofence. If you want to use sub areas (smaller detailed geofences within larger geofences), you must add a sub_area field and then true or false as the value. All geofences must be in geojson format.
   - config.ini
-      - Contains the meat and potato configs. Main token will be the main bot to respond in the subscription channel. The array of other bot tokens are for channel posts and DMs to avoid rate limits. Up to 15 bot tokens can be used at this time. If you have less than 15, delete the other example numbers or you will get invalid credential errors when starting the script. YOU MUST PROVIDE A MAIN TOKEN AND AT LEAST ONE DIFFERENT TOKEN FOR BOT_TOKENS. The Main token handles users, while the other tokens are the workers that perform DMs and channel posts. One Bot_Token is fine if you just have channel feeds, but you will need to add at least one more for DMs. 
-  - discords.json
-      - You need to add each Discord you plan on serving. Pokebot is multi-discord capable.
+      - All directions for this files are contianed within this file.
 
 ## 6: Channels
    - Fill out each channels.ini file with the channels, chosen filter, and areas. If you do not want to filter by area, use the name that you gave your discord in discords.json.

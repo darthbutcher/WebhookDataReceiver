@@ -27,4 +27,5 @@ electric = <:type_electric:408293833864904704>
 dragon = <:type_dragon:408293833512845312>
 dark = <:type_dark:408293833055666176>
 bug = <:type_bug:408293832451686403>
-checkYes = <:yes:526072075824398346>
+checkYes = <:checkYes:545014472096350208>
+yellowQuestion = <:yellowQuestion:545014461015130132>

@@ -18,7 +18,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
                    +'`add adv`  »  Create an Advanced Subscription.\n'
                    +'`remove`  »  Remove a pokemon Subscription.\n'
                    +'`edit`  »  Edit a Subscription.\n'
-                   +'`pause` or `resume`  »  Pause/Resume Pokemon Subscriptions.')
+                   +'`pause` or `resume`  »  Pause/Resume Pokemon Subscriptions Only.')
     .setFooter('Type the action, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
@@ -29,21 +29,21 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 // PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
 function subscription_status(MAIN, message, nickname, reason, prefix){
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
-    if(user[0].pokemon_paused == 'ACTIVE' && reason == 'resume'){
+    if(user[0].pokemon_status == 'ACTIVE' && reason == 'resume'){
       let already_active = new Discord.RichEmbed().setColor('ff0000')
         .setAuthor(nickname, message.member.user.displayAvatarURL)
-        .setTitle('You\'re Subscriptions are already **Active**!')
+        .setTitle('Your Pokemon subscriptions are already **Active**!')
         .setFooter('You can type \'view\', \'add\', \'add adv\', \'remove\', or \'edit\'.');
 
       // SEND THE EMBED
-      message.channel.send(already_paused).catch(console.error).then( msg => {
+      message.channel.send(already_active).catch(console.error).then( msg => {
         return initiate_collector(MAIN, 'view', message, msg, nickname, prefix);
       });
     }
-    else if(user[0].pokemon_paused == 'PAUSED' && reason == 'pause'){
+    else if(user[0].pokemon_status == 'PAUSED' && reason == 'pause'){
       let already_paused = new Discord.RichEmbed().setColor('ff0000')
         .setAuthor(nickname, message.member.user.displayAvatarURL)
-        .setTitle('You\'re Subscriptions are already **Paused**!')
+        .setTitle('Your Pokemon subscriptions are already **Paused**!')
         .setFooter('You can type \'view\', \'add\', \'add adv\', \'remove\', or \'edit\'.');
 
       // SEND THE EMBED
@@ -157,8 +157,8 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
 
   // RETRIEVE POKEMON NAME FROM USER
   sub.name = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'All\'  or the Pokémon name. Names are not case-sensitive.',sub);
-  if(sub.name.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-  else if(sub.name == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+  if(sub.name.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+  else if(sub.name == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
   if(advanced == true){
 
@@ -167,43 +167,43 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
 
     // RETRIEVE MIN IV FROM USER
     sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MAX IV FROM USER
     sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MIN LEVEL FROM USER
     sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MAX LEVEL FROM USER
     sub.max_lvl = await sub_collector(MAIN,'Maximum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.max_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.max_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MIN CP FROM USER
     sub.min_cp = await sub_collector(MAIN,'Minimum CP',nickname,message,sub.name,'Please respond with a number greater than 0 or \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.min_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.min_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MAX CP NAME FROM USER
     sub.max_cp = await sub_collector(MAIN,'Maximum CP',nickname,message,sub.name,'Please respond with a number greater than 0 or \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.max_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.max_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE GENDER FROM USER
     sub.gender = await sub_collector(MAIN,'Gender',nickname,message,sub.name,'Please respond with \'Male\' or \'Female\' or type \'All\'.',sub);
-    if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE AREA CONFIMATION FROM USER
     sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
-    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
   }
   else {
@@ -218,24 +218,24 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
 
     // RETRIEVE MIN IV FROM USER
     sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MIN LEVEL FROM USER
     sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
-    if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE AREA CONFIRMATION FROM USER
     sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
-    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+    if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
   }
 
   // RETRIEVE CONFIRMATION FROM USER
   let confirm = await sub_collector(MAIN,'Confirm-Add',nickname,message,sub.name,'Type \'Yes\' or \'No\'. Subscription will be saved.',sub);
-  if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-  else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+  if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+  else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
@@ -334,14 +334,14 @@ async function subscription_remove(MAIN, message, nickname, prefix){
       let remove_name = await sub_collector(MAIN,'Remove',nickname,message, undefined,'Type the Pokémon\'s name or \'all\'. Names are not case-sensitive.', undefined);
 
       switch(remove_name.toLowerCase()){
-        case 'time': return subscription_cancel(MAIN, nickname, message, prefix, sub);
-        case 'cancel': return subscription_timedout(MAIN, nickname, message, prefix, sub)
+        case 'time': return subscription_cancel(MAIN, nickname, message, prefix);
+        case 'cancel': return subscription_timedout(MAIN, nickname, message, prefix)
         case 'all':
 
           // CONFIRM THEY REALL MEANT TO REMOVE ALL
           let confirm = await sub_collector(MAIN,'Confirm-Remove',nickname,message,remove_name,'Type \'Yes\' or \'No\'. Subscription will be saved.',undefined);
-          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
           // MARK AS FOUND AND WIPE THE ARRAY
           found = true; pokemon.subscriptions = []; break;
@@ -439,48 +439,48 @@ async function subscription_modify(MAIN, message, nickname, prefix){
 
           // RETRIEVE MIN CP FROM USER
           sub.min_cp = await sub_collector(MAIN,'Minimum CP',nickname,message,sub.name,'Please respond with a number greater than 0 or \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.min_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.min_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.min_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MAX CP NAME FROM USER
           sub.max_cp = await sub_collector(MAIN,'Maximum CP',nickname,message,sub.name,'Please respond with a number greater than 0 or \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.max_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.max_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.max_cp.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.max_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MIN IV FROM USER
           sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MAX IV FROM USER
           sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MIN LEVEL FROM USER
           sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.min_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MAX LEVEL FROM USER
           sub.max_lvl = await sub_collector(MAIN,'Maximum Level',nickname,message,sub.name,'Please respond with a value between 0 and 35 or type \'All\'. Type \'Cancel\' to Stop.',sub);
-          if(sub.max_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.max_lvl.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE GENDER FROM USER
           sub.gender = await sub_collector(MAIN,'Gender',nickname,message,sub.name,'Please respond with \'Male\' or \'Female\' or type \'All\'.',sub);
-          if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // CONFIRM AREAS
           sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
-          if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub) }
+          if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
           // RETRIEVE CONFIRMATION FROM USER
           let confirm = await sub_collector(MAIN,'Confirm-Add',nickname,message,sub.name,'Type \'Yes\' or \'No\'. Subscription will be saved.',sub);
-          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, sub); }
-          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, sub); }
+          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
 
           // ADD THE NEW SUBSCRIPTION
@@ -626,6 +626,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           // MIN/MAX IV CONFIGURATION
           case type.indexOf('IV')>=0:
             if(parseInt(message.content) >= 0 && parseInt(message.content) <= 100){ collector.stop(message.content); }
+            else if(message.content.length <= 8 && message.content.indexOf('/') >= 0){ collector.stop(message.content); }
             else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
             else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); }
             break;
@@ -657,10 +658,10 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
   });
 }
 
-function subscription_cancel(MAIN, nickname, message, prefix, sub){
+function subscription_cancel(MAIN, nickname, message, prefix){
   let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
-    .setTitle(sub.name+' Subscription Cancelled.')
+    .setTitle('Subscription Cancelled.')
     .setDescription('Nothing has been Saved.')
     .setFooter('You can type \'view\', \'add\', \'add adv\', \'remove\', or \'edit\'.');
   message.channel.send(subscription_cancel).then( msg => {
@@ -668,10 +669,10 @@ function subscription_cancel(MAIN, nickname, message, prefix, sub){
   });
 }
 
-function subscription_timedout(MAIN, nickname, message, prefix, sub){
+function subscription_timedout(MAIN, nickname, message, prefix){
   let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
-    .setTitle(sub.name+' Subscription Timed Out.')
+    .setTitle('Your Subscription Has Timed Out.')
     .setDescription('Nothing has been Saved.')
     .setFooter('You can type \'view\', \'add\', \'add adv\', \'remove\', or \'edit\'.');
   message.channel.send(subscription_cancel).then( msg => {

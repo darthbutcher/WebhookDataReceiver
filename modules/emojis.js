@@ -14,22 +14,22 @@ bot.on('ready', () => {
 class DiscordEmojis
 {
 	constructor()
-	{		
+	{
         this.Load = LoadEmojis;
-	}	
+	}
 }
 
 function LoadEmojis(bot, serverIDs)
-{    
+{
     let guildArray = bot.guilds;
 
     guildArray = Array.from(guildArray);
 
-    if(serverIDs) 
-    { 
+    if(serverIDs)
+    {
         for(var i = 0; i < serverIDs.length; i++)
         {
-            guildArray.unshift([serverIDs[i]]); 
+            guildArray.unshift([serverIDs[i]]);
         }
     }
 
@@ -43,7 +43,7 @@ function LoadEmojis(bot, serverIDs)
                 this.bug = guild.emojis.find(emoji => emoji.name === "bugtype");
                 if(this.bug) { this.bugReact = this.bug; this.bug = this.bug.toString(); this.Bug = this.bug; }
             }
-            
+
             if(!this.dark)
             {
                 this.dark = guild.emojis.find(emoji => emoji.name === "dark");
@@ -76,19 +76,19 @@ function LoadEmojis(bot, serverIDs)
                 this.water = guild.emojis.find(emoji => emoji.name === "water");
                 if(this.water) { this.waterReact = this.water; this.water = this.water.toString(); this.Water = this.water; }
             }
-            
+
             if(!this.rock)
             {
                 this.rock = guild.emojis.find(emoji => emoji.name === "rock");
                 if(this.rock) { this.rockReact = this.rock; this.rock = this.rock.toString(); this.Rock = this.rock; }
             }
-            
+
             if(!this.fairy)
             {
                 this.fairy = guild.emojis.find(emoji => emoji.name === "fairy");
                 if(this.fairy) { this.fairyReact = this.fairy; this.fairy = this.fairy.toString(); this.Fairy = this.fairy; }
             }
-            
+
             if(!this.flying)
             {
                 this.flying = guild.emojis.find(emoji => emoji.name === "flying");
@@ -390,7 +390,7 @@ function LoadEmojis(bot, serverIDs)
             if(!this.totalRaids)
             {
                 this.totalRaids = guild.emojis.find(emoji => emoji.name === "lege");
-                if(this.totalRaids) {   
+                if(this.totalRaids) {
                     this.totalRaidsReact = this.totalRaidsReact; this.totalRaids = this.totalRaids.toString();
                     this.legendaryReact = this.totalRaidsReact; this.legendary = this.totalRaids;
                     }
@@ -435,9 +435,14 @@ function LoadEmojis(bot, serverIDs)
                 this.checkYes = guild.emojis.find(emoji => emoji.name === "check_yes")
                 if(this.checkYes) { this.checkYesReact = this.checkYes; this.checkYes = this.checkYes.toString() }
             }
+						if(!this.yellowQuestion)
+            {
+                this.yellowQuestion = guild.emojis.find(emoji => emoji.name === "yellow_question");
+                if(this.yellowQuestion) { this.yellowQuestionReact = this.yellowQuestion; this.yellowQuestion = this.yellowQuestion.toString() }
+            }
         }
-    }   
-    
+    }
+
 }
 
 module.exports = {

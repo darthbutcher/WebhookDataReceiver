@@ -1,18 +1,15 @@
-//#############################################################//
-//#############################################################//
-//#####   _____   ____  _  ________ __  __  ____  _   _   #####//
-//#####  |  __ \ / __ \| |/ /  ____|  \/  |/ __ \| \ | |  #####//
-//#####  | |__) | |  | | ' /| |__  | \  / | |  | |  \| |  #####//
-//#####  |  ___/| |  | |  < |  __| | |\/| | |  | | . ` |  #####//
-//#####  | |    | |__| | . \| |____| |  | | |__| | |\  |  #####//
-//#####  |_|     \____/|_|\_\______|_|  |_|\____/|_| \_|  #####//
-//#####             POKEMON SUBSCRIPTIONS                 #####//
-//#############################################################//
-//#############################################################//
+// POKEMON embeds
 
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, timezone) => {
+delete require.cache[require.resolve('../embeds/pokemon.js')];
+const Send_Pokemon = require('../embeds/pokemon.js');
+
+module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
+
+  if(sighting.cp == null){ return; }
+  let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
+  let time_now = new Date().getTime(); internal_value = Math.floor(internal_value*1000)/10;
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
   MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ? AND status = ?", [server.id, 'ACTIVE'], function (error, users, fields){
@@ -20,18 +17,18 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
       users.forEach((user,index) => {
 
         // FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
-        let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
-        switch(true){
-          case !member: proceed = false; break;
-          case member.hasPermission('ADMINISTRATOR'): proceed = true; break;
-          default: if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
-        }
+        // let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
+        // switch(true){
+        //   case !member: proceed = false; break;
+        //   case member.hasPermission('ADMINISTRATOR'): proceed = true; break;
+        //   default: if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
+        // }
 
         // DEFINE VARIABLES
         let user_areas = user.geofence.split(',');
 
         // CHECK IF THE USERS SUBS ARE PAUSED, EXIST, AND THAT THE AREA MATCHES THEIR DISCORD
-        if(user.pokemon && proceed == true){
+        if(user.pokemon /*&& proceed == true*/){
 
           // CONVERT POKEMON LIST TO AN ARRAY
           let pokemon = JSON.parse(user.pokemon);
@@ -96,14 +93,14 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
                     case sub.max_lvl < sighting.pokemon_level:
                       if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Max Level Filter.'); }
                       break;
-                    default:
 
+                    default:
                     // CHECK GENDER AND NAME FOR A MATCH
                     if(sub.gender.toLowerCase() != 'all' && sub.gender.toLowerCase() != gender){
                       if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
-                      break;
+                    } else{
+                      Send_Pokemon.run(MAIN, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
                     }
-                    else{ prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone); }
                   }
                 }
                 else{
@@ -131,15 +128,13 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
                     case sub.max_lvl < sighting.pokemon_level:
                       if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Max Level Filter.'); }
                       break;
-                    default:
 
+                    default:
                       // CHECK GENDER AND NAME FOR A MATCH
                       if(sub.gender.toLowerCase() != 'all' && sub.gender.toLowerCase() != gender){
                         if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gender Filter.'); }
-                        break;
-                      }
-                      else{
-                        prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone);
+                      } else{
+                        Send_Pokemon.run(MAIN, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
                       }
                   }
                 }
@@ -155,66 +150,5 @@ module.exports.run = async (MAIN, internal_value, sighting, time_now, main_area,
         }
       }); return;
     }
-  });
-}
-
-async function prepare_alert(MAIN, internal_value, sighting, time_now, main_area, sub_area, embed_area, server, user, timezone){
-
-  // FETCH THE MAP TILE
-  MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon').then(async function(img_url){
-
-    // DEFINE VARIABLES
-    let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
-    let hide_minutes = Math.floor((sighting.disappear_time-(time_now/1000))/60);
-
-    // DETERMINE MOVE NAMES AND TYPES
-    let move_name_1 = MAIN.moves[sighting.move_1].name;
-    let move_type_1 = await MAIN.Get_Type(sighting.move_1);
-    let move_name_2 = MAIN.moves[sighting.move_2].name;
-    let move_type_2 = await MAIN.Get_Type(sighting.move_2);
-
-    // DETERMINE POKEMON NAME AND DETAILS
-    let pokemon_type = '';
-    let name = MAIN.pokemon[sighting.pokemon_id].name;
-    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => { pokemon_type += type+' '+MAIN.emotes[type.toLowerCase()]+' / '; });
-    pokemon_type = pokemon_type.slice(0,-3);
-    let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
-    let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
-
-    // GET SPRITE IMAGE
-    let pokemon_url = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
-
-    // GET GENDER
-    let gender = '';
-    switch(sighting.gender){
-      case 1: gender = ' | ♂Male'; break;
-      case 2: gender = ' | ♀Female'; break;
-    }
-
-    // GET WEATHER BOOST
-    let weather_boost = '';
-    switch(sighting.weather){
-      case 1: weather_boost = ' '+MAIN.emotes.clear+' *Boosted*'; break;
-      case 2: weather_boost = ' '+MAIN.emotes.rain+' *Boosted*'; break;
-      case 3: weather_boost = ' '+MAIN.emotes.partlyCloudy+' *Boosted*'; break;
-      case 4: weather_boost = ' '+MAIN.emotes.cloudy+' *Boosted*'; break;
-      case 5: weather_boost = ' '+MAIN.emotes.windy+' *Boosted*'; break;
-      case 6: weather_boost = ' '+MAIN.emotes.snow+' *Boosted*'; break;
-      case 7: weather_boost = ' '+MAIN.emotes.fog+' *Boosted*'; break;
-    }
-
-    // CREATE AND SEND THE EMBED
-    let pokemon_embed = new Discord.RichEmbed()
-      .setColor('00ccff')
-      .setThumbnail(pokemon_url)
-      .setTitle(name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)'+weather_boost)
-      .addField('Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField('Disappears: '+hide_time+' (*'+hide_minutes+' Mins*)', height+' | '+weight+'\n'+pokemon_type, false)
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)')
-      .setImage(img_url);
-
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions] Sent a '+name+' DM to '+user.user_name+'.'); }
-
-    return MAIN.Send_DM(server.id, user.user_id, pokemon_embed, user.bot);
   });
 }
