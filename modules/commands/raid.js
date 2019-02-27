@@ -58,12 +58,12 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
     .setFooter('Type the action, no command prefix required.');
 
   message.channel.send(request_action).catch(console.error).then( msg => {
-      return initiate_collector(MAIN, 'start', message, msg, nickname, prefix, available_gyms, discord);
+      return initiate_collector(MAIN, 'start', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
   });
 }
 
 // PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
-function subscription_status(MAIN, message, nickname, reason, prefix, available_gyms, discord){
+function subscription_status(MAIN, message, nickname, reason, prefix, available_gyms, discord, gym_collection){
   MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], function (error, user, fields) {
     if(user[0].raids_status == 'ACTIVE' && reason == 'resume'){
       let already_active = new Discord.RichEmbed().setColor('ff0000')
@@ -73,7 +73,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix, available_
 
       // SEND THE EMBED
       message.channel.send(already_paused).catch(console.error).then( msg => {
-        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
       });
     }
     else if(user[0].raids_status == 'PAUSED' && reason == 'pause'){
@@ -84,7 +84,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix, available_
 
       // SEND THE EMBED
       message.channel.send(already_paused).catch(console.error).then( msg => {
-        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
       });
     }
     else{
@@ -105,7 +105,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix, available_
 }
 
 // SUBSCRIPTION REMOVE FUNCTION
-async function subscription_view(MAIN, message, nickname, prefix, available_gyms, discord){
+async function subscription_view(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection){
   MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], function (error, user, fields) {
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
@@ -117,7 +117,7 @@ async function subscription_view(MAIN, message, nickname, prefix, available_gyms
 
       // SEND THE EMBED
       message.channel.send(no_subscriptions).catch(console.error).then( msg => {
-        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
       });
     }
     else{
@@ -131,7 +131,7 @@ async function subscription_view(MAIN, message, nickname, prefix, available_gyms
           .setTitle('You do not have any Subscriptions!')
           .setFooter('You can type \'view\', \'add\', or \'remove\'.');
         message.channel.send(no_subscriptions).catch(console.error).then( msg => {
-          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
         });
       }
       else{
@@ -173,7 +173,7 @@ async function subscription_view(MAIN, message, nickname, prefix, available_gyms
 
         // SEND THE EMBED
         message.channel.send(raid_subs).catch(console.error).then( msg => {
-          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+          return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
         });
       }
     }
@@ -181,16 +181,16 @@ async function subscription_view(MAIN, message, nickname, prefix, available_gyms
 }
 
 // SUBSCRIPTION CREATE FUNCTION
-async function subscription_create(MAIN, message, nickname, prefix, advanced, available_gyms, discord){
+async function subscription_create(MAIN, message, nickname, prefix, advanced, available_gyms, discord, gym_collection){
 
   // DEFINED THE SUBSCRIPTION OBJECT
   let sub = {}, got_name = false;
 
   // RETRIEVE GYM NAME FROM USER
   do {
-    sub.gym = await sub_collector(MAIN, 'Gym', nickname, message, undefined, 'Respond with \'All\'  or a Gym name. Names are not case-sensitive.', sub, available_gyms, discord);
-    if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-    else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+    sub.gym = await sub_collector(MAIN, 'Gym', nickname, message, undefined, 'Respond with \'All\'  or a Gym name. Names are not case-sensitive.', sub, available_gyms, discord, gym_collection);
+    if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+    else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
     else{
       console.log('192',sub.gym);
       if(sub.gym == 'All'){ sub.gym = 'All'; got_name = true; }
@@ -200,9 +200,9 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
         if(!matches[0]){
           message.reply('`'+sub.gym+'`, does not closely match any gym in the database.').then(m => m.delete(5000)).catch(console.error);
         } else{
-          let user_choice = await match_collector(MAIN, 'Matches', nickname, message, matches, 'Type the number of the Correct Gym.', sub, available_gyms, discord);
-          if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-          else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+          let user_choice = await match_collector(MAIN, 'Matches', nickname, message, matches, 'Type the number of the Correct Gym.', sub, available_gyms, discord, gym_collection);
+          if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+          else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
           else{
             let collection_match = gym_collection.get(matches[user_choice]);
             console.log(collection_match);
@@ -215,9 +215,9 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
         }
       }
       else if(sub.gym.length > 1){
-        let user_choice = await match_collector(MAIN, 'Multiple', nickname, message, sub.gym, 'Type the number of the Correct Gym.', sub, available_gyms, discord);
-        if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-        else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+        let user_choice = await match_collector(MAIN, 'Multiple', nickname, message, sub.gym, 'Type the number of the Correct Gym.', sub, available_gyms, discord, gym_collection);
+        if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+        else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
         else{
           sub.id = sub.gym[user_choice].id;
           sub.gym = sub.gym[user_choice].name;
@@ -234,35 +234,35 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
   } while(got_name == false);
 
   // RETRIEVE BOSS NAME FROM USER
-  sub.boss = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'All\'  or the Raid Boss\'s name. Names are not case-sensitive.', sub,available_gyms, discord);
-  if(sub.boss == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-  else if(sub.boss == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+  sub.boss = await sub_collector(MAIN,'Name',nickname,message, undefined,'Respond with \'All\'  or the Raid Boss\'s name. Names are not case-sensitive.', sub,available_gyms, discord, gym_collection);
+  if(sub.boss == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+  else if(sub.boss == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
 
   if(sub.boss == 'All'){
     // RETRIEVE MIN LEVEL FROM USER
-    sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.boss,'Please respond with a value of 1 through 5 or type \'All\'. Type \'Cancel\' to Stop.', sub, available_gyms, discord);
-    if(sub.min_lvl == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+    sub.min_lvl = await sub_collector(MAIN,'Minimum Level',nickname,message,sub.boss,'Please respond with a value of 1 through 5 or type \'All\'. Type \'Cancel\' to Stop.', sub, available_gyms, discord, gym_collection);
+    if(sub.min_lvl == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+    else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
 
     // RETRIEVE MIN LEVEL FROM USER
-    sub.max_lvl = await sub_collector(MAIN,'Maximum Level',nickname,message,sub.boss,'Please respond with a value of 1 through 5 or type \'All\'. Type \'Cancel\' to Stop.', sub, available_gyms, discord);
-    if(sub.max_lvl == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-    else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+    sub.max_lvl = await sub_collector(MAIN,'Maximum Level',nickname,message,sub.boss,'Please respond with a value of 1 through 5 or type \'All\'. Type \'Cancel\' to Stop.', sub, available_gyms, discord, gym_collection);
+    if(sub.max_lvl == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+    else if(sub.max_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
   }
   else{ sub.min_lvl = 'Boss Specified'; sub.max_lvl = 'Boss Specified'; }
 
   // RETRIEVE AREA CONFIRMATION FROM USER IF NOT FOR A SPECIFIC GYM
   if(sub.gym == 'All'){
-    sub.areas = await sub_collector(MAIN, 'Area Filter', nickname, message, sub.boss, 'Please respond with \'Yes\' or \'No\'', sub, available_gyms, discord);
-    if(sub.areas == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+    sub.areas = await sub_collector(MAIN, 'Area Filter', nickname, message, sub.boss, 'Please respond with \'Yes\' or \'No\'', sub, available_gyms, discord, gym_collection);
+    if(sub.areas == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+    else if(sub.areas == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
   }
   else{ sub.areas = 'Gym Specified'; }
 
   // RETRIEVE CONFIRMATION FROM USER
-  let confirm = await sub_collector(MAIN, 'Confirm-Add', nickname, message, sub.boss, 'Type \'Yes\' or \'No\'. Subscription will be saved.', sub, available_gyms, discord);
-  if(confirm == 'cancel' || confirm == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-  else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+  let confirm = await sub_collector(MAIN, 'Confirm-Add', nickname, message, sub.boss, 'Type \'Yes\' or \'No\'. Subscription will be saved.', sub, available_gyms, discord, gym_collection);
+  if(confirm == 'cancel' || confirm == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+  else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
   MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], async function (error, user, fields) {
@@ -302,7 +302,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
           .setDescription('Saved to the Pokébot Database.')
           .setFooter('You can type \'view\', \'add\', or \'remove\'.');
         message.channel.send(subscription_success).then( msg => {
-          return initiate_collector(MAIN, 'create', message, msg, nickname, prefix, available_gyms, discord);
+          return initiate_collector(MAIN, 'create', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
         });
       }
     });
@@ -310,7 +310,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
 }
 
 // SUBSCRIPTION REMOVE FUNCTION
-async function subscription_remove(MAIN, message, nickname, prefix, available_gyms, discord){
+async function subscription_remove(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection){
 
   // FETCH USER FROM THE USERS TABLE
   MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], async function (error, user, fields) {
@@ -326,7 +326,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
 
       // SEND THE EMBED
       message.channel.send(no_subscriptions).catch(console.error).then( msg => {
-        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord);
+        return initiate_collector(MAIN, 'view', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
       });
     }
     else {
@@ -340,14 +340,14 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
       let remove_id = await sub_collector(MAIN,'Remove',nickname,message,raids,'Type the Number of the Subscription you want to remove.', undefined);
 
       switch(remove_id.toLowerCase()){
-        case 'time': return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord);
-        case 'cancel': return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord);
+        case 'time': return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection);
+        case 'cancel': return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection);
         case 'all':
 
           // CONFIRM THEY REALL MEANT TO REMOVE ALL
           let confirm = await sub_collector(MAIN, 'Confirm-Remove', nickname, message, remove_id, 'Type \'Yes\' or \'No\'. Subscription will be saved.', undefined);
-          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord); }
-          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord); }
+          if(confirm.toLowerCase() == 'cancel' || confirm.toLowerCase() == 'no'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
+          else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
 
           // MARK AS FOUND AND WIPE THE ARRAY
           raids.subscriptions = []; break;
@@ -374,7 +374,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
             .setDescription('Saved to the Pokébot Database.')
             .setFooter('You can type \'view\', \'add\', or \'remove\'.');
           return message.channel.send(subscription_success).then( msg => {
-            return initiate_collector(MAIN, 'remove', message, msg, nickname, prefix, available_gyms, discord);
+            return initiate_collector(MAIN, 'remove', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
           });
         }
       });
@@ -383,7 +383,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
 }
 
 // SUB COLLECTOR FUNCTION
-function sub_collector(MAIN, type, nickname, message, object, requirements, sub, available_gyms, discord){
+function sub_collector(MAIN, type, nickname, message, object, requirements, sub, available_gyms, discord, gym_collection){
   return new Promise(function(resolve, reject) {
 
     // DELCARE VARIABLES
@@ -473,11 +473,14 @@ function sub_collector(MAIN, type, nickname, message, object, requirements, sub,
             if(message.content.toLowerCase() == 'all'){ collector.stop('All'); }
             else{
               MAIN.database.query('SELECT * FROM '+MAIN.config.DB.rdm_db_name+'.gym WHERE name = ?', [message.content], async function (error, gyms, fields) {
-                await gyms.forEach((gym,index) => {
-                  if(!InsideGeojson.polygon(discord.geofence, [gym.lon,gym.lat])){ gyms.splice(index,1); }
-                });
-                if(gyms[0]){ return collector.stop(gyms); }
-                else{ return collector.stop('fuzzy,'+message.content); }
+                if(!gyms){ return collector.stop('fuzzy,'+message.content); }
+                else{
+                  await gyms.forEach((gym,index) => {
+                    if(!InsideGeojson.polygon(discord.geofence, [gym.lon,gym.lat])){ gyms.splice(index,1); }
+                  });
+                  if(gyms[0]){ return collector.stop(gyms); }
+                  else{ return collector.stop('fuzzy,'+message.content); }
+                }
               });
             } break;
 
@@ -524,29 +527,29 @@ function sub_collector(MAIN, type, nickname, message, object, requirements, sub,
   });
 }
 
-function subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord){
+function subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection){
   let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('Subscription Cancelled.')
     .setDescription('Nothing has been Saved.')
     .setFooter('You can type \'view\', \'add\', or \'remove\'.');
   message.channel.send(subscription_cancel).then( msg => {
-    return initiate_collector(MAIN, 'cancel', message, msg, nickname, prefix, available_gyms, discord);
+    return initiate_collector(MAIN, 'cancel', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
   });
 }
 
-function subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord){
+function subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection){
   let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('Subscription Timed Out.')
     .setDescription('Nothing has been Saved.')
     .setFooter('You can type \'view\', \'add\', or \'remove\'.');
   message.channel.send(subscription_cancel).then( msg => {
-    return initiate_collector(MAIN, 'time', message, msg, nickname, prefix, available_gyms, discord);
+    return initiate_collector(MAIN, 'time', message, msg, nickname, prefix, available_gyms, discord, gym_collection);
   });
 }
 
-function initiate_collector(MAIN, source, message, msg, nickname, prefix, available_gyms, discord){
+function initiate_collector(MAIN, source, message, msg, nickname, prefix, available_gyms, discord, gym_collection){
   // DEFINE COLLECTOR AND FILTER
   const filter = cMessage => cMessage.member.id == message.member.id;
   const collector = message.channel.createMessageCollector(filter, { time: 60000 });
@@ -571,11 +574,11 @@ function initiate_collector(MAIN, source, message, msg, nickname, prefix, availa
     msg.delete();
     switch(reason){
       case 'cancel': resolve('cancel'); break;
-      case 'add': subscription_create(MAIN, message, nickname, prefix, false, available_gyms, discord); break;
-      case 'remove': subscription_remove(MAIN, message, nickname, prefix, available_gyms, discord); break;
-      case 'view': subscription_view(MAIN, message, nickname, prefix, available_gyms, discord); break;
+      case 'add': subscription_create(MAIN, message, nickname, prefix, false, available_gyms, discord, gym_collection); break;
+      case 'remove': subscription_remove(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection); break;
+      case 'view': subscription_view(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection); break;
       case 'resume':
-      case 'pause': subscription_status(MAIN, message, nickname, reason, prefix, available_gyms, discord); break;
+      case 'pause': subscription_status(MAIN, message, nickname, reason, prefix, available_gyms, discord, gym_collection); break;
       default:
         if(source == 'start'){
           message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
@@ -584,7 +587,7 @@ function initiate_collector(MAIN, source, message, msg, nickname, prefix, availa
   });
 }
 
-async function match_collector(MAIN, type, nickname, message, object, requirements, sub, available_gyms, discord){
+async function match_collector(MAIN, type, nickname, message, object, requirements, sub, available_gyms, discord, gym_collection){
   return new Promise(async function(resolve, reject) {
     let options = '';
     switch(type){
