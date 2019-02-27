@@ -512,7 +512,7 @@ function sub_collector(MAIN, type, nickname, message, object, requirements, sub,
           // MIN/MAX LEVEL CONFIGURATION
           case type.indexOf('Level') >= 0:
             if(parseInt(message.content) >= 1 && parseInt(message.content) <= 5){ collector.stop(message.content); }
-            else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
+            else if(message.content.toLowerCase() == 'all'){ collector.stop('All'); }
             else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); }
             break;
         }
