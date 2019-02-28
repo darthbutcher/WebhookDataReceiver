@@ -330,7 +330,7 @@ MAIN.Static_Map_Tile = (lat,lon,type) => {
       let marker = { img: `https://i.imgur.com/OGMRWnh.png`, width: 40, height: 40 }; marker.coord = [lon,lat];
       map.addMarker(marker);
       map.render(center, zoom)
-        .then(() => { map.image.save('./static/images/'+type+'_tiles/'+lat+','+lon+'.png'); })
+        .then(() => { map.image.save(MAIN.config.IMAGE_DIR+type+'_tiles/'+lat+','+lon+'.png'); })
         .then(() => { console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Map Tiles] Saved a new map tile to '+type+'_images.'); return resolve(url); })
         .catch(function(err){ console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO SAVE MAP TILE'); return resolve(undefined); });
     } return;
