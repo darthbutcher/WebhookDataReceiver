@@ -6,8 +6,8 @@
   },
   "fighting": {
     "immunes": ["Ghost"],
-    "weaknesses": ["Psychic", "Flying", "Poison", "Bug", "Ghost", "Fairy"],
-    "strengths": ["Psychic", "Flying", "Poison", "Bug", "Ghost", "Fairy"]
+    "weaknesses": ["Psychic", "Flying", "Poison", "Bug"],
+    "strengths": ["Dark","Ice","Normal","Rock","Steel","Bug"]
   },
   "flying": {
     "immunes": [],
@@ -75,8 +75,8 @@
     "strengths": ["Grass","Ground","Flying","Dragon"]
   },
   "dragon": {
-    "immunes": ["Fairy"],
-    "weaknesses": ["Steel","fairy"],
+    "immunes": [],
+    "weaknesses": ["Dragon","Ice","Steel"],
     "strengths": ["Dragon"]
   },
   "fairy": {
