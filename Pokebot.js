@@ -242,6 +242,19 @@ MAIN.on('message', message => { return Commands.run(MAIN, message); });
 // NOVEMBER.on('message', message => { return Commands.run(MAIN, message); });
 // OSCAR.on('message', message => { return Commands.run(MAIN, message); });
 
+// CHECK FOR MESSAGE REACTION ADDS
+// let reaction_add = require('./modules/reactions');
+// MAIN.on('raw', event => {
+// 	switch(true){
+// 		case event.t == null: return;
+// 		//case event.d.user_id == MAIN.id: return;
+// 		case event.t == 'MESSAGE_REACTION_ADD':
+//       let reaction_add = require('./modules/');
+//       return reactions.run(MAIN, event);
+// 		default: return;
+// 	}
+// });
+
 // SAVE A USER IN THE USER TABLE
 MAIN.Save_Sub = (message,server) => {
   MAIN.database.query('SELECT * FROM '+MAIN.config.DB.pokebot_db_name+'.info', function (error, info, fields) {
@@ -251,7 +264,7 @@ MAIN.Save_Sub = (message,server) => {
     quest_time = moment.tz(quest_time, timezone[0]).set({hour: split[0], minute: split[1] ,second:0 ,millisecond:0});
     quest_time = moment.tz(quest_time, MAIN.config.TIMEZONE).format('HH:mm');
     MAIN.database.query('INSERT INTO '+MAIN.config.DB.pokebot_db_name+'.users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [message.member.id, message.member.user.tag, server.name, , , , 'ACTIVE', next_bot, quest_time, message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+      [message.member.id, message.member.user.tag.replace(/[\W]+/g,''), server.name, , , , 'ACTIVE', next_bot, quest_time, message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
       if(error){ return console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO '+MAIN.config.DB.pokebot_db_name+'.users',error); }
       else{
         MAIN.sqlFunction('UPDATE '+MAIN.config.DB.pokebot_db_name+'.info SET user_next_bot = ?',[next_bot],undefined,undefined);

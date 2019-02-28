@@ -10,6 +10,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let hatch_time = MAIN.Bot_Time(raid.start, '1', timezone);
   let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
   let hatch_mins = Math.floor((raid.start-(time_now/1000))/60);
+
   let end_mins = Math.floor((raid.end-(time_now/1000))/60);
 
   // GET STATIC MAP TILE
