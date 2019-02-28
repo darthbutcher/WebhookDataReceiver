@@ -46,8 +46,8 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
                 if(sub.areas == 'No' || sub.areas == 'Gym Specified' || user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
 
                   // CHECK IF THE RAID LEVEL MATCHES THE USER'S SUB
-                  if(raid.level >= sub.min_lvl || sub.min_lvl.toLowerCase() == 'all' || sub.min_lvl == 'Boss Specified'){
-                    if(raid.level <= sub.max_lvl || sub.max_level.toLowerCase() == 'all' || sub.max_lvl == 'Boss Specified'){
+                  if(sub.min_lvl == 'Boss Specified' || raid.level >= sub.min_lvl || sub.min_lvl.toLowerCase() == 'all'){
+                    if(sub.max_lvl == 'Boss Specified' || raid.level <= sub.max_lvl || sub.max_lvl.toLowerCase() == 'all'){
                         Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
                     }
                   }
