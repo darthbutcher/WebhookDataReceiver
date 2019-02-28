@@ -36,19 +36,27 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
           // CHECK EACH USER SUBSCRIPTION
           raid_subs.subscriptions.forEach((sub,index) => {
 
-            // CHECK IF THE GYM NAME MATCHES THE USER'S SUB
+            // CHECK IF THE GYM ID MATCHES THE USER'S SUBSCRIPTION
             if(sub.id == raid.gym_id || sub.gym == 'All'){
 
               // CHECK IF THE RAID BOSS NAME MATCHES THE USER'S SUB
               if(sub.boss == MAIN.pokemon[raid.pokemon_id].name || sub.boss == 'All'){
 
-                // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
-                if(sub.areas == 'No' || sub.areas == 'Gym Specified' || user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
+                // CHECK THE SUBS MIN LEVEL
+                if(sub.min_lvl == 'Boss Specified' || raid.level >= sub.min_lvl || sub.min_lvl.toLowerCase() == 'all'){
 
-                  // CHECK IF THE RAID LEVEL MATCHES THE USER'S SUB
-                  if(sub.min_lvl == 'Boss Specified' || raid.level >= sub.min_lvl || sub.min_lvl.toLowerCase() == 'all'){
-                    if(sub.max_lvl == 'Boss Specified' || raid.level <= sub.max_lvl || sub.max_lvl.toLowerCase() == 'all'){
-                        Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
+                  // CHECK THE SUBS MAX LEVEL
+                  if(sub.max_lvl == 'Boss Specified' || raid.level <= sub.max_lvl || sub.max_lvl.toLowerCase() == 'all'){
+
+                    // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
+                    if(sub.areas == 'No' || sub.areas == 'Gym Specified'){
+                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
+                    }
+                    else if(user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
+                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
+                    }
+                    else{
+                      if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
                     }
                   }
                   else{
@@ -56,7 +64,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
                   }
                 }
                 else{
-                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
+                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Level Filter.'); }
                 }
               }
               else{
