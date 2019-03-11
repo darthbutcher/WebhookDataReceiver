@@ -85,14 +85,25 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_Embed('raid', raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
-      if(MAIN.config.Raid_Lobbies == 'ENABLED'){
-        // UPDATE BOSS NAME
-        let embed = JSON.stringify(raid_embed);
-        MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`,
-          [embed, raid.gym_id], function (error, record, fields) {
-            if(error){ console.error(error); }
-        });
-      }
+      // CHECK FOR RAID LOBBIES
+      setTimeout(function() {
+        if(MAIN.config.Raid_Lobbies == 'ENABLED'){
+          MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [raid.gym_id], function (error, record, fields) {
+            if(record[0]){
+
+              // UPDATE BOSS NAME
+              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`,
+                [db_embed, raid.gym_id], function (error, record, fields) {
+                  if(error){ console.error(error); }
+              });
+
+              // UPDATE CHANNEL NAME AND SEND A NEW EMBED
+              if(record[0].raid_channel){
+                MAIN.Send_Embed('raid', raid_embed, record[0].raid_channel);
+              }
+            }
+          });
+      }, 5000);
       break;
 
     // RAID IS A BOSS
@@ -152,23 +163,24 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // CHECK FOR RAID LOBBIES
-      if(MAIN.config.Raid_Lobbies == 'ENABLED'){
-        MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [raid.gym_id], function (error, record, fields) {
-          if(record[0]){
+      setTimeout(function() {
+        if(MAIN.config.Raid_Lobbies == 'ENABLED'){
+          MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [raid.gym_id], function (error, record, fields) {
+            if(record[0]){
 
-            console.info('UPDATING');
-            // UPDATE BOSS NAME
-            MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`,
-              [db_embed, raid.gym_id], function (error, record, fields) {
-                if(error){ console.error(error); }
-            });
+              // UPDATE BOSS NAME
+              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`,
+                [db_embed, raid.gym_id], function (error, record, fields) {
+                  if(error){ console.error(error); }
+              });
 
-            // UPDATE CHANNEL NAME AND SEND A NEW EMBED
-            if(record[0].raid_channel){
-              MAIN.Send_Embed('raid', raid_embed, record[0].raid_channel);
+              // UPDATE CHANNEL NAME AND SEND A NEW EMBED
+              if(record[0].raid_channel){
+                MAIN.Send_Embed('raid', raid_embed, record[0].raid_channel);
+              }
             }
-          }
-        });
-      } break;
+          });
+      }, 5000);
+    } break;
   } return;
 }
