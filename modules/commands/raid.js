@@ -4,41 +4,14 @@ const path = require('path');
 const MySQL = require('mysql');
 const Fuzzy = require('fuzzy');
 const Discord = require('discord.js');
-const pokemon = require(path.join(__dirname, '../../static/pokemon.json'));
 const InsideGeojson = require('point-in-geopolygon');
 const config = ini.parse(fs.readFileSync(path.join(__dirname, '../../config/config.ini'), 'utf-8'));
-
-const database = MySQL.createConnection({
-  host: config.DB.host,
-  user: config.DB.username,
-  password: config.DB.password,
-  port: config.DB.port
-});
-
-var gym_array = [], pokemon_array;
-function load_arrays(){
-  database.query('SELECT * FROM '+config.DB.rdm_db_name+'.gym WHERE name is not NULL', function (error, gyms, fields){
-    if(gyms){
-      gyms.forEach((gym,index) => {
-        let record = {};
-        record.name = gym.name;
-        record.id = gym.id;
-        record.lat = gym.lat;
-        record.lon = gym.lon;
-        gym_array.push(record);
-      });
-    }
-  });
-  pokemon_array = Object.keys(pokemon).map(i => pokemon[i].name);
-} load_arrays();
-
-setTimeout(function() { load_arrays(); }, 21600000);
 
 module.exports.run = async (MAIN, message, prefix, discord) => {
 
   // LOAD ALL GYMS WITHIN DISCORD GEOFENCE TO AN ARRAY FOR FUZZY
   let available_gyms = [], gym_collection = new Discord.Collection();
-  await gym_array.forEach((gym,index) => {
+  await MAIN.gym_array.forEach((gym,index) => {
     if(InsideGeojson.polygon(discord.geofence, [gym.lon,gym.lat])){
       available_gyms.push(gym.name); gym_collection.set(gym.name, gym);
     }
@@ -64,7 +37,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 // PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
 function subscription_status(MAIN, message, nickname, reason, prefix, available_gyms, discord, gym_collection){
-  MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], function (error, user, fields) {
     if(user[0].raids_status == 'ACTIVE' && reason == 'resume'){
       let already_active = new Discord.RichEmbed().setColor('ff0000')
         .setAuthor(nickname, message.member.user.displayAvatarURL)
@@ -90,7 +63,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix, available_
     else{
       if(reason == 'pause'){ change = 'PAUSED'; }
       if(reason == 'resume'){ change = 'ACTIVE'; }
-      MAIN.database.query('UPDATE pokebot.users SET raids_status = ? WHERE user_id = ? AND discord_id = ?', [change, message.member.id, message.guild.id], function (error, user, fields) {
+      MAIN.pdb.query('UPDATE users SET raids_status = ? WHERE user_id = ? AND discord_id = ?', [change, message.member.id, message.guild.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -106,7 +79,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix, available_
 
 // SUBSCRIPTION REMOVE FUNCTION
 async function subscription_view(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection){
-  MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], function (error, user, fields) {
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].raids){
@@ -192,9 +165,10 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
     if(sub.gym == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
     else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
     else{
-      console.log('192',sub.gym);
       if(sub.gym == 'All'){ sub.gym = 'All'; got_name = true; }
       else if(!Array.isArray(sub.gym) && sub.gym.split(',')[0] == 'fuzzy'){
+        console.log(sub.gym);
+        console.log(sub.gym.split(',')[1]);
         let results = Fuzzy.filter(sub.gym.split(',')[1], available_gyms);
         let matches = results.map(function(el) { return el.string; });
         if(!matches[0]){
@@ -205,7 +179,6 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
           else if(sub.gym == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
           else{
             let collection_match = gym_collection.get(matches[user_choice]);
-            console.log(collection_match);
             if(collection_match){
               sub.id = collection_match.id;
               sub.gym = collection_match.name;
@@ -224,11 +197,9 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
           got_name = true;
         }
       } else{
-        console.log('224',sub.gym[0].id);
         sub.id = sub.gym[0].id;
         sub.gym = sub.gym[0].name;
         got_name = true;
-        console.log(sub);
       }
     }
   } while(got_name == false);
@@ -265,7 +236,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
   else if(confirm == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix, available_gyms, discord, gym_collection); }
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
     let raid = '';
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].raids){
@@ -293,7 +264,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
     let new_subs = JSON.stringify(raid);
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query('UPDATE pokebot.users SET raids = ? WHERE user_id = ? AND discord_id = ?', [new_subs, message.member.id, message.guild.id], function (error, user, fields) {
+    MAIN.pdb.query(`UPDATE users SET raids = ? WHERE user_id = ? AND discord_id = ?`, [new_subs, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -313,7 +284,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced, av
 async function subscription_remove(MAIN, message, nickname, prefix, available_gyms, discord, gym_collection){
 
   // FETCH USER FROM THE USERS TABLE
-  MAIN.database.query('SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?', [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // END IF USER HAS NO SUBSCRIPTIONS
     if(!user[0].raids){
@@ -333,8 +304,6 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
 
       // PARSE THE STRING TO AN OBJECT
       let raids = JSON.parse(user[0].raids), found = false, embed_title = '';
-
-      console.log(raids.subscriptions);
 
       // FETCH NAME OF POKEMON TO BE REMOVED AND CHECK RETURNED STRING
       let remove_id = await sub_collector(MAIN,'Remove',nickname,message,raids,'Type the Number of the Subscription you want to remove.', undefined);
@@ -359,13 +328,11 @@ async function subscription_remove(MAIN, message, nickname, prefix, available_gy
           embed_title = 'Subscription #'+remove_id+' Removed!'
       }
 
-      console.log(raids)
-
       // STRINGIFY THE OBJECT
       let new_subs = JSON.stringify(raids);
 
       // UPDATE THE USER'S RECORD
-      MAIN.database.query('UPDATE pokebot.users SET raids = ? WHERE user_id = ? AND discord_id = ?', [new_subs, message.member.id, message.guild.id], function (error, user, fields) {
+      MAIN.pdb.query(`UPDATE users SET raids = ? WHERE user_id = ? AND discord_id = ?`, [new_subs, message.member.id, message.guild.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -472,7 +439,7 @@ function sub_collector(MAIN, type, nickname, message, object, requirements, sub,
           case type.indexOf('Gym') >= 0:
             if(message.content.toLowerCase() == 'all'){ collector.stop('All'); }
             else{
-              MAIN.database.query('SELECT * FROM '+MAIN.config.DB.rdm_db_name+'.gym WHERE name = ?', [message.content], async function (error, gyms, fields) {
+              MAIN.rdmdb.query(`SELECT * FROM gym WHERE name = ?`, [message.content], async function (error, gyms, fields) {
                 if(!gyms){ return collector.stop('fuzzy,'+message.content); }
                 else{
                   await gyms.forEach((gym,index) => {
@@ -600,7 +567,7 @@ async function match_collector(MAIN, type, nickname, message, object, requiremen
         });
         options = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
-          .setTitle('Possible matches for \''+message.content+'\' were found.')
+          .setTitle('Possible matches for \''+sub.gym.split(',')[1]+'\' were found.')
           .setDescription(match_desc)
           .setFooter('Type the number of the gym you wish to select or type \'cancel\'.'); break;
 
