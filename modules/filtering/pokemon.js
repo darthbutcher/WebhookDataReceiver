@@ -36,6 +36,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         case filter.Post_Without_IV:
           switch(true){
             case sighting.cp > 0: break;
+            case filter[MAIN.pokemon[sighting.pokemon_id].name] == 'False': break;
             default:
               Send_Pokemon.run(MAIN, false, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone); break;
           }
