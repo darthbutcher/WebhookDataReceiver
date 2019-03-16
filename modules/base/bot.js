@@ -306,7 +306,7 @@ MAIN.Get_Sprite = (form, id) => {
     case 3: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/'+id+'.png'; break;
   }
   switch(true){
-    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; }
+    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
     case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;
   }
   return sprite_url;
@@ -603,6 +603,7 @@ MAIN.start = async (type) => {
   await load_data();
   await update_database();
   await load_arrays();
+  Reactions.startInterval(MAIN);
   switch(type){
     case 'startup': return bot_login(); break;
     case 'reload': return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Re-Load] Pokébot has re-loaded.'); break;
@@ -613,8 +614,7 @@ MAIN.start('startup');
 
 // INTERVAL FUNCTION TO SEND QUEST SUBSCRIPTION DMS
 setInterval(function() {
-  let timeNow = new Date().getTime();
-  MAIN.pdb.query('SELECT * FROM quest_alerts WHERE alert_time < '+timeNow, function (error, alerts, fields) {
+  MAIN.pdb.query(`SELECT * FROM quest_alerts WHERE alert_time < UNIX_TIMESTAMP()*1000`, function (error, alerts, fields) {
     if(alerts && alerts[0]){
       alerts.forEach( async (alert,index) => {
         setTimeout(async function() {
@@ -637,18 +637,18 @@ setInterval(function() {
         }, 2000*index);
       });
       console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Sent '+alerts.length+' Quest Alerts out.');
-      MAIN.pdb.query('DELETE FROM quest_alerts WHERE alert_time < '+timeNow, function (error, alerts, fields) { if(error){ console.error; } });
+      MAIN.pdb.query(`DELETE FROM quest_alerts WHERE alert_time < UNIX_TIMESTAMP()*1000`, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
-  // MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < `+timeNow, function (error, active_raids, fields) {
-  //   if(active_raids[0]){
-  //     active_raids.forEach( async (raid,index) => {
-  //       let raid_channel = MAIN.channels.get(raid.raid_channel);
-  //       raid_channel.delete().catch(console.error);
-  //     });
-  //     MAIN.pdb.query('DELETE FROM active_raids WHERE expire_time < '+timeNow, function (error, active_raids, fields) { if(error){ console.error; } });
-  //   }
-  // }); return;
+  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-120`, function (error, active_raids, fields) {
+    if(active_raids[0]){
+      active_raids.forEach( async (raid,index) => {
+        let raid_channel = MAIN.channels.get(raid.raid_channel);
+        if(raid_channel){ raid_channel.delete().catch(console.error); }
+      });
+      MAIN.pdb.query(`DELETE FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-120`, function (error, active_raids, fields) { if(error){ console.error; } });
+    }
+  }); return;
 }, 60000);
 
 module.exports = MAIN;

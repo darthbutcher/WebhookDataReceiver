@@ -98,7 +98,7 @@
     }
   ],
   "8": [{
-      "sql": "CREATE TABLE IF NOT EXISTS active_raids (gym_id TEXT, gym_name TEXT, guild_id TEXT, area TEXT, boss_name TEXT, active TEXT, end_time TEXT, expire_time TEXT, embed TEXT, raid_channel TEXT);",
+      "sql": "CREATE TABLE IF NOT EXISTS active_raids (gym_id TEXT, gym_name TEXT, initiated_by TEXT, guild_id TEXT, channel_id TEXT, area TEXT, boss_name TEXT, active TEXT, end_time TEXT, expire_time TEXT, embed TEXT, raid_channel TEXT);",
       "data": "",
       "gLog": "Created active_raids table",
       "bLog": "[Pokébot] Failed to Create active_raids"

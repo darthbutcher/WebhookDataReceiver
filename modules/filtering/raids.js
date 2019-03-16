@@ -2,40 +2,43 @@ delete require.cache[require.resolve('../embeds/raids.js')];
 const Send_Raid = require('../embeds/raids.js');
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timezone) => {
 
   if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Received a Raid.'); }
 
   // FILTER FEED TYPE FOR EGG, BOSS, OR BOTH
-  let type = '';
+  let type = '', gym_id = raid.gym_id;
   if(raid.cp > 0){ type = 'Boss'; boss_name = MAIN.pokemon[raid.pokemon_id].name; }
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
   // UPDATE/INSERT ACTIVE RAIDS
-  if(MAIN.config.Raid_Lobbies == 'ENABLED'){
-    await MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [raid.gym_id], async function (error, record, fields) {
+  if(MAIN.config.Raid_Lobbies == 'ENABLED' && server.id){
+    MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
       if(record[0]){
 
+        // UPDATE CHANNEL NAME
+        if(record[0].raid_channel){
+          let raid_channel = MAIN.channels.get(record[0].raid_channel);
+          raid_channel.setName(boss_name+'_'+embed_area).catch(console.error);
+        }
+
         // UPDATE BOSS NAME
-        await MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`,
-          [boss_name, raid.gym_id], function (error, record, fields) {
-            if(error){ console.error(error); }
+        MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [boss_name, gym_id], function (error, record, fields) {
+          if(error){ console.error(error); }
         });
       } else {
 
         // INSERT INTO ACTIVE RAIDS
         let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
-        await MAIN.pdb.query("INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?)",
-          [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end], function (error, record, fields) {
-            if(error){ console.error(error); }
-            else{ return; }
+        MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?)`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end], function (error, record, fields) {
+          if(error){ console.error(error); }
         });
       }
     });
   }
 
   // CHECK EACH FEED FILTER
-  MAIN.Raid_Channels.forEach( async (raid_channel,index) => {
+  MAIN.Raid_Channels.forEach((raid_channel,index) => {
 
     // DEFINE MORE VARIABLES
     let geofences = raid_channel[1].geofences.split(',');
