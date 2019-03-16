@@ -19,7 +19,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
         // UPDATE CHANNEL NAME
         if(record[0].raid_channel){
           let raid_channel = MAIN.channels.get(record[0].raid_channel);
-          raid_channel.setName(boss_name+'_'+embed_area).catch(console.error);
+          raid_channel.setName(gym_name).catch(console.error);
         }
 
         // UPDATE BOSS NAME
