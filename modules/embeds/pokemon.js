@@ -31,12 +31,16 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // GET GENDER
   let gender = '';
   switch(sighting.gender){
-    case 1: gender = ' | ♂Male'; break;
-    case 2: gender = ' | ♀Female'; break;
+    case 1: gender = ' |'+MAIN.emotes.male; break;
+    case 2: gender = ' |'+MAIN.emotes.female; break;
   }
 
+  // GET ROLEID
+  let roleID = '';
+  if (internal_value == 100){ roleID = '@everyone'; } else { roleID = ''; }
+
   // DESPAWN VERIFICATION
-  let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : '';
+  let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
 
   // GET WEATHER BOOST
   let weather_boost = '';
@@ -56,8 +60,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     .setThumbnail(pokemon_url)
   if(has_iv == false){
     pokemon_embed
-      .addField(pokemon_name+' (*'+hide_mins+'m '+hide_secs+'s*)')
-      .setDescription('Disappears: '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '+verified+'\n'+pokemon_type+weather_boost, false)
+      .addField(pokemon_name+gender, 'Disappears: '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '+verified+'\n'+pokemon_type+weather_boost)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
                                            +'[Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)', false);
@@ -87,7 +90,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
   } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
     if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
-    return MAIN.Send_Embed('pokemon', pokemon_embed, target.id);
+    return MAIN.Send_Embed('pokemon', roleID, pokemon_embed, target.id);
   } else{ return; }
 
 }

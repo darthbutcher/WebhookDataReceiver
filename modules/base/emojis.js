@@ -371,9 +371,19 @@ function LoadEmojis(bot, serverIDs){
           if(this.checkYes) { this.checkYesReact = this.checkYes; this.checkYes = this.checkYes.toString() }
         }
 
-				if(!this.yellowQuestion){
+	if(!this.yellowQuestion){
           this.yellowQuestion = guild.emojis.find(emoji => emoji.name === "yellow_question");
           if(this.yellowQuestion) { this.yellowQuestionReact = this.yellowQuestion; this.yellowQuestion = this.yellowQuestion.toString() }
+        }
+
+        if(!this.male){
+          this.male = guild.emojis.find(emoji => emoji.name === "male");
+          if(this.male) { this.maleReact = this.male; this.male = this.male.toString() }
+        }
+
+        if(!this.female){
+          this.female = guild.emojis.find(emoji => emoji.name === "female");
+          if(this.female) { this.femaleReact = this.female; this.female = this.female.toString() }
         }
       }
     }

@@ -168,9 +168,9 @@ MAIN.on('raw', event => {
 });
 
 // CHOOSE NEXT BOT AND SEND EMBED
-MAIN.Send_Embed = (type, embed, channel_id) => {
+MAIN.Send_Embed = (type, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
-	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(embed)
+	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
     .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies == 'ENABLED'){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
     .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
 }
@@ -301,9 +301,9 @@ MAIN.Bot_Time = (time,type,timezone) => {
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
   switch(id.toString().length){
-    case 1: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/00'+id+'.png'; break;
-    case 2: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/0'+id+'.png'; break;
-    case 3: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/'+id+'.png'; break;
+    case 1: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
+    case 2: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
+    case 3: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
   }
   switch(true){
     case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
