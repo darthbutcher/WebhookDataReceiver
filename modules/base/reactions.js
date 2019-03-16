@@ -40,14 +40,13 @@ reactions.run = (MAIN, event) => {
               } else{
 
                 // SET THE CHANNEL NAME
-                let channel_name = record[0].boss_name+'_'+record[0].area
+                let channel_name = record[0].gym_name
 
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
                   // SET THE CATEGORY ID
-                  new_channel.setParent(discord.raid_lobbies_category_id).then( new_channel => {
-
+                  new_channel.setParent(channel.parent).then( new_channel => {
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                     let channel_embed = new Discord.RichEmbed()
@@ -70,6 +69,7 @@ reactions.run = (MAIN, event) => {
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
+                  new_channel.lockPermissions();
                   });
                 });
               }

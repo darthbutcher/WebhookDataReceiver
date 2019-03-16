@@ -31,9 +31,11 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // GET GENDER
   let gender = '';
   switch(sighting.gender){
-    case 1: gender = ' |'+MAIN.emotes.male; break;
-    case 2: gender = ' |'+MAIN.emotes.female; break;
+    case 1: gender = ' '+MAIN.emotes.male; break;
+    case 2: gender = ' '+MAIN.emotes.female; break;
   }
+  // Round IV
+  internal_value = Math.round(internal_value);
 
   // GET ROLEID
   let roleID = '';
@@ -60,7 +62,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     .setThumbnail(pokemon_url)
   if(has_iv == false){
     pokemon_embed
-      .addField(pokemon_name+gender, 'Disappears: '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '+verified+'\n'+pokemon_type+weather_boost)
+      .addField(pokemon_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
                                            +'[Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)', false);
@@ -77,9 +79,9 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
     pokemon_embed
-      .addField(pokemon_name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%) (*'+hide_mins+'m '+hide_secs+'s*)\n'
+      .addField(pokemon_name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
                +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField('Disappears: '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '+verified, pokemon_type+weather_boost, false)
+      .addField(verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ', pokemon_type+weather_boost, false)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
                                            +'[Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes)', false);

@@ -27,6 +27,9 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
     default: defending_team = 'Uncontested Gym';
   }
 
+  //role ID mention
+  let roleID ='';
+
   // GET RAID LEVEL
   let embed_color = '';
   switch(raid.level){
@@ -63,9 +66,6 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         case 5: embed_thumb = 'https://i.imgur.com/jaTCRXJ.png'; break;
       }
 
-      //role ID mention
-      let roleID ='';
-
       // CREATE THE EGG EMBED
       raid_embed = new Discord.RichEmbed()
         .setThumbnail(embed_thumb)
@@ -85,7 +85,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', raid_embed, target.id);
+        MAIN.Send_Embed('raid', roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED
