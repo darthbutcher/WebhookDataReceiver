@@ -1,20 +1,7 @@
-//#########################################################//
-//#########################################################//
-//#####    ____  _    _ ______  _____ _______ _____   #####//
-//#####   / __ \| |  | |  ____|/ ____|__   __/ ____|  #####//
-//#####  | |  | | |  | | |__  | (___    | | | (___    #####//
-//#####  | |  | | |  | |  __|  \___ \   | |  \___ \   #####//
-//#####  | |__| | |__| | |____ ____) |  | |  ____) |  #####//
-//#####   \___\_\\____/|______|_____/   |_| |_____/   #####//
-//#####              QUEST SUBSCRIPTIONS              #####//
-//#########################################################//
-//#########################################################//
-
-const moment = require('moment');
-const Discord = require('discord.js');
-
 delete require.cache[require.resolve('../embeds/quests.js')];
 const Send_Quest = require('../embeds/quests.js');
+const Discord = require('discord.js');
+const moment = require('moment');
 
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
 
@@ -23,7 +10,6 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   switch(quest.rewards[0].type){
     // PLACEHOLDER
     case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
-
     // ITEM REWARDS (EXCEPT STARDUST)
     case 2:
       simple_reward = MAIN.proto.values['item_'+quest.rewards[0].info.item_id];
@@ -32,27 +18,22 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
         if(quest_reward.indexOf('Berry') >= 0){ quest_reward = quest_reward.toString().slice(0,-1)+'ies'; }
         else{ quest_reward = quest_reward+'s'; }
       } break;
-
     // STARDUST REWARD
     case 3: quest_reward = quest.rewards[0].info.amount+' Stardust'; break;
-
     // PLACEHOLDER
     case 4: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
-
     // PLACEHOLDER
     case 5: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
-
     // PLACEHOLDER
     case 6: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
-
     // ENCOUNTER REWARDS
     case 7:
       simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
-      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
+      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter';
       if(quest.rewards[0].info.shiny == true){
         simple_reward = 'Shiny '+simple_reward;
         quest_reward = 'Shiny '+quest_reward;
-      }
+      } break;
   }
 
   // GET THE QUEST TASK
@@ -61,7 +42,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] Received '+quest_reward+' Quest for '+server.name+'.'); }
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE discord_id = ? AND status = ?", [server.id, 'ACTIVE'], function (error, users, fields){
+  MAIN.pdb.query(`SELECT * FROM users WHERE discord_id = ? AND status = ?`, [server.id, 'ACTIVE'], function (error, users, fields){
     if(users && users[0]){
       users.forEach((user,index) => {
 
@@ -75,7 +56,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
         let user_areas = user.geofence.split(',');
 
         // CHECK IF THE USER HAS SUBS
-        if(user.quests){
+        if(user.quests && user.quests_status == 'ACTIVE'){
 
           // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
           if(user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
@@ -89,13 +70,11 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
               // PREPARE ALERT TO SEND TO USER
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] Preparing '+quest_reward+' Quest for DM.'); }
               send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user, timezone);
-            }
-            else{
+            } else{
               // DEBUG
               if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] '+quest_reward+' Did Not Pass '+user.user_name+'\'s Reward Filters.'); }
             }
-          }
-          else{
+          } else{
             // DEBUG
             if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] '+quest_reward+' Did Not Pass '+user.user_name+'\'s Area Filters. '+user.geofence+' | '+server.name+','+main_area+','+sub_area); }
           }
@@ -125,7 +104,6 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
   // DETERMINE THE QUEST TASK
   let quest_task = '';
   switch(true){
-
     // CATCHING SPECIFIC POKEMON
     case quest.template.indexOf('catch')>=0:
       if(quest.conditions && quest.conditions[0]){
@@ -133,7 +111,6 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
           quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
         } else{ quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.'; }
       } else{ quest_task = 'Catch '+quest.target+' Pokémon.'; } break;
-
     // LANDING SPECIFIC THROWS
     case quest.template.indexOf('great') >= 0:
     case quest.template.indexOf('curveball') >= 0:
@@ -142,55 +119,43 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
       if(quest.conditions[1]){ quest_task = 'Throw '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[1].type]+'(s).'; }
       else if(quest.target > 1){ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throws in a Row.'; }
       else{ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throw.'; } break;
-
     // COMPLETE RAIDS
     case quest.template.indexOf('raid') >= 0:
       if(!quest.conditions[0]){ quest_task='Battle in '+quest.target+' Raid.'; }
       else if(quest.conditions[0].type == 6){ quest_task = 'Battle in '+quest.target+' Raid(s).'; }
       else{ quest_task='Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
-
     // SEND GIFTS TO FRIENDS
     case quest.template.indexOf('gifts') >= 0:
       quest_task = 'Send '+quest.target+' Gift(s).'; break;
-
     // GYM BATTLING
     case quest.template.indexOf('gym') >= 0:
       if(quest.target > 1){ quest_task = 'Battle '+quest.target+' Times in a Gym.'; }
       else{ quest_task = 'Battle '+quest.target+' Time in a Gym.'; } break;
-
     // BERRY GYM POKEMON
     case quest.template.indexOf('berry') >= 0:
       quest_task = 'Berry Pokémon '+quest.target+' Time(s) in a Gym.'; break;
-
     // HATCH EGGS
     case quest.template.indexOf('hatch') >= 0:
       if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
       else{ quest_task = 'Hatch '+quest.target+' Egg.'; } break;
-
     // SPIN POKESTOPS
     case quest.template.indexOf('spin') >= 0:
       quest_task = 'Spin '+quest.target+' Pokéstops.'; break;
-
     // EVOLVE POKEMON
     case quest.template.indexOf('evolve') >= 0:
       quest_task = 'Evolve '+quest.target+' Pokémon.'; break;
-
     // BUDDY TASKS
     case quest.template.indexOf('buddy') >= 0:
       quest_task = 'Get '+quest.target+' Buddy Walking Candy.'; break;
-
     // POWER UP POKEMON
     case quest.template.indexOf('powerup') >= 0:
       quest_task = 'Power Up '+quest.target+' Pokémon.'; break;
-
     // TRADE POKEMON
     case quest.template.indexOf('trade') >= 0:
       quest_task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
-
     // TRANSFER POKEMON
     case quest.template.indexOf('transfer') >= 0:
       quest_task = 'Transfer '+quest.target+' Pokémon.'; break;
-
     // USE SPECIFIC CHARGE MOVES
     case quest.template.indexOf('charge') >= 0:
       if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
@@ -228,13 +193,12 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
     quest_embed = JSON.stringify(quest_embed);
 
     // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
-    return MAIN.database.query(`INSERT INTO pokebot.quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+    return MAIN.pdb.query(`INSERT INTO quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [user.user_id, user.user_name.replace(/[\W]+/g,''), quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
-        if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO pokebot.quest_alerts',error); }
+        if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO quest_alerts',error); }
         else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions-Quest] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
     });
-  }
-  else{
+  } else{
     return console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.');
   } return;
 }

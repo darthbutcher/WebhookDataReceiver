@@ -28,7 +28,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 // PAUSE OR RESUME POKEMON SUBSCRIPTIOONS
 function subscription_status(MAIN, message, nickname, reason, prefix){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], function (error, user, fields) {
     if(user[0].pokemon_status == 'ACTIVE' && reason == 'resume'){
       let already_active = new Discord.RichEmbed().setColor('ff0000')
         .setAuthor(nickname, message.member.user.displayAvatarURL)
@@ -54,7 +54,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix){
     else{
       if(reason == 'pause'){ change = 'PAUSED'; }
       if(reason == 'resume'){ change = 'ACTIVE'; }
-      MAIN.database.query("UPDATE pokebot.users SET pokemon_status = ? WHERE user_id = ? AND discord_id = ?", [change, message.member.id, message.guild.id], function (error, user, fields) {
+      MAIN.pdb.query(`UPDATE users SET pokemon_status = ? WHERE user_id = ? AND discord_id = ?`, [change, message.member.id, message.guild.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -73,7 +73,7 @@ function subscription_status(MAIN, message, nickname, reason, prefix){
 
 // SUBSCRIPTION REMOVE FUNCTION
 async function subscription_view(MAIN, message, nickname, prefix){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], function (error, user, fields) {
 
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].pokemon){
@@ -166,12 +166,12 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     sub.type = 'advanced';
 
     // RETRIEVE MIN IV FROM USER
-    sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
+    sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100 -OR- specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
     if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
     else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
     // RETRIEVE MAX IV FROM USER
-    sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
+    sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100 -OR- specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
     if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
     else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
@@ -217,7 +217,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     sub.gender = 'ALL';
 
     // RETRIEVE MIN IV FROM USER
-    sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
+    sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100 -OR- specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
     if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
     else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
@@ -238,7 +238,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
   else if(sub.min_lvl == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
     let pokemon = '';
     // CHECK IF THE USER ALREADY HAS SUBSCRIPTIONS AND ADD
     if(!user[0].pokemon){
@@ -267,7 +267,6 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
         pokemon.subscriptions.push(sub);
       }
       else{
-        console.log('4')
         // CONVERT TO OBJECT AND CHECK EACH SUBSCRIPTION
         pokemon = JSON.parse(user[0].pokemon);
         pokemon.subscriptions.forEach((subscription,index) => {
@@ -285,7 +284,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     let newSubs = JSON.stringify(pokemon);
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET pokemon = ? WHERE user_id = ? AND discord_id = ?", [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
+    MAIN.pdb.query(`UPDATE users SET pokemon = ? WHERE user_id = ? AND discord_id = ?`, [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -309,7 +308,7 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
 async function subscription_remove(MAIN, message, nickname, prefix){
 
   // FETCH USER FROM THE USERS TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // END IF USER HAS NO SUBSCRIPTIONS
     if(!user[0].pokemon){
@@ -373,7 +372,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
       let newSubs = JSON.stringify(pokemon);
 
       // UPDATE THE USER'S RECORD
-      MAIN.database.query("UPDATE pokebot.users SET pokemon = ? WHERE user_id = ? AND discord_id = ?", [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
+      MAIN.pdb.query(`UPDATE users SET pokemon = ? WHERE user_id = ? AND discord_id = ?`, [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
         if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
         else{
           let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -392,7 +391,7 @@ async function subscription_remove(MAIN, message, nickname, prefix){
 
 // SUBSCRIPTION MODIFY FUNCTION
 async function subscription_modify(MAIN, message, nickname, prefix){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
     if(!user[0].pokemon){
       return message.reply('You do not have any active Pokémon subscriptions.').then(m => m.delete(5000)).catch(console.error);
     }
@@ -448,12 +447,12 @@ async function subscription_modify(MAIN, message, nickname, prefix){
           else if(sub.max_cp == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MIN IV FROM USER
-          sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
+          sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
           if(sub.min_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
           else if(sub.min_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
           // RETRIEVE MAX IV FROM USER
-          sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values or type \'All\'. Type \'Cancel\' to Stop.',sub);
+          sub.max_iv = await sub_collector(MAIN,'Maximum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100, specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
           if(sub.max_iv.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
           else if(sub.max_iv == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
@@ -490,7 +489,7 @@ async function subscription_modify(MAIN, message, nickname, prefix){
           let newSubs = JSON.stringify(pokemon);
 
           // UPDATE THE USER'S RECORD
-          MAIN.database.query("UPDATE pokebot.users SET pokemon = ? WHERE user_id = ? AND discord_id = ?", [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
+          MAIN.pdb.query(`UPDATE users SET pokemon = ? WHERE user_id = ? AND discord_id = ?`, [newSubs, message.member.id, message.guild.id], function (error, user, fields) {
             if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
             else{
 
@@ -543,7 +542,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('Are you sure you want to Remove ALL of your subscriptions?')
-          .setDescription('If you wanted to remove an "ALL" pokemon filter, you need to specify the number associated with it. \"ALL-1\", \"ALL-2\", etc')
+          .setDescription('If you wanted to remove an `ALL` pokemon filter, you need to specify the number associated with it. \`ALL-1\`, \`ALL-2\`, etc')
           .setFooter(requirements); break;
 
       // REMOVEAL EMBED
@@ -625,7 +624,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
 
           // MIN/MAX IV CONFIGURATION
           case type.indexOf('IV')>=0:
-            if(parseInt(message.content) >= 0 && parseInt(message.content) <= 100){ collector.stop(message.content); }
+            if(message.content.length <= 3 && parseInt(message.content) >= 0 && parseInt(message.content) <= 100){ collector.stop(message.content); }
             else if(message.content.length <= 8 && message.content.indexOf('/') >= 0){ collector.stop(message.content); }
             else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
             else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); }

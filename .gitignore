@@ -22,6 +22,7 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 
+Oauth2.js
 config/*.ini
 filters/*.json
 config/*.json
@@ -40,3 +41,7 @@ modules/*.DS_Store
 modules/commands/test.js
 modules/stripe
 modules/oauth2
+files/nginx/*.conf
+oauth2-stripe/*.ini
+oauth2-stripe/*.js
+oauth2-stripe/templates

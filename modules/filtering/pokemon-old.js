@@ -1,19 +1,6 @@
-//#############################################################//
-//#############################################################//
-//#####   _____   ____  _  ________ __  __  ____  _   _   #####//
-//#####  |  __ \ / __ \| |/ /  ____|  \/  |/ __ \| \ | |  #####//
-//#####  | |__) | |  | | ' /| |__  | \  / | |  | |  \| |  #####//
-//#####  |  ___/| |  | |  < |  __| | |\/| | |  | | . ` |  #####//
-//#####  | |    | |__| | . \| |____| |  | | |__| | |\  |  #####//
-//#####  |_|     \____/|_|\_\______|_|  |_|\____/|_| \_|  #####//
-//#####                  POKEMON FEEDS                    #####//
-//#############################################################//
-//#############################################################//
-
+delete require.cache[require.resolve('../embeds/pokemon.js')];
+const Send_Pokemon = require('../embeds/pokemon.js');
 const Discord = require('discord.js');
-
-delete require.cache[require.resolve('./embeds/pokemon.js')];
-const Send_Pokemon = require('./embeds/pokemon.js');
 
 module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
 
@@ -60,7 +47,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                   if(filter.min_cp <= sighting.cp && filter.max_cp >= sighting.cp){
 
                     // SEND POKEMON TO DISCORD
-                    if(MAIN.debug.Pokemon=='ENABLED' && server.name == MAIN.debug.Target){ console.info('[DEBUG] [pokemon.js] Pokemon matched filters for '+server.name+'. '+pokemon_channel[1].filter+'.'); return; }
+                    if(MAIN.debug.Pokemon=='ENABLED'filter.){ console.info('[DEBUG] [pokemon.js] Pokemon matched filters for '+server.name+'. '+pokemon_channel[1].filter+'.'); return; }
                     return Send_Pokemon.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
                   }
                   else{

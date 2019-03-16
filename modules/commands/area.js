@@ -19,10 +19,9 @@ module.exports.run = async (MAIN, message, prefix, server) => {
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What would you like to do with your Area Subscriptions?')
-    .setDescription('`view`  »  View your Subscriptions.\n'
-                   +'`add`  »  Add a Subscriptions.\n'
-                   +'`remove`  »  Remove a Subscriptions.\n'
-                   +'`pause` or `resume`  »  Pause/Resume Raid Subscriptions.')
+    .setDescription('`view`  »  View your Areas.\n'
+                   +'`add`  »  Add an Area.\n'
+                   +'`remove`  »  Remove an Area.')
     .setFooter('Type the action, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
@@ -59,7 +58,7 @@ module.exports.run = async (MAIN, message, prefix, server) => {
 
 // AREA VIEW FUNCTION
 async function subscription_view(MAIN, message, nickname, prefix, area_array, server){
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], function (error, user, fields) {
 
     let area_list = '';
     if(!user[0].geofence){ area_list = 'None'; }
@@ -112,7 +111,7 @@ async function subscription_view(MAIN, message, nickname, prefix, area_array, se
 async function subscription_create(MAIN, message, nickname, prefix, area_array, server){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
@@ -138,7 +137,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array, 
     areas = areas.toString();
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query("UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?", [areas, message.member.id, message.guild.id], function (error, user, fields) {
+    MAIN.pdb.query(`UPDATE users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [areas, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(5000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -185,7 +184,7 @@ async function subscription_create(MAIN, message, nickname, prefix, area_array, 
 async function subscription_remove(MAIN, message, nickname, prefix, area_array, server){
 
   // PULL THE USER'S SUBSCRITIONS FROM THE USER TABLE
-  MAIN.database.query("SELECT * FROM pokebot.users WHERE user_id = ? AND discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+  MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
     let sub = await sub_collector(MAIN, 'Name', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
@@ -205,7 +204,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array, 
     else{ areas = areas.toString(); }
 
     // UPDATE THE USER'S RECORD
-    MAIN.database.query(`UPDATE pokebot.users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [areas, message.member.id, message.guild.id], function (error, user, fields) {
+    MAIN.pdb.query(`UPDATE users SET geofence = ? WHERE user_id = ? AND discord_id = ?`, [areas, message.member.id, message.guild.id], function (error, user, fields) {
       if(error){ console.error(error); return message.reply('There has been an error, please contact an Admin to fix.').then(m => m.delete(10000)).catch(console.error); }
       else{
         let subscription_success = new Discord.RichEmbed().setColor('00ff00')
@@ -276,7 +275,7 @@ function sub_collector(MAIN, type, nickname, message, requirements, sub, area_ar
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
           .setTitle('What Area would you like to Subscribe to?')
-          .addField('Available Areas:', '**'+area_list+'**', false)
+          .setDescription('**'+area_list+'**', false)
           .setFooter(requirements); break;
 
       // REMOVEAL EMBED
