@@ -36,6 +36,7 @@ const OSCAR = new Discord.Client({ disabledEvents: eventsToDisable });
 // INITIAL LOAD OF CONFIG AND DISCORDS
 MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 MAIN.Discord = require('../../config/discords.json');
+MAIN.notes = require('../../static/notes.json');
 
 // GLOBAL VARIABLES, LOGGING, & DEBUGGING
 MAIN.BOTS = []; MAIN.debug = MAIN.config.DEBUG;
