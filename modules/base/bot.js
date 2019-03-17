@@ -381,8 +381,8 @@ async function update_each_version(version){
         await MAIN.db[update_to].forEach(async (update,index) => {
           await MAIN.sqlFunction(update.sql, update.data, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] '+update.gLog, update.bLog);
           await MAIN.sqlFunction('UPDATE info SET db_version = ? WHERE db_version = ?', [update_to,u], undefined, '[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO UPDATE THE info TABLE.');
-          return;
-        }); return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+update_to+'.');
+          console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] Database updated to Version '+update_to+'.');
+        });
       }
     } return resolve('done');
   });
