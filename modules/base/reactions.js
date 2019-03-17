@@ -9,7 +9,6 @@ reactions.run = (MAIN, event) => {
   let guild = MAIN.guilds.get(event.d.guild_id);
   let member = guild.members.get(event.d.user_id);
   let channel = MAIN.channels.get(event.d.channel_id);
-  let roleID = '<@&551467095293165591>';
   let user_list = '', discord = '';
 	if(!member.user.bot && event.d.emoji.id == MAIN.emotes.checkYesReact.id){
 
@@ -66,7 +65,7 @@ reactions.run = (MAIN, event) => {
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
 
-                    new_channel.send(roleID+' '+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
+                    new_channel.send('<@&'+MAIN.config.RaidTag+'> '+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
 
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
