@@ -37,7 +37,7 @@ reactions.run = (MAIN, event) => {
               if(record[0].active == 'true'){
 
                 // TAG USER IN EXISTING CHANNEL
-                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid!').catch(console.error);
+                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! Make sure to coordinate a start time.').catch(console.error);
               } else{
 
                 // SET THE CHANNEL NAME
@@ -65,7 +65,7 @@ reactions.run = (MAIN, event) => {
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
 
-                    new_channel.send(roleID+' '+member+' has shown interest in a raid!', channel_embed).catch(console.error);
+                    new_channel.send(roleID+' '+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
 
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }

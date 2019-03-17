@@ -73,7 +73,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setAuthor(gym_name, raid.gym_url)
         .setImage(img_url)
         .setFooter(raid.gym_id)
-        .setDescription('**'+embed_area+'**')
+
         .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)', 'Level '+raid.level+' | '+defending_team+raid_sponsor, false)
         .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                              +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
@@ -138,10 +138,9 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setColor(embed_color)
         .setImage(img_url)
         .setAuthor(gym_name, raid.gym_url)
-        .addField(MAIN.notes.[raid.gym_id].[raid.gym_name])
-        .addField('**'+pokemon_name+'** Raid | '+embed_area, move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+        .addField('**'+pokemon_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
         .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)','Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
-        .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
+        .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
                                +'[Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes)',false);
 
