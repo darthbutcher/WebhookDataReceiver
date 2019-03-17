@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const moment = require('moment-timezone');
 
 const reactions = {
     "interval": 60000
@@ -26,10 +27,10 @@ reactions.run = (MAIN, event) => {
         else if(record[0]){
 
           // CHECK FOR ABUSE
-          MAIN.pdb.query(`SELECT * FROM active_raids WHERE initiated_by = ? AND expire_time > UNIX_TIMESTAMP()-900`, [member.id], function (error, posts, fields) {
+          MAIN.pdb.query(`SELECT * FROM active_raids WHERE initiated_by = ? AND created > UNIX_TIMESTAMP()-900`, [member.id], function (error, posts, fields) {
             if(posts && posts.length >= MAIN.config.Lobby_Limit){
               guild.fetchMember(event.d.user_id).then( TARGET => {
-                return TARGET.send('You have reacted to too many raids in a short amount of time. Please only react to raids you can actually make it to and are seriously interested in.').catch(console.error);
+                return TARGET.send('You have have attempted to create too many raid lobbies in a short amount of time. Please only react to raids you can actually make it to and are seriously interested in.').catch(console.error);
               });
             } else{
 
@@ -67,7 +68,7 @@ reactions.run = (MAIN, event) => {
 
                     new_channel.send(roleID+' '+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
 
-                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, gym_id], function (error, raids, fields) {
+                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
                   new_channel.lockPermissions();

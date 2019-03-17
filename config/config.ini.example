@@ -34,7 +34,9 @@ PREFIX = '.'
 Tidy_Channel = ENABLED
 
 # Raid Lobbies that are created upon user reaction to Raid Embeds
-Raid_Lobbies = DISABLED
+Raid_Lobbies = ENABLED
+# The number of raid lobbies people can "create" within a 15 minute period
+Lobby_Limit = 2
 
 [DB]
 # DATABASE CREDENTIALS

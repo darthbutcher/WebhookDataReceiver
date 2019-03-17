@@ -97,7 +97,6 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
           // UPDATE BOSS NAME
           MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
-            console.log('97 updating embed');
             if(error){ console.error(error); }
           });
         }

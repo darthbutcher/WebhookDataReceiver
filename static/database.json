@@ -1,5 +1,5 @@
 {
-  "LATEST": 8,
+  "LATEST": 9,
   "1": [{
       "sql": "",
       "data": "",
@@ -102,6 +102,13 @@
       "data": "",
       "gLog": "Created active_raids table",
       "bLog": "[Pokébot] Failed to Create active_raids"
+    }
+  ],
+  "9": [{
+      "sql": "ALTER TABLE active_raids ADD COLUMN created TEXT;",
+      "data": "",
+      "gLog": "Update Applied to quest_alerts table",
+      "bLog": "[Pokébot] Failed to Update quest_alerts"
     }
   ]
 }
