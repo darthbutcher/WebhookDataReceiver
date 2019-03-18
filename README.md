@@ -1,10 +1,6 @@
 # Pokebot
 
-## This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user.
-
-## Join my discord server: https://discord.gg/NnujtZ4
-
-### ReadMe may be out of date. I just do not have time to keep up with it on every update. See example files for specific explanations. This project is in Beta. So you will see errors at some point.
+## This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user. You will not receive beginner level support for this. 
 
 # Installation:
 ### 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
