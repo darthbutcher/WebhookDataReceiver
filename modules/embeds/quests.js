@@ -40,7 +40,8 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
     .setImage(img_url)
     .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | '
                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=d) | '
-                           +'[Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)');
+                           +'[Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes) | '
+                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
 
   // LOGGING
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
