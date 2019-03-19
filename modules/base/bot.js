@@ -412,46 +412,46 @@ async function update_database(){
 
 // SET ALL TO INVISIBLE ON READY
 MAIN.on('ready', () => {
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Main is logged in.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Main ('+MAIN.user.tag+') is logged in.');
 });
 ALPHA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha ('+ALPHA.user.tag+') is logged in.');
   return ALPHA.user.setPresence({ status: 'invisible' });
 });
 BRAVO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo ('+BRAVO.user.tag+') is logged in.');
   return BRAVO.user.setPresence({ status: 'invisible' });
 });
 CHARLIE.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie ('+CHARLIE.user.tag+') is logged in.');
   return CHARLIE.user.setPresence({ status: 'invisible' });
 });
 DELTA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta ('+DELTA.user.tag+') is logged in.');
   return DELTA.user.setPresence({ status: 'invisible' });
 });
 ECHO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo ('+ECHO.user.tag+') is logged in.');
   return ECHO.user.setPresence({ status: 'invisible' });
 });
 FOXTROT.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot ('+FOXTROT.user.tag+') is logged in.');
   return FOXTROT.user.setPresence({ status: 'invisible' });
 });
 GULF.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf ('+GULF.user.tag+') is logged in.');
   return GULF.user.setPresence({ status: 'invisible' });
 });
 HOTEL.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel ('+HOTEL.user.tag+') is logged in.');
   return HOTEL.user.setPresence({ status: 'invisible' });
 });
 INDIA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India ('+INDIA.user.tag+') is logged in.');
   return INDIA.user.setPresence({ status: 'invisible' });
 });
 JULIET.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet ('+JULIET.user.tag+') is logged in.');
   return JULIET.user.setPresence({ status: 'invisible' });
 });
 
