@@ -302,9 +302,9 @@ MAIN.Bot_Time = (time,type,timezone) => {
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
   switch(id.toString().length){
-    case 1: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
-    case 2: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
-    case 3: sprite_url = 'https://github.com/nileplumb/PkmnShuffleMap/raw/master/NOVA_Sprites/'+id+'.png'; break;
+    case 1: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
+    case 2: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
+    case 3: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
   }
   switch(true){
     case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
