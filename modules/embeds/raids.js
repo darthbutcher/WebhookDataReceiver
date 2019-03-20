@@ -87,7 +87,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', roleID, raid_embed, target.id);
+        MAIN.Send_Embed('raid', 5, roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED
@@ -155,7 +155,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a '+pokemon_name+' Raid Boss to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', roleID, raid_embed, target.id);
+        MAIN.Send_Embed('raid', raid.level, roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED

@@ -41,7 +41,7 @@ reactions.run = (MAIN, event) => {
               } else{
 
                 // SET THE CHANNEL NAME
-                let channel_name = record[0].gym_name
+                let channel_name = record[0].boss_name+'_'+record[0].gym_name
 
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {

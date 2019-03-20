@@ -169,10 +169,10 @@ MAIN.on('raw', event => {
 });
 
 // CHOOSE NEXT BOT AND SEND EMBED
-MAIN.Send_Embed = (type, roleID, embed, channel_id) => {
+MAIN.Send_Embed = (type, raid_level, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
-    .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies >= raid.level){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
+    .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies <= raid_level ){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
     .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
 }
 
@@ -198,6 +198,7 @@ MAIN.webhookParse = async (PAYLOAD) => {
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
       proper_data = true;
+      if (data.type == 'raid'){ level = data.level }
 
       MAIN.Discord.Servers.forEach( async (server,index) => {
 
