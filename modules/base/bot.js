@@ -160,7 +160,7 @@ function load_data(){
 MAIN.on('raw', event => {
 	switch(true){
     case !MAIN.Active: break;
-    case MAIN.config.Raid_Lobbies == 'DISABLED': return;
+    case MAIN.config.Raid_Lobbies == 0: return;
 		case event.t == null: return;
 		case event.d.user_id == MAIN.user.id: return;
 		case event.t == 'MESSAGE_REACTION_ADD': return Reactions.run(MAIN, event);
@@ -172,7 +172,7 @@ MAIN.on('raw', event => {
 MAIN.Send_Embed = (type, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
-    .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies == 'ENABLED'){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
+    .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies >= raid.level){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
     .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
 }
 
