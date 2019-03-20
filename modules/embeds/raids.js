@@ -95,7 +95,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       setTimeout(function() {
         // CHECK FOR RAID LOBBIES
-        if(MAIN.config.Raid_Lobbies >= raid.level){
+        if(raid_level >= MAIN.config.Raid_Lobbies ){
 
           // UPDATE BOSS NAME
           MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
@@ -147,7 +147,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
                                +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
-      if(MAIN.config.Raid_Lobbies >= raid.level){ raid_embed.setFooter(raid.gym_id); }
+      if(raid_level >= MAIN.config.Raid_Lobbies){ raid_embed.setFooter(raid.gym_id); }
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
@@ -163,7 +163,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       // CHECK FOR RAID LOBBIES
       setTimeout( async function() {
-        if(MAIN.config.Raid_Lobbies >= raid.level){
+        if(raid_level >= MAIN.config.Raid_Lobbies ){
           MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], function (error, record, fields) {
             if(record[0]){
 

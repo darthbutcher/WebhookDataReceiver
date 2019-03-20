@@ -12,7 +12,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
   // UPDATE/INSERT ACTIVE RAIDS
-  if(MAIN.config.Raid_Lobbies >= raid.level && server.id){
+  if(raid_level >= MAIN.config.Raid_Lobbies  && server.id){
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
       if(record[0]){
 
