@@ -172,7 +172,7 @@ MAIN.on('raw', event => {
 MAIN.Send_Embed = (type, raid_level, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
-    .then( message => { if(type == 'raid' && raid_level >= MAIN.config.Raid_Lobbies ){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
+    .then( message => { if(type == 'raid' && raid_level >= discord.min_raid_lobbies ){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
     .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
 }
 

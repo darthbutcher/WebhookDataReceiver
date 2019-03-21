@@ -47,7 +47,9 @@ reactions.run = (MAIN, event) => {
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
                   // SET THE CATEGORY ID
-                  new_channel.setParent(channel.parent).then( new_channel => {
+                  if(!discord.raid_lobbies_category_id) { let lobby_id = channel.parent; } else { let lobby_id = discord.raid_lobbies_category_id; }
+
+                  new_channel.setParent(lobby_id).then( new_channel => {
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                     let channel_embed = new Discord.RichEmbed()
