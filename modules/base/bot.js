@@ -137,7 +137,7 @@ function load_data(){
     let filter_files = filters.filter(f => f.split('.').pop()==='json'), filter_count = 0;
     filter_files.forEach((f,i) => {
       delete require.cache[require.resolve('../../filters/'+f)]; filter_count++;
-      let filter = require('../../filters/'+f); MAIN.Filters.set(f, filter);
+      let filter = require('../../filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+filter_count+' Feed Filters.');
   });
 
@@ -147,7 +147,7 @@ function load_data(){
     let geofence_files = geofences.filter(g => g.split('.').pop()==='json'), geofence_count = 0;
     geofence_files.forEach((g,i) => {;
       delete require.cache[require.resolve('../../geofences/'+g)]; geofence_count++;
-      let geofence = require('../../geofences/'+g); MAIN.Geofences.set(g, geofence);
+      let geofence = require('../../geofences/'+g); geofence.name = g; MAIN.Geofences.set(g, geofence);
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+geofence_count+' Geofence files.');
   });
 
@@ -178,7 +178,9 @@ MAIN.Send_Embed = (type, embed, channel_id) => {
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_DM = (guild_id, user_id, embed, bot) => {
   MAIN.BOTS[bot].guilds.get(guild_id).fetchMember(user_id).then( TARGET => {
-    return TARGET.send(embed).catch(console.error);
+    return TARGET.send(embed).catch( error => {
+      if(error){ console.error(TARGET.user.tag+' ('+TARGET.id+')', error); }
+    });
   });
 }
 
