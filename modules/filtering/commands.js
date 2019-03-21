@@ -59,7 +59,7 @@ module.exports.run = async (MAIN, message) => {
         // else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
         // LOAD DATABASE RECORD
-        MAIN.pdb.query('SELECT * FROM users WHERE user_id = ?', [message.member.id], async function (error, user, fields) {
+        MAIN.pdb.query('SELECT * FROM users WHERE user_id = ? AND discord_id = ?', [message.member.id, server.id], async function (error, user, fields) {
 
           // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
           if(!user || !user[0]){ await MAIN.Save_Sub(message,server); }
