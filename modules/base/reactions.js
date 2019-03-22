@@ -46,6 +46,7 @@ reactions.run = (MAIN, event) => {
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
+
                   // SET THE CATEGORY ID
                   if(!discord.raid_lobbies_category_id) { let lobby_id = channel.parent; } else { let lobby_id = discord.raid_lobbies_category_id; }
 
