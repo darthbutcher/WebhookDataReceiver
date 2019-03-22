@@ -87,7 +87,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', 5, roleID, raid_embed, target.id);
+        MAIN.Send_Embed('raid', raid.level, roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED
@@ -95,10 +95,10 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       setTimeout(function() {
         // CHECK FOR RAID LOBBIES
-        if(raid.level >= MAIN.config.Raid_Lobbies ){
+        if(raid.level >= discord.min_raid_lobbies ){
 
           // UPDATE BOSS NAME
-          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
+          MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [pokemon_name, gym_id], function (error, record, fields) {
             if(error){ console.error(error); }
           });
         }
@@ -155,7 +155,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
                                +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
-      if(raid.level >= MAIN.config.Raid_Lobbies){ raid_embed.setFooter(raid.gym_id); }
+      if(raid.level >= discord.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
@@ -171,7 +171,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       // CHECK FOR RAID LOBBIES
       setTimeout( async function() {
-        if(raid.level >= MAIN.config.Raid_Lobbies ){
+        if(raid.level >= discord.min_raid_lobbies ){
           MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], function (error, record, fields) {
             if(record[0]){
 
