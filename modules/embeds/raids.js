@@ -95,10 +95,10 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       setTimeout(function() {
         // CHECK FOR RAID LOBBIES
-        if(raid.level >= discord.min_raid_lobbies ){
+        if(raid.level >= server.min_raid_lobbies ){
 
           // UPDATE BOSS NAME
-          MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [pokemon_name, gym_id], function (error, record, fields) {
+          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
             if(error){ console.error(error); }
           });
         }
@@ -121,7 +121,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       pokemon_type = pokemon_type.slice(0,-3);
       weaknesses = weaknesses.slice(0,-1);
 
-      if(raid.level >= MAIN.config.Raid_Lobbies ){
+      if(raid.level >= server.min_raid_lobbies ){
 
           // UPDATE BOSS NAME
           MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [pokemon_name, gym_id], function (error, record, fields) {
@@ -155,7 +155,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
                                +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
-      if(raid.level >= discord.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
+      if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
@@ -171,7 +171,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       // CHECK FOR RAID LOBBIES
       setTimeout( async function() {
-        if(raid.level >= discord.min_raid_lobbies ){
+        if(raid.level >= server.min_raid_lobbies ){
           MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], function (error, record, fields) {
             if(record[0]){
 
