@@ -46,6 +46,7 @@ reactions.run = (MAIN, event) => {
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
+
                   // SET THE CATEGORY ID
                   new_channel.setParent(channel.parent).then( new_channel => {
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;

@@ -121,6 +121,14 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       pokemon_type = pokemon_type.slice(0,-3);
       weaknesses = weaknesses.slice(0,-1);
 
+      if(raid.level >= MAIN.config.Raid_Lobbies ){
+
+          // UPDATE BOSS NAME
+          MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [pokemon_name, gym_id], function (error, record, fields) {
+            if(error){ console.error(error); }
+          });
+      }
+
       if(!MAIN.moves[raid.move_1]){ console.error('Move ID #'+raid.move_1+' not found in pokemon.json. Please report to the Discord.'); }
       if(!MAIN.moves[raid.move_2]){ console.error('Move ID #'+raid.move_2+' not found in pokemon.json. Please report to the Discord.'); }
 
