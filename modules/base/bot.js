@@ -138,7 +138,7 @@ function load_data(){
     let filter_files = filters.filter(f => f.split('.').pop()==='json'), filter_count = 0;
     filter_files.forEach((f,i) => {
       delete require.cache[require.resolve('../../filters/'+f)]; filter_count++;
-      let filter = require('../../filters/'+f); MAIN.Filters.set(f, filter);
+      let filter = require('../../filters/'+f); filter.name = f; MAIN.Filters.set(f, filter);
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+filter_count+' Feed Filters.');
   });
 
@@ -148,7 +148,7 @@ function load_data(){
     let geofence_files = geofences.filter(g => g.split('.').pop()==='json'), geofence_count = 0;
     geofence_files.forEach((g,i) => {;
       delete require.cache[require.resolve('../../geofences/'+g)]; geofence_count++;
-      let geofence = require('../../geofences/'+g); MAIN.Geofences.set(g, geofence);
+      let geofence = require('../../geofences/'+g); geofence.name = g; MAIN.Geofences.set(g, geofence);
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+geofence_count+' Geofence files.');
   });
 
@@ -179,7 +179,9 @@ MAIN.Send_Embed = (type, raid_level, roleID, embed, channel_id) => {
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_DM = (guild_id, user_id, embed, bot) => {
   MAIN.BOTS[bot].guilds.get(guild_id).fetchMember(user_id).then( TARGET => {
-    return TARGET.send(embed).catch(console.error);
+    return TARGET.send(embed).catch( error => {
+      if(error){ console.error(TARGET.user.tag+' ('+TARGET.id+')', error); }
+    });
   });
 }
 
@@ -414,46 +416,46 @@ async function update_database(){
 
 // SET ALL TO INVISIBLE ON READY
 MAIN.on('ready', () => {
-  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Main is logged in.');
+  return console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Main ('+MAIN.user.tag+') is logged in.');
 });
 ALPHA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha ('+ALPHA.user.tag+') is logged in.');
   return ALPHA.user.setPresence({ status: 'invisible' });
 });
 BRAVO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo ('+BRAVO.user.tag+') is logged in.');
   return BRAVO.user.setPresence({ status: 'invisible' });
 });
 CHARLIE.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie ('+CHARLIE.user.tag+') is logged in.');
   return CHARLIE.user.setPresence({ status: 'invisible' });
 });
 DELTA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta ('+DELTA.user.tag+') is logged in.');
   return DELTA.user.setPresence({ status: 'invisible' });
 });
 ECHO.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo ('+ECHO.user.tag+') is logged in.');
   return ECHO.user.setPresence({ status: 'invisible' });
 });
 FOXTROT.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot ('+FOXTROT.user.tag+') is logged in.');
   return FOXTROT.user.setPresence({ status: 'invisible' });
 });
 GULF.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf ('+GULF.user.tag+') is logged in.');
   return GULF.user.setPresence({ status: 'invisible' });
 });
 HOTEL.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel ('+HOTEL.user.tag+') is logged in.');
   return HOTEL.user.setPresence({ status: 'invisible' });
 });
 INDIA.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India ('+INDIA.user.tag+') is logged in.');
   return INDIA.user.setPresence({ status: 'invisible' });
 });
 JULIET.on('ready', () => {
-  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet is logged in.');
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet ('+JULIET.user.tag+') is logged in.');
   return JULIET.user.setPresence({ status: 'invisible' });
 });
 
