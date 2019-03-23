@@ -160,7 +160,7 @@ function load_data(){
 MAIN.on('raw', event => {
 	switch(true){
     case !MAIN.Active: break;
-    case MAIN.config.Raid_Lobbies == DISABLED: return;
+    case MAIN.config.Raid_Lobbies == 'DISABLED': return;
 		case event.t == null: return;
 		case event.d.user_id == MAIN.user.id: return;
 		case event.t == 'MESSAGE_REACTION_ADD': return Reactions.run(MAIN, event);
@@ -200,7 +200,6 @@ MAIN.webhookParse = async (PAYLOAD) => {
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
       proper_data = true;
-      if (data.type == 'raid'){ level = data.level }
 
       MAIN.Discord.Servers.forEach( async (server,index) => {
 
