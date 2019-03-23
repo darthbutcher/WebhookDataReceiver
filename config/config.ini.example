@@ -34,6 +34,7 @@ PREFIX = '.'
 # AUTO-DELETE MESSAGES IN COMMAND CHANNEL
 Tidy_Channel = ENABLED
 
+Raid_Lobbies = ENABLED
 # The number of raid lobbies people can "create" within a 15 minute period
 Lobby_Limit = 2
 
