@@ -87,7 +87,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', raid.level, roleID, raid_embed, target.id);
+        MAIN.Send_Embed('raid', raid.level, server, roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED
@@ -120,14 +120,6 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       });
       pokemon_type = pokemon_type.slice(0,-3);
       weaknesses = weaknesses.slice(0,-1);
-
-      if(raid.level >= server.min_raid_lobbies ){
-
-          // UPDATE BOSS NAME
-          MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [pokemon_name, gym_id], function (error, record, fields) {
-            if(error){ console.error(error); }
-          });
-      }
 
       if(!MAIN.moves[raid.move_1]){ console.error('Move ID #'+raid.move_1+' not found in pokemon.json. Please report to the Discord.'); }
       if(!MAIN.moves[raid.move_2]){ console.error('Move ID #'+raid.move_2+' not found in pokemon.json. Please report to the Discord.'); }
@@ -163,7 +155,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
       } else if(MAIN.config.RAID.Discord_Feeds == 'ENABLED'){
         if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a '+pokemon_name+' Raid Boss to '+target.guild.name+' ('+target.id+').'); }
-        MAIN.Send_Embed('raid', raid.level, roleID, raid_embed, target.id);
+        MAIN.Send_Embed('raid', raid.level, server, roleID, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
 
       // STRINGIFY THE EMBED

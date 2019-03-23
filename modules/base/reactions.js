@@ -48,9 +48,7 @@ reactions.run = (MAIN, event) => {
 
 
                   // SET THE CATEGORY ID
-                  if(!discord.raid_lobbies_category_id) { let lobby_id = channel.parent; } else { let lobby_id = discord.raid_lobbies_category_id; }
-
-                  new_channel.setParent(lobby_id).then( new_channel => {
+                  new_channel.setParent(channel.parent).then( new_channel => {
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                     let channel_embed = new Discord.RichEmbed()
@@ -68,7 +66,10 @@ reactions.run = (MAIN, event) => {
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
 
-                    new_channel.send('<@&'+discord.raid_role+'> '+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
+                    
+                    let mention = '<@&'+discord.raid_role+'> '
+                    if (mention == "<@&> "){ mention = '' }
+                    new_channel.send(mention+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
 
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
