@@ -160,7 +160,7 @@ function load_data(){
 MAIN.on('raw', event => {
 	switch(true){
     case !MAIN.Active: break;
-    case MAIN.config.Raid_Lobbies == 0: return;
+    case MAIN.config.Raid_Lobbies == 'DISABLED': return;
 		case event.t == null: return;
 		case event.d.user_id == MAIN.user.id: return;
 		case event.t == 'MESSAGE_REACTION_ADD': return Reactions.run(MAIN, event);
@@ -200,7 +200,6 @@ MAIN.webhookParse = async (PAYLOAD) => {
     if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
 
       proper_data = true;
-      if (data.type == 'raid'){ level = data.level }
 
       MAIN.Discord.Servers.forEach( async (server,index) => {
 
@@ -304,11 +303,7 @@ MAIN.Bot_Time = (time,type,timezone) => {
 // OBTAIN POKEMON SPRITE
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
-  switch(id.toString().length){
-    case 1: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
-    case 2: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
-    case 3: sprite_url = 'https://spindamap.com/static/PkmnShuffleMap/NOVA_Sprites/'+id+'.png'; break;
-  }
+  sprite_url =  MAIN.config.SPRITE_URL+parseInt(id, 10)+'.png';
   switch(true){
     case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
     case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;

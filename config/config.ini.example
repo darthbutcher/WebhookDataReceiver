@@ -17,7 +17,8 @@ Tile_Height = 220
 # IMAGE HOST
 # This must be URL. You must include http:// or https:// and the / at the end.
 HOST = http://www.yourimages.com/
-FRONTEND_URL = https://yourmap.com
+FRONTEND_URL = https://yourmap.com/
+SPRITE_URL = https://www.serebii.net/sunmoon/pokemon/
 
 # IMAGE DIRECTORY
 # pokemon_tiles, raid_tiles, and quest_tiles folders must be created in this location.
@@ -34,6 +35,8 @@ PREFIX = '.'
 # AUTO-DELETE MESSAGES IN COMMAND CHANNEL
 Tidy_Channel = ENABLED
 
+# Raid Lobbies that are created upon user reaction to Raid Embeds
+Raid_Lobbies = ENABLED
 # The number of raid lobbies people can "create" within a 15 minute period
 Lobby_Limit = 2
 
