@@ -49,7 +49,7 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
 
   // CHECK DISCORD CONFIG
   if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){
-    MAIN.Send_Embed('quest', 0, roleID, quest_embed, channel.id);
+    MAIN.Send_Embed('quest', 0, roleID, server, quest_embed, channel.id);
   } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.'); }
   return;
 }
