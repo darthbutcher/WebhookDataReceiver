@@ -304,7 +304,7 @@ MAIN.Bot_Time = (time,type,timezone) => {
 // OBTAIN POKEMON SPRITE
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
-  sprite_url =  MAIN.config.SPRITE_URL+id+'.png';
+  sprite_url =  MAIN.config.SPRITE_URL+parseInt(id, 10)+'.png';
   switch(true){
     case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
     case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;
