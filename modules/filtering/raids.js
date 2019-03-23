@@ -16,16 +16,16 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
       if(record[0]){
 
+        // UPDATE BOSS NAME
+        MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [boss_name, gym_id], function (error, record, fields) {
+          if(error){ console.error(error); }
+        })
+
         // UPDATE CHANNEL NAME
         if(record[0].raid_channel){
           let raid_channel = MAIN.channels.get(record[0].raid_channel);
           raid_channel.setName(boss_name+'_'+gym_name).catch(console.error);
-        }
-
-        // UPDATE BOSS NAME
-        MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [boss_name, gym_id], function (error, record, fields) {
-          if(error){ console.error(error); }
-        });
+        };
       } else {
 
         // INSERT INTO ACTIVE RAIDS
