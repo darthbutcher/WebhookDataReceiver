@@ -36,7 +36,6 @@ const OSCAR = new Discord.Client({ disabledEvents: eventsToDisable });
 // INITIAL LOAD OF CONFIG AND DISCORDS
 MAIN.config = ini.parse(fs.readFileSync('./config/config.ini', 'utf-8'));
 MAIN.Discord = require('../../config/discords.json');
-MAIN.notes = require('../../static/gyms.json');
 
 // GLOBAL VARIABLES, LOGGING, & DEBUGGING
 MAIN.BOTS = []; MAIN.debug = MAIN.config.DEBUG;
@@ -94,6 +93,8 @@ function load_data(){
   MAIN.proto = require('../../static/en.json');
   delete require.cache[require.resolve('../../static/moves.json')];
   MAIN.moves = require('../../static/moves.json');
+  delete require.cache[require.resolve('../../static/gyms.json')];
+  MAIN.gymNotes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/database.json')];
   MAIN.db = require('../../static/database.json');
   delete require.cache[require.resolve('../../static/types.json')];
