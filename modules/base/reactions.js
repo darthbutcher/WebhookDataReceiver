@@ -40,12 +40,16 @@ reactions.run = (MAIN, event) => {
                 MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! Make sure to coordinate a start time.').catch(console.error);
               } else{
 
+                // UPDATE SQL RECORD
+                MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym_id], function (error, raids, fields) {
+                  if(error){ console.error(error); }
+                });
+
                 // SET THE CHANNEL NAME
                 let channel_name = record[0].boss_name+'_'+record[0].gym_name
 
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
-
 
                   // SET THE CATEGORY ID
                   new_channel.setParent(channel.parent).then( new_channel => {
@@ -66,15 +70,11 @@ reactions.run = (MAIN, event) => {
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
 
-                    
                     let mention = '<@&'+discord.raid_role+'> '
                     if (mention == "<@&> "){ mention = '' }
                     new_channel.send(mention+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
 
-                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym_id], function (error, raids, fields) {
-                      if(error){ console.error(error); }
-                    });
-                  new_channel.lockPermissions();
+                    new_channel.lockPermissions();
                   });
                 });
               }
