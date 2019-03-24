@@ -64,8 +64,6 @@
 
 (This is a work in progress guide. This bot is still technically in Beta as well)
 
-## Join my discord server: https://discord.gg/NnujtZ4
-
 # Subscriptions
 
 - Subscription commands can only be used in the command channel set in the pokebot_config.json.
