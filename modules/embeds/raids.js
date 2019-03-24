@@ -139,6 +139,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setColor(embed_color)
         .setImage(img_url)
         .setAuthor(gym_name, raid.gym_url)
+        if(MAIN.gymNotes[raid.gym_id]){.addField(false,MAIN.gymNotes[raid.gym_id])}
         .addField('**'+pokemon_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
         .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)','Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
         .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
