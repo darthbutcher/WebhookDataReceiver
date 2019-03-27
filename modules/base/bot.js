@@ -94,7 +94,7 @@ function load_data(){
   delete require.cache[require.resolve('../../static/moves.json')];
   MAIN.moves = require('../../static/moves.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
-  MAIN.gymNotes = require('../../static/gyms.json');
+  MAIN.notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/database.json')];
   MAIN.db = require('../../static/database.json');
   delete require.cache[require.resolve('../../static/types.json')];

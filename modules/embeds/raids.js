@@ -53,6 +53,12 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   // DETERMINE IF IT'S AN EGG OR A RAID
   let embed_thumb = '', raid_embed = '', db_embed = '', gym_id = raid.gym_id;
 
+  let gym_notes = '';
+  if(!MAIN.notes[raid.gym_id]){ console.log('no note'); }
+  else {
+    gym_notes = MAIN.notes[raid.gym_id].note;
+  }
+
   switch(raid_type){
 
     case 'Egg':
@@ -72,13 +78,13 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setColor(embed_color)
         .setAuthor(gym_name, raid.gym_url)
         .setImage(img_url)
-        .setFooter(raid.gym_id)
-
-        .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)', 'Level '+raid.level+' | '+defending_team+raid_sponsor, false)
-        .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
+        .addField('**Level '+raid.level+'** Raid', defending_team+raid_sponsor, false)
+        .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)',embed_area, false)
+        .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                              +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
                                              +'[Waze](https://waze.com/ul?ll='+raid.latitude+','+raid.longitude+'&navigate=yes) | '
-                                             +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);
+                                             +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false)
+        .setFooter(raid.gym_id);
 
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
@@ -139,7 +145,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setColor(embed_color)
         .setImage(img_url)
         .setAuthor(gym_name, raid.gym_url)
-        if(MAIN.gymNotes[raid.gym_id]){.addField(false,MAIN.gymNotes[raid.gym_id])}
+        .setDescription(gym_notes)
         .addField('**'+pokemon_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
         .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)','Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
         .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
@@ -149,6 +155,12 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
+      //if(!MAIN.notes[raid.gym_id]){
+	//console.log('no note');
+      //} else {
+	//raid_embed.setDescription(MAIN.notes[raid.gym_id].note.toLowerCase() );
+	//console.log(MAIN.notes[raid.gym_id].note);
+      //}
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
