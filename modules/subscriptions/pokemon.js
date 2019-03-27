@@ -4,7 +4,7 @@ const Discord = require('discord.js');
 
 module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
 
-  if(sighting.cp == null){ return; }
+
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
   let time_now = new Date().getTime(); internal_value = Math.floor(internal_value*1000)/10;
 

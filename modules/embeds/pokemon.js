@@ -68,7 +68,8 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
                                            +'[Waze](https://waze.com/ul?ll='+sighting.latitude+','+sighting.longitude+'&navigate=yes) | '
                                            +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
   } else{
-
+    if(sighting.cp == null){ return; }
+    
     // DETERMINE MOVE NAMES AND TYPES
     let move_name_1 = MAIN.moves[sighting.move_1].name;
     let move_type_1 = MAIN.emotes[MAIN.moves[sighting.move_1].type.toLowerCase()];
