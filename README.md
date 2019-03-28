@@ -3,18 +3,18 @@
 ## This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user. You will not receive beginner level support for this. 
 
 # Installation:
-### 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
+## 1: `git clone https://github.com/RussellG89/Pokebot.git` to desired location or download the zip and unzip.
 
-### 2: cd to the new Pokebot folder
+## 2: cd to the new Pokebot folder
 
-### 3: Type `node -v` in your terminal to determine if node is installed on your machine.
+## 3: Type `node -v` in your terminal to determine if node is installed on your machine.
   - If not or version is less than 10.14, upate or download node.js from here: https://nodejs.org/en/
   - Type `node -v` again in your terminal post install to confirm installation.
 
-### 4: Install npm package requirements.
+## 4: Install npm package requirements.
   - Run `npm install` in your cloned directory.
 
-### 5: Edit the Config files and save them without the `.example` on them.
+## 5: Edit the Config files and save them without the `.example` on them.
   - Emotes.ini
     You have the option of setting your own custom emotes. If "Custom_Emotes" is set to false in your config, you will need to join then add your bots to these servers:
       https://discord.gg/zqVCfPy - WEATHER, TEAMS, GYMS, TYPES
