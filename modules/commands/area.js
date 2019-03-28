@@ -187,7 +187,7 @@ async function subscription_remove(MAIN, message, nickname, prefix, area_array, 
   MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ? AND discord_id = ?`, [message.member.id, message.guild.id], async function (error, user, fields) {
 
     // RETRIEVE AREA NAME FROM USER
-    let sub = await sub_collector(MAIN, 'Remove'', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
+    let sub = await sub_collector(MAIN, 'Remove', nickname, message, 'Names are not case-sensitive. The Check denotes you are already subscribed to that Area.', user[0].geofence, area_array, server);
     if(sub.toLowerCase() == 'cancel'){ return message.reply('Subscription cancelled. Type `'+prefix+'area` to restart.').then(m => m.delete(5000)).catch(console.error); }
     else if(sub == 'time'){ return message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error); }
 
