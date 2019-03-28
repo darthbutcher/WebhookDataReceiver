@@ -62,12 +62,8 @@
   - If you get errors that are not because of missing configs, Contact me via discord.
   - PM2 Docs http://pm2.keymetrics.io/docs/usage/cluster-mode/
 
-(This is a work in progress guide. This bot is still technically in Beta as well)
+## Subscriptions
 
-## Join my discord server: https://discord.gg/NnujtZ4
-
-# Subscriptions
-
-- Subscription commands can only be used in the command channel set in the pokebot_config.json.
+- Subscription commands can only be used in the command channel set in the discords.json.
 - Type `.help` (or whatever prefix you set) for command instructions.
 - Rewards that users can subscribe to are set in `quest_config.json` in the configs folder. These are case sensitive and the Encounter rewards must state "Encounter" after the pokemon name just as the example shows.
