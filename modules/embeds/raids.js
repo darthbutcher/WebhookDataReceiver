@@ -56,7 +56,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let gym_notes = '';
   if(!MAIN.notes[raid.gym_id]){ console.log('no note'); }
   else {
-    gym_notes = MAIN.notes[raid.gym_id].note;
+    gym_notes = MAIN.notes[raid.gym_id];
   }
 
   switch(raid_type){
@@ -155,12 +155,6 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
-      //if(!MAIN.notes[raid.gym_id]){
-	//console.log('no note');
-      //} else {
-	//raid_embed.setDescription(MAIN.notes[raid.gym_id].note.toLowerCase() );
-	//console.log(MAIN.notes[raid.gym_id].note);
-      //}
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){

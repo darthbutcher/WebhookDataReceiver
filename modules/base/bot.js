@@ -301,14 +301,21 @@ MAIN.Bot_Time = (time,type,timezone) => {
   }
 }
 
+function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+
 // OBTAIN POKEMON SPRITE
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
-  sprite_url =  MAIN.config.SPRITE_URL+parseInt(id, 10)+'.png';
+  sprite_url =  MAIN.config.SPRITE_URL+pad(id,3)+'_00.png';
   switch(true){
-    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
+    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-6)+form+'.png'; } break;
     case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;
   }
+  //console.log(sprite_url);
   return sprite_url;
 }
 
