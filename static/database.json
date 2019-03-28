@@ -110,5 +110,12 @@
       "gLog": "Update Applied to quest_alerts table",
       "bLog": "[Pokébot] Failed to Update quest_alerts"
     }
+  ],
+  "10": [{
+      "sql": "CREATE TABLE IF NOT EXISTS active_areas (guild_id TEXT, area TEXT, category_id TEXT);",
+      "data": "",
+      "gLog": "Created active_areas table",
+      "bLog": "[Pokébot] Failed to Create active_areas"
+    }
   ]
 }
