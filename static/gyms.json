@@ -1,9 +1,15 @@
 {
+		"6cb80703043d4be09b9f0e7b9a9f3179.16": {
+			"description": "Spinda Gym"
+		},
+		"4a3765e35e0d435b828b7527e06b3811.16": {
+			"description": "6400 W 3500 S"
+		},
 		"efdc68165fbb4282bff0136469442cca.16": {
 			"description": "Hunter Stake"
 		},
 		"dd61eeb24ceb48d997061be554d4fb5f.16": {
-			"description": "Be Nice Aware of where you park"
+			"description": "Be aware of where you park"
 		},
 		"5cdb4e990a14435f808ca422d14539df.11": {
 			"description": "Maverick Center Parking Lot"
@@ -36,7 +42,10 @@
 			"description": "Poor signal for T-Mobile users"
 		},
 		"18710049a95543f8a25a026d7b0a6ea5.12": {
-			"description": "Magna cemetary top"
+			"description": "Magna Cemetary Top"
+		},
+		"0dade20f054c45cea032d3ae08498343.16": {
+			"description": "Magna Cemetary Bottom"
 		},
 		"ecc32d3a1ff34c02932afa05ea33e034.16": {
 			"description": "Park behind West Valley Library"
@@ -55,5 +64,8 @@
 		},
 		"e0c47e120e47414da63118bb7036f671.12": {
 			"description": "Magna Firestation"
+		},
+		"0150bdfa450c4537b77ca4fecb09c067.16": {
+			"description": "Must get out of car to reach Gym"
 		}
 }
