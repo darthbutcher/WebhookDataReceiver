@@ -647,11 +647,14 @@ setInterval(function() {
       MAIN.pdb.query(`DELETE FROM quest_alerts WHERE alert_time < UNIX_TIMESTAMP()*1000`, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
-  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()`, function (error, active_raids, fields) {
+  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP() AND boss_name != "expired"`, function (error, active_raids, fields) {
     if(active_raids[0]){
       active_raids.forEach( async (raid,index) => {
         let raid_channel = MAIN.channels.get(raid.raid_channel);
-        if(raid_channel){ raid_channel.setName('expired').catch(console.error); }
+        if(raid_channel){
+          raid_channel.setName('expired').catch(console.error)
+          raid_channel.send('Raid has ended, channel will delete in 15 minutes. Wrap up converation or join another raid lobby.').catch(console.error);
+        }
       });
       MAIN.pdb.query(`UPDATE active_raids set boss_name = "expired" WHERE expire_time < UNIX_TIMESTAMP()`, function (error, fields) { if(error){ console.error; } });
     }

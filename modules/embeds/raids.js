@@ -54,9 +54,8 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let embed_thumb = '', raid_embed = '', db_embed = '', gym_id = raid.gym_id;
 
   let gym_notes = '';
-  if(!MAIN.notes[raid.gym_id]){ console.log('no note'); }
-  else {
-    gym_notes = MAIN.notes[raid.gym_id];
+  if(MAIN.notes[raid.gym_id]){
+    gym_notes = MAIN.notes[raid.gym_id].description;
   }
 
   switch(raid_type){
@@ -77,6 +76,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setThumbnail(embed_thumb)
         .setColor(embed_color)
         .setAuthor(gym_name, raid.gym_url)
+	.setDescription(gym_notes)
         .setImage(img_url)
         .addField('**Level '+raid.level+'** Raid', defending_team+raid_sponsor, false)
         .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)',embed_area, false)
