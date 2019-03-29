@@ -54,9 +54,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let embed_thumb = '', raid_embed = '', db_embed = '', gym_id = raid.gym_id;
 
   let gym_notes = '';
-  if(MAIN.notes[raid.gym_id]){
-    gym_notes = MAIN.notes[raid.gym_id].description;
-  }
+  if (!MAIN.gym_notes[gym_id]) { console.log('add note'); } else { gym_notes = MAIN.gym_notes[gym_id].description; }
 
   switch(raid_type){
 
@@ -79,7 +77,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 	.setDescription(gym_notes)
         .setImage(img_url)
         .addField('**Level '+raid.level+'** Raid', defending_team+raid_sponsor, false)
-        .addField('Hatches: '+hatch_time+' (*'+hatch_mins+' Mins*)',embed_area, false)
+        .addField('Hatches: '+hatch_time,embed_area, false)
         .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                              +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
                                              +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false)
@@ -146,7 +144,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setAuthor(gym_name, raid.gym_url)
         .setDescription(gym_notes)
         .addField('**'+pokemon_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-        .addField('Raid Ends: '+end_time+' (*'+end_mins+' Mins*)','Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
+        .addField('Raid Ends: '+end_time,'Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
         .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
                                +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);

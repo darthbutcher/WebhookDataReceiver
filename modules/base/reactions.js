@@ -124,7 +124,7 @@ reactions.startInterval = async (MAIN) => {
 
 	    boss_name = embed.fields[0].name.slice(0, -7);
             boss_name = boss_name.slice(2);
-	    new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+	    MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
 
             MAIN.channels.get(record[0].raid_channel).send(channel_embed).catch(console.error);
           }

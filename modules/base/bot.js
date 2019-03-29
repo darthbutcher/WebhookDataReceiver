@@ -93,14 +93,14 @@ function load_data(){
   MAIN.proto = require('../../static/en.json');
   delete require.cache[require.resolve('../../static/moves.json')];
   MAIN.moves = require('../../static/moves.json');
-  delete require.cache[require.resolve('../../static/gyms.json')];
-  MAIN.notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/database.json')];
   MAIN.db = require('../../static/database.json');
   delete require.cache[require.resolve('../../static/types.json')];
   MAIN.types = require('../../static/types.json');
   delete require.cache[require.resolve('../../static/pokemon.json')];
   MAIN.pokemon = require('../../static/pokemon.json');
+  delete require.cache[require.resolve('../../static/gyms.json')];
+  MAIN.gym_notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/rewards.json')];
   MAIN.rewards = require('../../static/rewards.json');
   delete require.cache[require.resolve('../../config/discords.json')];
@@ -317,6 +317,21 @@ MAIN.Get_Sprite = (form, id) => {
   }
   //console.log(sprite_url);
   return sprite_url;
+}
+
+// POKEMON CPs
+MAIN.Get_CP = (pokemon, form, level) => {
+  if (form > 28) { pokemon = pokemon+form }
+  let cpmult = cp_multiplier[level]
+  let atk = base_stats[pokemon].attack
+  let def = base_stats[pokemon].defense
+  let sta = base_stats[pokemon].stamina
+
+  let cp = Math.max(10, Math.floor((atk + ivatk) *
+    ((def + ivdef) ** 0.5) *
+    ((sta + ivsta) ** 0.5) *
+    ((cpmult ** 2) / 10)))
+  return cp;
 }
 
 // GET QUEST REWARD ICON

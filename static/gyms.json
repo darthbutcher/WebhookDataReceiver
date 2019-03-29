@@ -1,4 +1,4 @@
-[{
+{
 		"efdc68165fbb4282bff0136469442cca.16": {
 			"description": "Hunter Stake"
 		},
@@ -49,7 +49,11 @@
 		},
 		"3c33c3323e2047048dcffc2a311bc06e.16": {
 			"description": "Harmon's Coorprate Building"
+		},
+		"1a6341be775a419db62d5bf06741ecb7.16": {
+			"description": "Neighboorhood Park"
+		},
+		"e0c47e120e47414da63118bb7036f671.12": {
+			"description": "Magna Firestation"
 		}
-	}
-
-]
+}
