@@ -160,8 +160,8 @@ function load_data(){
 //CHECK FOR MESSAGE REACTION ADDS
 MAIN.on('raw', event => {
 	switch(true){
-    case !MAIN.Active: break;
-    case MAIN.config.Raid_Lobbies == 'DISABLED': return;
+		case !MAIN.Active: break;
+		case MAIN.config.Raid_Lobbies == 'DISABLED': return;
 		case event.t == null: return;
 		case event.d.user_id == MAIN.user.id: return;
 		case event.t == 'MESSAGE_REACTION_ADD': return Reactions.run(MAIN, event);
