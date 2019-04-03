@@ -13,9 +13,10 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   // DETERMINE POKEMON NAME
   let pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
-
-  if (sighting.form > 0){
-    pokemon_name = pokemon_name+' ['+MAIN.forms[sighting.pokemon_id].[sighting.form]+']';
+  form = sighting.form;
+  if (form > 0){
+    form_name = MAIN.forms[sighting.pokemon_id][form];
+    pokemon_name = pokemon_name+' ['+form_name+']';
   }
 
   // DEFINE VARIABLES

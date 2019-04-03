@@ -113,6 +113,13 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       // DETERMINE POKEMON NAME AND TYPE
       let pokemon_type = '', weaknesses = '';
       let pokemon_name = MAIN.pokemon[raid.pokemon_id].name;
+
+      form = sighting.form;
+      if (form > 0){
+        form_name = MAIN.forms[sighting.pokemon_id][form];
+        pokemon_name = pokemon_name+' ['+form_name+']';
+      }
+
       await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {
         pokemon_type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
         MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {

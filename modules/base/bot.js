@@ -98,7 +98,7 @@ function load_data(){
   delete require.cache[require.resolve('../../static/types.json')];
   MAIN.types = require('../../static/types.json');
   delete require.cache[require.resolve('../../static/pokemon.json')];
-  MAIN.forms = require('../../static/pokemon.json');
+  MAIN.pokemon = require('../../static/pokemon.json');
   delete require.cache[require.resolve('../../static/forms.json')];
   MAIN.forms = require('../../static/forms.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
