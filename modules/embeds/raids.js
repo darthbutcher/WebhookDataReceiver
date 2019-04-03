@@ -45,6 +45,10 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   if(raid.sponsor_id == true){ raid_sponsor = ' | '+MAIN.emotes.exPass+' Eligible'; }
   if(raid.ex_raid_eligible == true){ raid_sponsor = ' | '+MAIN.emotes.exPass+' Eligible'; }
 
+  // CHECK IF EXCLUSIVE RAID
+  let is_exclusive = '';
+  if(raid.is_exclusive == true){ is_exclusive = 'EXRaid Invite Only'; }
+
   // CHECK FOR GYM NAME
   let gym_name = '';
   if(!raid.gym_name){ gym_name = 'No Name'; }
@@ -77,6 +81,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 	.setDescription(gym_notes)
         .setImage(img_url)
         .addField('**Level '+raid.level+'** Raid', defending_team+raid_sponsor, false)
+	.addDescription(is_exclusive)
         .addField('Hatches: '+hatch_time,embed_area, false)
         .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                              +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
