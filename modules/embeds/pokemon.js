@@ -14,6 +14,10 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // DETERMINE POKEMON NAME
   let pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
 
+  if (sighting.form > 0){
+    pokemon_name = pokemon_name+' ['+MAIN.forms[sighting.pokemon_id].[sighting.form]+']';
+  }
+
   // DEFINE VARIABLES
   let hide_time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
   let hide_mins = Math.floor((sighting.disappear_time-(time_now/1000))/60);
