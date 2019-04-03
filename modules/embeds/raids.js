@@ -114,10 +114,11 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       let pokemon_type = '', weaknesses = '';
       let pokemon_name = MAIN.pokemon[raid.pokemon_id].name;
 
-      form = sighting.form;
+      // DETERMINE POKEMON FORM
+      form = raid.form;
+      let form_name = '';
       if (form > 0){
-        form_name = MAIN.forms[sighting.pokemon_id][form];
-        pokemon_name = pokemon_name+' ['+form_name+']';
+        form_name = ' ['+MAIN.forms[raid.pokemon_id][form]+']';
       }
 
       await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {
@@ -150,7 +151,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         .setImage(img_url)
         .setAuthor(gym_name, raid.gym_url)
         .setDescription(gym_notes)
-        .addField('**'+pokemon_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+        .addField('**'+pokemon_name+form_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
         .addField('Raid Ends: '+end_time,'Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
         .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
                                +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '

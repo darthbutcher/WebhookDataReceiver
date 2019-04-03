@@ -11,12 +11,12 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     img_url = await MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon');
   }
 
-  // DETERMINE POKEMON NAME
+  // DETERMINE POKEMON NAME AND FORM
   let pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
   form = sighting.form;
+  let form_name = '';
   if (form > 0){
-    form_name = MAIN.forms[sighting.pokemon_id][form];
-    pokemon_name = pokemon_name+' ['+form_name+']';
+    form_name = '['+MAIN.forms[sighting.pokemon_id][form]+'] ';
   }
 
   // DEFINE VARIABLES
@@ -68,7 +68,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   if(has_iv == false || (sighting.cp == null && MAIN.config.sub_without_iv == 'ENABLED')){
     pokemon_embed
-      .addField(pokemon_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
+      .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
                                            +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
@@ -86,7 +86,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
     pokemon_embed
-      .addField(pokemon_name+' '+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
+      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
                +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField(verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ', pokemon_type+weather_boost, false)
       //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
