@@ -14,7 +14,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   // UPDATE/INSERT ACTIVE RAIDS
   if(MAIN.config.Raid_Lobbies == 'ENABLED' && server.id){
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
-      if(record[0]){
+      if(record && record[0]){
 
         // UPDATE CHANNEL NAME
         if(record[0].raid_channel){
