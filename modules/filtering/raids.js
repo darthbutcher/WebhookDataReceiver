@@ -14,7 +14,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   // UPDATE/INSERT ACTIVE RAIDS
   if(raid.level >= server.min_raid_lobbies){
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
-      if(record[0]){
+      if(record && record[0]){
 
         //let embed = JSON.parse(record[0].embed);
         //boss_name = embed.field[0].name.slice(0, -7);
