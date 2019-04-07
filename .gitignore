@@ -29,9 +29,7 @@ config/*.json
 config/config.ini.ex
 feeds/*.txt
 node_modules
-static/images/quest_tiles/*.png
-static/images/raid_tiles/*.png
-static/images/pokemon_tiles/*.png
+static/*
 *.DS_Store
 filters/*.DS_Store
 geofences/*.DS_Store
