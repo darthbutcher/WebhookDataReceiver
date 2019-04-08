@@ -35,9 +35,17 @@ reactions.run = (MAIN, event) => {
 
               // CHECK IF THE RAID IS ALREADY ACTIVE
               if(record[0].active == 'true'){
-
+                let lobby_count = 0;
+                MAIN.pdb.query(`SELECT count FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
+                  lobby_count += lobby;
+                });
                 // TAG USER IN EXISTING CHANNEL
-                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! Make sure to coordinate a start time.').catch(console.error);
+                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
+
+                // INSERT USER IN LOBBY
+                MAIN.pdb.query(`INSERT INTO lobby_members SET gym_id = ?, user_id = ?`, [gym_id, member.id, function (error, lobby, fields) {
+                  if(error){ console.error(error); }
+                });
               } else{
 
                 // SET THE CHANNEL NAME
@@ -72,8 +80,11 @@ reactions.run = (MAIN, event) => {
 		    boss_name = embed.fields[0].name.slice(0, -7);
 		    boss_name = boss_name.slice(2);
 
-                    // UPDATE SQL RECORD
+                    // UPDATE SQL RECORDS
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
+                      if(error){ console.error(error); }
+                    });
+                    MAIN.pdb.query(`INSERT INTO lobby_members SET gym_id = ?, user_id = ?`, [gym_id, member.id, function (error, lobby, fields) {
                       if(error){ console.error(error); }
                     });
                     new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
