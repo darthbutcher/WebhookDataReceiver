@@ -39,17 +39,15 @@ reactions.run = (MAIN, event) => {
                 MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id) VALUES (?, ?)`, [gym_id, member.id], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
-function interested() {
-MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
+                MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
                   lobby.forEach(function(row) {
-                   lobby_count += parseInt(row.count);
+                    lobby_count += row.count;
                   });
-console.log(lobby_count);
-return lobby_count;
+                  console.log(lobby_count);
+                  lobby_count = lobby_count;
                 });
-}
                 // TAG USER IN EXISTING CHANNEL
-                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+interested()+' interested. Make sure to coordinate a start time.').catch(console.error);
+                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
               } else{
 
                 // SET THE CHANNEL NAME
@@ -81,8 +79,8 @@ return lobby_count;
                     let mention = '<@&'+discord.raid_role+'> '
                     if (mention == "<@&> "){ mention = '' }
                     new_channel.send(mention+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
-		    boss_name = embed.fields[0].name.slice(0, -7);
-		    boss_name = boss_name.slice(2);
+                    boss_name = embed.fields[0].name.slice(0, -7);
+                    boss_name = boss_name.slice(2);
 
                     // UPDATE SQL RECORDS
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
