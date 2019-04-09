@@ -4,12 +4,12 @@ const moment = require('moment-timezone');
 const reactions = {
     "interval": 60000
 };
-
 reactions.run = (MAIN, event) => {
   let guild = MAIN.guilds.get(event.d.guild_id);
   let member = guild.members.get(event.d.user_id);
   let channel = MAIN.channels.get(event.d.channel_id);
   let user_list = '', discord = '';
+  let lobby_count = 0;
 	if(!member.user.bot && event.d.emoji.id == MAIN.emotes.checkYesReact.id){
 
     // FETCH CHANNEL
@@ -35,17 +35,21 @@ reactions.run = (MAIN, event) => {
 
               // CHECK IF THE RAID IS ALREADY ACTIVE
               if(record[0].active == 'true'){
-                let lobby_count = 0;
-                MAIN.pdb.query(`SELECT count FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
-                  lobby_count += lobby;
-                });
-                // TAG USER IN EXISTING CHANNEL
-                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
-
                 // INSERT USER IN LOBBY
-                MAIN.pdb.query(`INSERT INTO lobby_members SET gym_id = ?, user_id = ?`, [gym_id, member.id, function (error, lobby, fields) {
+                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id) VALUES (?, ?)`, [gym_id, member.id], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
+function interested() {
+MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
+                  lobby.forEach(function(row) {
+                   lobby_count += parseInt(row.count);
+                  });
+console.log(lobby_count);
+return lobby_count;
+                });
+}
+                // TAG USER IN EXISTING CHANNEL
+                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+interested()+' interested. Make sure to coordinate a start time.').catch(console.error);
               } else{
 
                 // SET THE CHANNEL NAME
@@ -84,7 +88,7 @@ reactions.run = (MAIN, event) => {
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
-                    MAIN.pdb.query(`INSERT INTO lobby_members SET gym_id = ?, user_id = ?`, [gym_id, member.id, function (error, lobby, fields) {
+                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id ,user_id) VALUES (?,?)`, [gym_id, member.id], function (error, lobby, fields) {
                       if(error){ console.error(error); }
                     });
                     new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
