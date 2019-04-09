@@ -41,10 +41,9 @@ reactions.run = (MAIN, event) => {
                 });
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
                   lobby.forEach(function(row) {
-                    lobby_count += row.count;
-                  });
-                  console.log(lobby_count);
-                  lobby_count = lobby_count;
+                    lobby_count += row.count
+                  })
+		  if(error){ console.error(error);}
                 });
                 // TAG USER IN EXISTING CHANNEL
                 MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
