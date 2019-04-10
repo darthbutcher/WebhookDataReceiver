@@ -371,14 +371,14 @@ function LoadEmojis(bot, serverIDs){
           if(this.checkYes) { this.checkYesReact = this.checkYes; this.checkYes = this.checkYes.toString() }
         }
 
-        if(!this.plusone){
-          this.plusone = guild.emojis.find(emoji => emoji.name === "plusone")
-          if(this.plusone) { this.plusoneReact = this.plusone; this.plusone = this.plusone.toString() }
-        }
-
-	if(!this.yellowQuestion){
+				if(!this.yellowQuestion){
           this.yellowQuestion = guild.emojis.find(emoji => emoji.name === "yellow_question");
           if(this.yellowQuestion) { this.yellowQuestionReact = this.yellowQuestion; this.yellowQuestion = this.yellowQuestion.toString() }
+        }
+
+				if(!this.plusOne){
+          this.plusOne = guild.emojis.find(emoji => emoji.name === "plusone");
+          if(this.plusOne) { this.plusOneReact = this.plusOne; this.plusOne = this.plusOne.toString() }
         }
 
         if(!this.male){
