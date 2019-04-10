@@ -43,10 +43,10 @@ reactions.run = (MAIN, event) => {
                   lobby.forEach(function(row) {
                     lobby_count += row.count
                   })
-		  if(error){ console.error(error);}
+                  // TAG USER IN EXISTING CHANNEL
+                  MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
+                  if(error){ console.error(error);}
                 });
-                // TAG USER IN EXISTING CHANNEL
-                MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
               } else{
 
                 // SET THE CHANNEL NAME
