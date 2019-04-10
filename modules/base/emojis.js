@@ -402,7 +402,7 @@ function LoadEmojis(bot, serverIDs){
         }
 
         if(!this.cancel){
-          this.cancel = guild.emojis.find(emoji => emoji.name === "no_entry_sign");
+          this.cancel = guild.emojis.find(emoji => emoji.name === "cancel");
           if(this.cancel) { this.cancelReact = this.cancel; this.cancel = this.cancel.toString() }
         }
 
