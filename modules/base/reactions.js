@@ -44,7 +44,7 @@ reactions.run = (MAIN, event) => {
               // CHECK IF THE RAID IS ALREADY ACTIVE
               if(record[0].active == 'true'){
                 // INSERT USER IN LOBBY
-                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?;`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
+                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
@@ -53,14 +53,17 @@ reactions.run = (MAIN, event) => {
                   })
                   switch (member_count){
                     case 0:
-                      interest = 'has **left** the raid. ';
+                      interest = ' has *left* the raid. ';
+                      break;
+                    case 1:
+                      interest = ' has shown interest in the raid with **'+member_count+'** account! ';
                       break;
                     default:
-                      interest = 'has shown interest in the raid! ';
+                      interest = ' has shown interest in the raid with **'+member_count+'** accounts! ';
                       break;
                   }
                   // TAG USER IN EXISTING CHANNEL
-                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
+                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are now **'+lobby_count+'** interested. Make sure to coordinate a start time.').catch(console.error);
                   if(error){ console.error(error);}
                 });
               } else{
@@ -93,7 +96,7 @@ reactions.run = (MAIN, event) => {
 
                     let mention = '<@&'+discord.raid_role+'> '
                     if (mention == "<@&> "){ mention = '' }
-                    new_channel.send(mention+member+' has shown interest in a raid! Make sure to coordinate a start time.', channel_embed).catch(console.error);
+                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing '+member_count+'. Make sure to coordinate a start time.', channel_embed).catch(console.error);
                     boss_name = embed.fields[0].name.slice(0, -7);
                     boss_name = boss_name.slice(2);
 
@@ -101,7 +104,7 @@ reactions.run = (MAIN, event) => {
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
-                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id ,user_id) VALUES (?,?)`, [gym_id, member.id], function (error, lobby, fields) {
+                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                       if(error){ console.error(error); }
                     });
                     new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
