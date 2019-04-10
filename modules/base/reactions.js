@@ -10,7 +10,7 @@ reactions.run = (MAIN, event) => {
   let channel = MAIN.channels.get(event.d.channel_id);
   let user_list = '', discord = '';
   let lobby_count = 0;
-	if(!member.user.bot && event.d.emoji.id == MAIN.emotes.checkYesReact.id){
+	if(!member.user.bot && (event.d.emoji.id == MAIN.emotes.plusOneReact.id || event.d.emoji.id == MAIN.emotes.plusTwoReact.id || event.d.emoji.id == MAIN.emotes.plusThreeReact.id || event.d.emoji.id == MAIN.emotes.plusFourReact.id || event.d.emoji.id == MAIN.emotes.plusFiveReact.id || event.d.emoji.id == MAIN.emotes.cancelReact.id) ){
 
     // FETCH CHANNEL
     channel.fetchMessage(event.d.message_id).then( async raid => {
