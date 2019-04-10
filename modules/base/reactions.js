@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const moment = require('moment-timezone');
 
 const reactions = {
-    "interval": 60000
+  "interval": 60000
 };
 reactions.run = (MAIN, event) => {
   let guild = MAIN.guilds.get(event.d.guild_id);
@@ -10,7 +10,15 @@ reactions.run = (MAIN, event) => {
   let channel = MAIN.channels.get(event.d.channel_id);
   let user_list = '', discord = '';
   let lobby_count = 0;
-	if(!member.user.bot && (event.d.emoji.id == MAIN.emotes.plusOneReact.id || event.d.emoji.id == MAIN.emotes.plusTwoReact.id || event.d.emoji.id == MAIN.emotes.plusThreeReact.id || event.d.emoji.id == MAIN.emotes.plusFourReact.id || event.d.emoji.id == MAIN.emotes.plusFiveReact.id || event.d.emoji.id == MAIN.emotes.cancelReact.id) ){
+  if(!member.user.bot && (event.d.emoji.id == MAIN.emotes.plusOneReact.id || event.d.emoji.id == MAIN.emotes.plusTwoReact.id || event.d.emoji.id == MAIN.emotes.plusThreeReact.id || event.d.emoji.id == MAIN.emotes.plusFourReact.id || event.d.emoji.id == MAIN.emotes.plusFiveReact.id || event.d.emoji.id == MAIN.emotes.cancelReact.id) ){
+
+    let member_count = 0;
+    if (event.d.emoji.id == MAIN.emotes.plusOneReact.id) { member_count = 1; }
+    if (event.d.emoji.id == MAIN.emotes.plusTwoReact.id) { member_count = 2; }
+    if (event.d.emoji.id == MAIN.emotes.plusThreeReact.id) { member_count = 3; }
+    if (event.d.emoji.id == MAIN.emotes.plusFourReact.id) { member_count = 4; }
+    if (event.d.emoji.id == MAIN.emotes.plusFiveReact.id) { member_count = 5; }
+    if (event.d.emoji.id == MAIN.emotes.cancelReact.id) { member_count = 0; }
 
     // FETCH CHANNEL
     channel.fetchMessage(event.d.message_id).then( async raid => {
@@ -36,15 +44,23 @@ reactions.run = (MAIN, event) => {
               // CHECK IF THE RAID IS ALREADY ACTIVE
               if(record[0].active == 'true'){
                 // INSERT USER IN LOBBY
-                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id) VALUES (?, ?)`, [gym_id, member.id], function (error, lobby, fields) {
+                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?;`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
                   lobby.forEach(function(row) {
                     lobby_count += row.count
                   })
+                  switch (member_count){
+                    case 0:
+                      interest = 'has **left** the raid. ';
+                      break;
+                    default:
+                      interest = 'has shown interest in the raid! ';
+                      break;
+                  }
                   // TAG USER IN EXISTING CHANNEL
-                  MAIN.channels.get(record[0].raid_channel).send(member+' has shown interest in the raid! There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
+                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are '+lobby_count+' interested. Make sure to coordinate a start time.').catch(console.error);
                   if(error){ console.error(error);}
                 });
               } else{
@@ -57,14 +73,14 @@ reactions.run = (MAIN, event) => {
 
                   // SET THE CATEGORY ID
                   new_channel.setParent(channel.parent).then( new_channel => {
-		    new_channel.lockPermissions();
+                    new_channel.lockPermissions();
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                     let channel_embed = new Discord.RichEmbed()
-                      .setColor(embed.color)
-                      .setThumbnail(embed.thumbnail.url)
-                      .setAuthor(embed.author.name, embed.author.iconURL)
-                      .setImage(embed.image.url);
+                    .setColor(embed.color)
+                    .setThumbnail(embed.thumbnail.url)
+                    .setAuthor(embed.author.name, embed.author.iconURL)
+                    .setImage(embed.image.url);
                     if(embed.fields[0]){
                       channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
                     }
@@ -111,39 +127,39 @@ function getActiveRaids(MAIN){
 }
 
 reactions.startInterval = async (MAIN) => {
-    let active_raids = await getActiveRaids(MAIN);
-    setInterval(async function() {
-      await active_raids.forEach((active,index) => {
-        MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ? AND active = ?`, [active.gym_id, 'true'], function (error, record, fields) {
-          if(record[0] && active.embed != record[0].embed){
+  let active_raids = await getActiveRaids(MAIN);
+  setInterval(async function() {
+    await active_raids.forEach((active,index) => {
+      MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ? AND active = ?`, [active.gym_id, 'true'], function (error, record, fields) {
+        if(record[0] && active.embed != record[0].embed){
 
-            let embed = JSON.parse(record[0].embed);
+          let embed = JSON.parse(record[0].embed);
 
-            let channel_embed = new Discord.RichEmbed()
-              .setColor(embed.color)
-              .setThumbnail(embed.thumbnail.url)
-              .setAuthor(embed.author.name, embed.author.iconURL)
-              .setImage(embed.image.url);
-            if(embed.fields[0]){
-              channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
-            }
-            if(embed.fields[1]){
-              channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
-            }
-            if(embed.fields[2]){
-              channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
-            }
-
-	    boss_name = embed.fields[0].name.slice(0, -7);
-            boss_name = boss_name.slice(2);
-	    MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
-
-            MAIN.channels.get(record[0].raid_channel).send(channel_embed).catch(console.error);
+          let channel_embed = new Discord.RichEmbed()
+          .setColor(embed.color)
+          .setThumbnail(embed.thumbnail.url)
+          .setAuthor(embed.author.name, embed.author.iconURL)
+          .setImage(embed.image.url);
+          if(embed.fields[0]){
+            channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
           }
-        });
+          if(embed.fields[1]){
+            channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
+          }
+          if(embed.fields[2]){
+            channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
+          }
+
+          boss_name = embed.fields[0].name.slice(0, -7);
+          boss_name = boss_name.slice(2);
+          MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+
+          MAIN.channels.get(record[0].raid_channel).send(channel_embed).catch(console.error);
+        }
       });
-      active_raids = await getActiveRaids(MAIN);
-    }, 60000);
+    });
+    active_raids = await getActiveRaids(MAIN);
+  }, 60000);
 }
 
 module.exports = reactions;
