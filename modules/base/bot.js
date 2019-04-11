@@ -99,6 +99,10 @@ function load_data(){
   MAIN.types = require('../../static/types.json');
   delete require.cache[require.resolve('../../static/pokemon.json')];
   MAIN.pokemon = require('../../static/pokemon.json');
+  delete require.cache[require.resolve('../../static/forms.json')];
+  MAIN.forms = require('../../static/forms.json');
+  delete require.cache[require.resolve('../../static/gyms.json')];
+  MAIN.gym_notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/rewards.json')];
   MAIN.rewards = require('../../static/rewards.json');
   delete require.cache[require.resolve('../../config/discords.json')];
@@ -158,8 +162,8 @@ function load_data(){
 //CHECK FOR MESSAGE REACTION ADDS
 MAIN.on('raw', event => {
 	switch(true){
-    case !MAIN.Active: break;
-    case MAIN.config.Raid_Lobbies == 'DISABLED': return;
+		case !MAIN.Active: break;
+		case MAIN.config.Raid_Lobbies == 'DISABLED': return;
 		case event.t == null: return;
 		case event.d.user_id == MAIN.user.id: return;
 		case event.t == 'MESSAGE_REACTION_ADD': return Reactions.run(MAIN, event);
@@ -168,10 +172,16 @@ MAIN.on('raw', event => {
 });
 
 // CHOOSE NEXT BOT AND SEND EMBED
-MAIN.Send_Embed = (type, embed, channel_id) => {
+MAIN.Send_Embed = (type, raid_level, server, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
-	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(embed)
-    .then( message => { if(type == 'raid' && MAIN.config.Raid_Lobbies == 'ENABLED'){ message.react(MAIN.emotes.checkYesReact.id).catch(console.error); } })
+	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
+    .then( message => { if(type == 'raid' && raid_level >= server.min_raid_lobbies ){
+	message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
+    } })
     .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
 }
 
@@ -299,19 +309,37 @@ MAIN.Bot_Time = (time,type,timezone) => {
   }
 }
 
+function pad(num, size) {
+    var s = num+"";
+    while (s.length < size) s = "0" + s;
+    return s;
+}
+
 // OBTAIN POKEMON SPRITE
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = '';
-  switch(id.toString().length){
-    case 1: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/00'+id+'.png'; break;
-    case 2: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/0'+id+'.png'; break;
-    case 3: sprite_url = 'https://www.serebii.net/sunmoon/pokemon/'+id+'.png'; break;
-  }
+  sprite_url =  MAIN.config.SPRITE_URL+pad(id,3)+'_00.png';
   switch(true){
-    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-4)+'-a.png'; } break;
+    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-6)+form+'.png'; } break;
     case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;
   }
+  //console.log(sprite_url);
   return sprite_url;
+}
+
+// POKEMON CPs
+MAIN.Get_CP = (pokemon, form, level) => {
+  if (form > 28) { pokemon = pokemon+form }
+  let cpmult = cp_multiplier[level]
+  let atk = base_stats[pokemon].attack
+  let def = base_stats[pokemon].defense
+  let sta = base_stats[pokemon].stamina
+
+  let cp = Math.max(10, Math.floor((atk + ivatk) *
+    ((def + ivdef) ** 0.5) *
+    ((sta + ivsta) ** 0.5) *
+    ((cpmult ** 2) / 10)))
+  return cp;
 }
 
 // GET QUEST REWARD ICON
@@ -642,13 +670,25 @@ setInterval(function() {
       MAIN.pdb.query(`DELETE FROM quest_alerts WHERE alert_time < UNIX_TIMESTAMP()*1000`, function (error, alerts, fields) { if(error){ console.error; } });
     }
   });
-  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-120`, function (error, active_raids, fields) {
+  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP() AND boss_name != "expired"`, function (error, active_raids, fields) {
+    if(active_raids[0]){
+      active_raids.forEach( async (raid,index) => {
+        let raid_channel = MAIN.channels.get(raid.raid_channel);
+        if(raid_channel){
+          raid_channel.setName('expired').catch(console.error)
+          raid_channel.send('Raid has ended, channel will delete in 15 minutes. Wrap up converation or join another raid lobby.').catch(console.error);
+        }
+      });
+      MAIN.pdb.query(`UPDATE active_raids set boss_name = "expired" WHERE expire_time < UNIX_TIMESTAMP()`, function (error, fields) { if(error){ console.error; } });
+    }
+  });
+  MAIN.pdb.query(`SELECT * FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-900`, function (error, active_raids, fields) {
     if(active_raids[0]){
       active_raids.forEach( async (raid,index) => {
         let raid_channel = MAIN.channels.get(raid.raid_channel);
         if(raid_channel){ raid_channel.delete().catch(console.error); }
       });
-      MAIN.pdb.query(`DELETE FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-120`, function (error, active_raids, fields) { if(error){ console.error; } });
+      MAIN.pdb.query(`DELETE FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-900`, function (error, active_raids, fields) { if(error){ console.error; } });
     }
   }); return;
 }, 60000);

@@ -12,20 +12,24 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
   // UPDATE/INSERT ACTIVE RAIDS
-  if(MAIN.config.Raid_Lobbies == 'ENABLED' && server.id){
+  if(raid.level >= server.min_raid_lobbies){
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
       if(record && record[0]){
 
-        // UPDATE CHANNEL NAME
-        if(record[0].raid_channel){
-          let raid_channel = MAIN.channels.get(record[0].raid_channel);
-          raid_channel.setName(boss_name+'_'+embed_area).catch(console.error);
-        }
+        //let embed = JSON.parse(record[0].embed);
+        //boss_name = embed.field[0].name.slice(0, -7);
+        //boss_name = boss_name.slice(2);
 
         // UPDATE BOSS NAME
         MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [boss_name, gym_id], function (error, record, fields) {
           if(error){ console.error(error); }
-        });
+        })
+
+        // UPDATE CHANNEL NAME
+        if(record[0].raid_channel){
+          let raid_channel = MAIN.channels.get(record[0].raid_channel);
+          raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+        };
       } else {
 
         // INSERT INTO ACTIVE RAIDS
@@ -50,7 +54,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
     else if(!channel){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+raid_channel[0]+' does not appear to exist.'); }
 
     // FILTER FOR EGG LEVEL
-    else if( (type == 'Egg' && filter.Egg_Levels.indexOf(raid.level) >= 0) || (type == 'Boss' && filter.Boss_Levels.indexOf(raid.level) >= 0) ){
+    else if( (type == 'Egg' && filter.Egg_Levels.indexOf(raid.level) >= 0) || (type == 'Boss' && filter.Boss_Levels.indexOf(raid.level) >= 0) || (filter.Boss_Levels.indexOf(boss_name) >= 0) ){
 
       // AREA FILTER
       if(geofences.indexOf(server.name) >= 0 || geofences.indexOf(main_area) >= 0 || geofences.indexOf(sub_area) >= 0){
@@ -70,7 +74,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
       }
     }
     else{
-      if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Did Not Meet Type or Level Filter for '+raid_channel[0]+'. Expected: '+filter.Egg_Or_Boss_Or_Both+', Saw: '+type.toLowerCase()); }
+      if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Did Not Meet Type or Level Filter for '+raid_channel[0]+'. Expected: '+filter.Boss_Levels+', Saw: '+type.toLowerCase()); }
     }
   });
 }

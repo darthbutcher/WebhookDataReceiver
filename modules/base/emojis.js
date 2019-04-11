@@ -371,9 +371,49 @@ function LoadEmojis(bot, serverIDs){
           if(this.checkYes) { this.checkYesReact = this.checkYes; this.checkYes = this.checkYes.toString() }
         }
 
-				if(!this.yellowQuestion){
+	if(!this.yellowQuestion){
           this.yellowQuestion = guild.emojis.find(emoji => emoji.name === "yellow_question");
           if(this.yellowQuestion) { this.yellowQuestionReact = this.yellowQuestion; this.yellowQuestion = this.yellowQuestion.toString() }
+        }
+
+	if(!this.plusOne){
+          this.plusOne = guild.emojis.find(emoji => emoji.name === "plusone");
+          if(this.plusOne) { this.plusOneReact = this.plusOne; this.plusOne = this.plusOne.toString() }
+        }
+
+        if(!this.plusTwo){
+          this.plusTwo = guild.emojis.find(emoji => emoji.name === "plustwo");
+          if(this.plusTwo) { this.plusTwoReact = this.plusTwo; this.plusTwo = this.plusTwo.toString() }
+        }
+
+        if(!this.plusThree){
+          this.plusThree = guild.emojis.find(emoji => emoji.name === "plusthree");
+          if(this.plusThree) { this.plusThreeReact = this.plusThree; this.plusThree = this.plusThree.toString() }
+        }
+
+        if(!this.plusFour){
+          this.plusFour = guild.emojis.find(emoji => emoji.name === "plusfour");
+          if(this.plusFour) { this.plusFourReact = this.plusFour; this.plusFour = this.plusFour.toString() }
+        }
+
+        if(!this.plusFive){
+          this.plusFive = guild.emojis.find(emoji => emoji.name === "plusfive");
+          if(this.plusFive) { this.plusFiveReact = this.plusFive; this.plusFive = this.plusFive.toString() }
+        }
+
+        if(!this.cancel){
+          this.cancel = guild.emojis.find(emoji => emoji.name === "cancel");
+          if(this.cancel) { this.cancelReact = this.cancel; this.cancel = this.cancel.toString() }
+        }
+
+        if(!this.male){
+          this.male = guild.emojis.find(emoji => emoji.name === "male");
+          if(this.male) { this.maleReact = this.male; this.male = this.male.toString() }
+        }
+
+        if(!this.female){
+          this.female = guild.emojis.find(emoji => emoji.name === "female");
+          if(this.female) { this.femaleReact = this.female; this.female = this.female.toString() }
         }
       }
     }

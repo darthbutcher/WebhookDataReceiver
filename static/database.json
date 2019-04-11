@@ -1,5 +1,5 @@
 {
-  "LATEST": 9,
+  "LATEST": 11,
   "1": [{
       "sql": "",
       "data": "",
@@ -117,5 +117,24 @@
       "gLog": "Created active_areas table",
       "bLog": "[Pokébot] Failed to Create active_areas"
     }
+  ],
+  "11": [{
+      "sql": "ALTER TABLE active_raids MODIFY COLUMN gym_id varchar(35) NOT NULL;",
+      "data": "",
+      "gLog": "Modified active_raids gym_id column",
+      "bLog": "[Pokébot] Failed to modify active_raids"
+    },
+    {
+        "sql": "ALTER TABLE active_raids ADD PRIMARY KEY (gym_id);",
+        "data": "",
+        "gLog": "Added Primary key to active raids",
+        "bLog": "[Pokébot] Failed to modify active_raids"
+      },
+    {
+        "sql": "CREATE TABLE IF NOT EXISTS lobby_members (gym_id varchar(35) NOT NULL, user_id bigint(20) NOT NULL, count int(11) DEFAULT '1', time varchar(5) CHARACTER SET utf8 COLLATE utf8_unicode_ci DEFAULT NULL, PRIMARY KEY (`gym_id`,`user_id`), CONSTRAINT `fk_lobby_members` FOREIGN KEY (`gym_id`) REFERENCES `active_raids` (`gym_id`) ON DELETE CASCADE);",
+        "data": "",
+        "gLog": "Create lobby_members table",
+        "bLog": "[Pokébot] Failed to create lobby_members"
+      }
   ]
 }

@@ -17,6 +17,8 @@ Tile_Height = 220
 # IMAGE HOST
 # This must be URL. You must include http:// or https:// and the / at the end.
 HOST = http://www.yourimages.com/
+FRONTEND_URL = https://yourmap.com/
+SPRITE_URL = https://www.serebii.net/sunmoon/pokemon/
 
 # IMAGE DIRECTORY
 # pokemon_tiles, raid_tiles, and quest_tiles folders must be created in this location.

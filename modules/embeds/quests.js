@@ -29,7 +29,7 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
     case quest.template.indexOf('hard') >= 0: embed_color = 'ff0000'; break;
     default: embed_color = '00ccff';
   }
-
+  let roleID = '';
   // CREATE RICH EMBED
   if(!quest_url){ quest_url = quest.url; }
   let quest_embed = new Discord.RichEmbed()
@@ -40,7 +40,8 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
     .setImage(img_url)
     .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | '
                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=d) | '
-                           +'[Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)');
+                           +'[Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes) | '
+                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
 
   // LOGGING
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
@@ -48,7 +49,7 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
 
   // CHECK DISCORD CONFIG
   if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){
-    MAIN.Send_Embed('quest', quest_embed, channel.id);
+    MAIN.Send_Embed('quest', 0, roleID, server, quest_embed, channel.id);
   } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.'); }
   return;
 }
