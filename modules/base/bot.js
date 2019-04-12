@@ -329,16 +329,16 @@ MAIN.Get_Sprite = (form, id) => {
   if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
     switch (MAIN.forms[raid.pokemon_id][form]) {
       case 'Alolan':
-      extention = '-a'+extension;
+      extension = '-a'+extension;
       break;
       case 'Origin':
       extension = '-o'+extension;
       break;
       default:
-      extention = extension;
+      extension = extension;
     }
   }
-  sprite_url =  sprite_url+pad(id,3)+extention;
+  sprite_url =  sprite_url+pad(id,3)+extension;
   //console.log(sprite_url);
   return sprite_url;
 }
