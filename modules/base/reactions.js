@@ -74,8 +74,9 @@ reactions.run = (MAIN, event) => {
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
+		let category = discord.raid_lobbies_category_id ? discord.raid_lobbies_category_id : channel.parent;
                   // SET THE CATEGORY ID
-                  new_channel.setParent(channel.parent).then( new_channel => {
+                  new_channel.setParent(category).then( new_channel => {
                     new_channel.lockPermissions();
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 

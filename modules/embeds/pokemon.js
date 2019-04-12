@@ -66,7 +66,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     .setColor('00ccff')
     .setThumbnail(pokemon_url)
 
-  if(has_iv == false || (sighting.cp == null && MAIN.config.sub_without_iv != 'FALSE')){
+  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
     pokemon_embed
       .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
