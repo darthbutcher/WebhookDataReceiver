@@ -317,12 +317,28 @@ function pad(num, size) {
 
 // OBTAIN POKEMON SPRITE
 MAIN.Get_Sprite = (form, id) => {
-  let sprite_url = '';
-  sprite_url =  MAIN.config.SPRITE_URL+pad(id,3)+'_00.png';
-  switch(true){
-    case form > 0: if(MAIN.pokemon.alolan_forms.indexOf(form) >= 0){ sprite_url = sprite_url.toString().slice(0,-6)+form+'.png'; } break;
-    case form == 'shiny': sprite_url = 'https://www.serebii.net/Shiny/SM/'+id+'.png'; break;
+  let sprite_url = MAIN.config.SPRITE_URL;
+  let extension = '.png';
+  if (MAIN.config.SPRITE_TYPE == 'SHUFFLE') {
+    if (form > 0 ){
+      extension = '_'+form+extension;
+    } else { extension = '_00'+extension; }
+    sprite_url = sprite_url+'pokemon_icon_';
   }
+
+  if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
+    switch (MAIN.forms[raid.pokemon_id][form]) {
+      case 'Alolan':
+      extention = '-a'+extension;
+      break;
+      case 'Origin':
+      extension = '-o'+extension;
+      break;
+      default:
+      extention = extension;
+    }
+  }
+  sprite_url =  sprite_url+pad(id,3)+extention;
   //console.log(sprite_url);
   return sprite_url;
 }

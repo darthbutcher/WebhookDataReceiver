@@ -18,6 +18,9 @@ Tile_Height = 220
 # This must be URL. You must include http:// or https:// and the / at the end.
 HOST = http://www.yourimages.com/
 FRONTEND_URL = https://yourmap.com/
+
+# SPRITES TYPE DEFAULT / SHUFFLE
+SPRITE_TYPE = DEFAULT
 SPRITE_URL = https://www.serebii.net/sunmoon/pokemon/
 
 # IMAGE DIRECTORY
