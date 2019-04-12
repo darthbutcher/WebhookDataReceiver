@@ -327,7 +327,7 @@ MAIN.Get_Sprite = (form, id) => {
   }
 
   if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
-    switch (MAIN.forms[raid.pokemon_id][form]) {
+    switch (MAIN.forms[id][form]) {
       case 'Alolan':
       extension = '-a'+extension;
       break;
