@@ -11,6 +11,21 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   if(raid.cp > 0){ type = 'Boss'; boss_name = MAIN.pokemon[raid.pokemon_id].name; }
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
+  // UPDATE/INSERT ACTIVE RAIDS
+  if(raid.level >= server.min_raid_lobbies){
+    let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
+    MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE boss_name = ?`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end, boss_name], function (error, record, fields) {
+      if(error){ console.error(error); }
+    });
+    MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
+      // UPDATE CHANNEL NAME
+      if(record[0].raid_channel){
+        let raid_channel = MAIN.channels.get(record[0].raid_channel);
+        raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+      };
+    });
+  }
+
   // CHECK EACH FEED FILTER
   MAIN.Raid_Channels.forEach((raid_channel,index) => {
 
@@ -28,21 +43,6 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
 
       // AREA FILTER
       if(geofences.indexOf(server.name) >= 0 || geofences.indexOf(main_area) >= 0 || geofences.indexOf(sub_area) >= 0){
-
-        // UPDATE/INSERT ACTIVE RAIDS
-        if(raid.level >= server.min_raid_lobbies){
-          let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
-          MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE boss_name = ?`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end, boss_name], function (error, record, fields) {
-            if(error){ console.error(error); }
-          });
-          MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
-            // UPDATE CHANNEL NAME
-            if(record[0].raid_channel){
-              let raid_channel = MAIN.channels.get(record[0].raid_channel);
-              raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
-            };
-          });
-        }
 
         // CHECK FOR EX ELIGIBLE REQUIREMENT
         if(filter.Ex_Eligible_Only == undefined || filter.Ex_Eligible_Only != true){
