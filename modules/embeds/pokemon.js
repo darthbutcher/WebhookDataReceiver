@@ -49,7 +49,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
   if (verified == MAIN.emotes.yellowQuestion) {
-    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [encounter_id], function (error, record, fields) {
+    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
       if(error){ console.error(error); }
       if (record.expire_timestamp_verified == 1) {
         console.log('DESPAWN is verified');
