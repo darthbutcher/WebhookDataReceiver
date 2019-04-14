@@ -87,17 +87,23 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
     // VERIFY VERIFICATION FOR IV SCAN
     if (verified == MAIN.emotes.yellowQuestion) {
-      MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+      let encounter = []
+      encounter =  MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
         if(error){ console.error(error); }
         console.log(record[0].expire_timestamp_verified+'<db-webhook>'+sighting.encounter_id)
         if (record[0].expire_timestamp_verified == 1) {
           console.log('DESPAWN is verified');
-          hide_time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
-          hide_mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
-          hide_secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
-          verified = MAIN.emotes.checkYes;
+          let time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
+          let mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
+          let secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
+          let veri = MAIN.emotes.checkYes;
         } else {console.log('DESPAWN is not verified');}
+        return time, mins, secs, veri;
       });
+      hide_time = encounter[0];
+      hide_mins = encounter[1];
+      hide_secs = encounter[2];
+      verified = encounter[3];
     }
 
     pokemon_embed
