@@ -89,6 +89,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     if (verified == MAIN.emotes.yellowQuestion) {
       MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
         if(error){ console.error(error); }
+        console.log(record.expire_timestamp_verified+'<db-webhook>'+sighting.encounter_id)
         if (record.expire_timestamp_verified == 1) {
           console.log('DESPAWN is verified');
           hide_time = MAIN.Bot_Time(record.expire_timestamp, '1', timezone);
@@ -110,10 +111,10 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   }
 
   if(member){
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
+    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
     return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
   } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
+    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
     return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
   } else{ return; }
 

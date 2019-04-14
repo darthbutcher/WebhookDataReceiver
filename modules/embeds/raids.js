@@ -58,7 +58,9 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let embed_thumb = '', raid_embed = '', db_embed = '', gym_id = raid.gym_id;
 
   let gym_notes = '';
-  if (!MAIN.gym_notes[gym_id]) { console.log('add note'); } else { gym_notes = MAIN.gym_notes[gym_id].description; }
+  if (!MAIN.gym_notes[gym_id]) {
+    if(MAIN.config.DEBUG.Raids == 'ENABLED') {console.log('[Pokébot] [Embed] [raids.js] GYM Has no note in gyms.json, add note.');}
+  } else { gym_notes = MAIN.gym_notes[gym_id].description; }
 
   switch(raid_type){
 
