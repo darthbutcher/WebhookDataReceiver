@@ -48,6 +48,19 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
+  if (verified == MAIN.emotes.yellowQuestion) {
+    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [encounter_id], function (error, record, fields) {
+      if(error){ console.error(error); }
+      if (record.expire_timestamp_verified == 1) {
+        console.log('DESPAWN is verified')
+        hide_time = await MAIN.Bot_Time(record.expire_timestamp, '1', timezone);
+        hide_mins = Math.floor((record.expire_timestamp-(time_now/1000))/60);
+        hide_secs = Math.floor((record.expire_timestamp-(time_now/1000)) - (hide_mins*60));
+        verified = MAIN.emotes.checkYes;
+      }
+    });
+  }
+
 
   // GET WEATHER BOOST
   let weather_boost = '';
