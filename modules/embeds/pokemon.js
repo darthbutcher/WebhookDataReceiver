@@ -48,19 +48,6 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
-  if (verified == MAIN.emotes.yellowQuestion) {
-    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
-      if(error){ console.error(error); }
-      if (record.expire_timestamp_verified == 1) {
-        console.log('DESPAWN is verified');
-        hide_time = MAIN.Bot_Time(record.expire_timestamp, '1', timezone);
-        hide_mins = Math.floor((record.expire_timestamp-(time_now/1000))/60);
-        hide_secs = Math.floor((record.expire_timestamp-(time_now/1000)) - (hide_mins*60));
-        verified = MAIN.emotes.checkYes;
-      } else {console.log('DESPAWN is not verified');}
-    });
-  }
-
 
   // GET WEATHER BOOST
   let weather_boost = '';
@@ -97,6 +84,20 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     // DETERMINE HEIGHT AND WEIGHT
     let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
+
+    // VERIFY VERIFICATION FOR IV SCAN
+    if (verified == MAIN.emotes.yellowQuestion) {
+      MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+        if(error){ console.error(error); }
+        if (record.expire_timestamp_verified == 1) {
+          console.log('DESPAWN is verified');
+          hide_time = MAIN.Bot_Time(record.expire_timestamp, '1', timezone);
+          hide_mins = Math.floor((record.expire_timestamp-(time_now/1000))/60);
+          hide_secs = Math.floor((record.expire_timestamp-(time_now/1000)) - (hide_mins*60));
+          verified = MAIN.emotes.checkYes;
+        } else {console.log('DESPAWN is not verified');}
+      });
+    }
 
     pokemon_embed
       .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
