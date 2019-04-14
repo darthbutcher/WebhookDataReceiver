@@ -86,9 +86,9 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
     // VERIFY VERIFICATION FOR IV SCAN
+    let timer = '';
     if (verified == MAIN.emotes.yellowQuestion) {
-      let encounter = []
-      encounter =  MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+      timer =  MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
         if(error){ console.error(error); }
         console.log(record[0].expire_timestamp_verified+'<db-webhook>'+sighting.encounter_id)
         if (record[0].expire_timestamp_verified == 1) {
@@ -97,19 +97,18 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
           let mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
           let secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
           let veri = MAIN.emotes.checkYes;
-        } else {console.log('DESPAWN is not verified');}
-        return time, mins, secs, veri;
+          return veri+': '+time+' (*'+mins+'m '+secs+'s*) ';
+        } else {
+          console.log('DESPAWN is not verified');
+          return verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ';
+        }
       });
-      hide_time = encounter[0];
-      hide_mins = encounter[1];
-      hide_secs = encounter[2];
-      verified = encounter[3];
-    }
+    } else { timer = verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '; }
 
     pokemon_embed
       .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
                +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField(verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ', pokemon_type+weather_boost, false)
+      .addField(timer, pokemon_type+weather_boost, false)
       //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                            +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
