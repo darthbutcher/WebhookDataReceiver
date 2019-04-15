@@ -82,7 +82,7 @@ module.exports.run = async (MAIN, message) => {
             case prefix+'raid': command = 'raid'; break;
             case prefix+'q':
             case prefix+'quest': command = 'quest'; break;
-            default: command = message.content.slice(prefix.length);
+            default: if(message.content.startsWith(prefix)){ command = message.content.slice(prefix.length); }
           }
 
           // SEND TO THE COMMAND FUNCTION

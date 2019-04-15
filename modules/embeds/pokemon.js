@@ -62,16 +62,17 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   }
 
   let pokemon_embed = new Discord.RichEmbed()
-    .setImage(img_url)
-    .setColor('00ccff')
-    .setThumbnail(pokemon_url)
+  .setImage(img_url)
+  .setColor('00ccff')
+  .setThumbnail(pokemon_url)
 
-  if(has_iv == false || (sighting.cp == null && MAIN.config.sub_without_iv != 'FALSE')){
+  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
     pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                           +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
+    .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
+    +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+    +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    send_embed();
   } else{
 
     if(sighting.cp == null){ return; }
@@ -85,22 +86,51 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
-    pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
-               +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField(verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ', pokemon_type+weather_boost, false)
+    // VERIFY VERIFICATION FOR IV SCAN
+    if (verified == MAIN.emotes.yellowQuestion) {
+      MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+        if(error){ console.error(error); }
+        veri = verified;
+        time = hide_time;
+        mins = hide_mins;
+        secs = hide_secs;
+        if (record[0].expire_timestamp_verified == 1) {
+          console.log('DESPAWN for '+pokemon_name+' is verified');
+          time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
+          mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
+          secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
+          veri = MAIN.emotes.checkYes;
+        } else {
+          console.log('DESPAWN for '+pokemon_name+' is not verified');
+        }
+        embed(veri, time, mins, secs);
+        send_embed();
+      });
+    } else {
+      embed(verified,hide_time,hide_mins,hide_secs);
+      console.log('DESPAWN for '+pokemon_name+' is already verified');
+      send_embed();
+    }
+
+
+    function embed(veri, time, mins, secs) {
+      pokemon_embed
+      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+      .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
       //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                           +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+      +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+      +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    }
   }
 
-  if(member){
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
-    return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
-  } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-    if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
-    return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
-  } else{ return; }
+  function send_embed(){
+    if(member){
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
+      return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
+    } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
+      return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
+    } else{ return; }}
 
-}
+  }
