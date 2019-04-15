@@ -19,9 +19,10 @@ Tile_Height = 220
 HOST = http://www.yourimages.com/
 FRONTEND_URL = https://yourmap.com/
 
-# SPRITES TYPE DEFAULT / SHUFFLE
+# SPRITES TYPE DEFAULT / SHUFFLE comment or un-comment the base url
 SPRITE_TYPE = DEFAULT
 SPRITE_URL = https://www.serebii.net/sunmoon/pokemon/
+#SPRITE_URL = https://raw.githubusercontent.com/nileplumb/PkmnShuffleMap/master/PMSF_icons_large/
 
 # IMAGE DIRECTORY
 # pokemon_tiles, raid_tiles, and quest_tiles folders must be created in this location.
@@ -44,13 +45,20 @@ Raid_Lobbies = ENABLED
 Lobby_Limit = 2
 
 [DB]
-# DATABASE CREDENTIALS
-host = 172.29.1.16
+# POKEBOT DATABASE CREDENTIALS
+host = localhost
+username = username
+password = password
+port = 3306
+db_name = pokebot
+
+[rdmDB]
+# RDM DATABASE CREDENTIALS
+host = localhost
 username = username
 password = password
 port = 3306
 rdm_db_name = rdmdb
-pokebot_db_name = pokebot
 
 # Remove any pokestops that have been upgraded to gyms daily.
 Remove_Upgraded_Pokestops = ENABLED
@@ -134,6 +142,7 @@ Discord_Feeds = ENABLED
 [POKEMON]
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
+subs_without_iv = DISABLED
 
 [DEBUG]
 # Debugs will flood the console with logs.

@@ -43,11 +43,11 @@ MAIN.logging = MAIN.config.CONSOLE_LOGS;
 
 // RDM DATABASE CONNECTION
 MAIN.rdmdb = MySQL.createConnection({
-  host: MAIN.config.DB.host,
-  user: MAIN.config.DB.username,
-  password: MAIN.config.DB.password,
-  port: MAIN.config.DB.port,
-  database : MAIN.config.DB.rdm_db_name
+  host: MAIN.config.rdmDB.host,
+  user: MAIN.config.rdmDB.username,
+  password: MAIN.config.rdmDB.password,
+  port: MAIN.config.rdmDB.port,
+  database : MAIN.config.rdmDB.db_name
 });
 
 // POKEBOT DATABASE CONNECTION
@@ -56,7 +56,7 @@ MAIN.pdb = MySQL.createConnection({
   user: MAIN.config.DB.username,
   password: MAIN.config.DB.password,
   port: MAIN.config.DB.port,
-  database : MAIN.config.DB.pokebot_db_name
+  database : MAIN.config.DB.db_name
 });
 
 // LOAD CHANNELS
