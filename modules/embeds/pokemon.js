@@ -62,16 +62,16 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   }
 
   let pokemon_embed = new Discord.RichEmbed()
-    .setImage(img_url)
-    .setColor('00ccff')
-    .setThumbnail(pokemon_url)
+  .setImage(img_url)
+  .setColor('00ccff')
+  .setThumbnail(pokemon_url)
 
   if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
     pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                           +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
+    .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
+                                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+                                         +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
   } else{
 
     if(sighting.cp == null){ return; }
@@ -86,19 +86,14 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
     // VERIFY VERIFICATION FOR IV SCAN
-     let timer = 'XX';
-     function setTimes(veri, time, mins, secs) {
-        timer = veri+': '+time+' (*'+mins+'m '+secs+'s*) ';
-        console.log( timer );
-      }
     if (verified == MAIN.emotes.yellowQuestion) {
-    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+      MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
         if(error){ console.error(error); }
         console.log(record[0].expire_timestamp_verified+'<db-webhook>'+sighting.encounter_id)
         veri = verified;
-	time = hide_time;
-	mins = hide_mins;
-	secs = hide_secs;
+        time = hide_time;
+        mins = hide_mins;
+        secs = hide_secs;
         if (record[0].expire_timestamp_verified == 1) {
           console.log('DESPAWN for '+pokemon_name+' is verified');
           time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
@@ -108,20 +103,21 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         } else {
           console.log('DESPAWN for '+pokemon_name+' is not verified');
         }
-	setTimes(veri, time, mins, secs);
+        embed(veri, time, mins, secs);
       });
     } else {
-	setTimes(verified,hide_time,hide_mins,hide_secs);;
-	console.log('DESPAWN for '+pokemon_name+' is already verified');
+      embed(verified,hide_time,hide_mins,hide_secs);;
+      console.log('DESPAWN for '+pokemon_name+' is already verified');
     }
-     pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
-               +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField(timer, pokemon_type+weather_boost, false)
-      //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                           +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    function embed(veri, time, mins, secs) {
+    pokemon_embed
+    .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+    .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
+    //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
+    .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
+                                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+                                         +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+    }
   }
 
   if(member){
