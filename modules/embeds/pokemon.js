@@ -86,26 +86,35 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
 
     // VERIFY VERIFICATION FOR IV SCAN
-    let timer = '';
+     let timer = 'XX';
+     function setTimes(veri, time, mins, secs) {
+        timer = veri+': '+time+' (*'+mins+'m '+secs+'s*) ';
+        console.log( timer );
+      }
     if (verified == MAIN.emotes.yellowQuestion) {
-      timer =  MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
         if(error){ console.error(error); }
         console.log(record[0].expire_timestamp_verified+'<db-webhook>'+sighting.encounter_id)
+        veri = verified;
+	time = hide_time;
+	mins = hide_mins;
+	secs = hide_secs;
         if (record[0].expire_timestamp_verified == 1) {
-          console.log('DESPAWN is verified');
-          let time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
-          let mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
-          let secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
-          let veri = MAIN.emotes.checkYes;
-          return veri+': '+time+' (*'+mins+'m '+secs+'s*) ';
+          console.log('DESPAWN for '+pokemon_name+' is verified');
+          time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
+          mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
+          secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
+          veri = MAIN.emotes.checkYes;
         } else {
-          console.log('DESPAWN is not verified');
-          return verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) ';
+          console.log('DESPAWN for '+pokemon_name+' is not verified');
         }
+	setTimes(veri, time, mins, secs);
       });
-    } else { timer = verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*) '; }
-
-    pokemon_embed
+    } else {
+	setTimes(verified,hide_time,hide_mins,hide_secs);;
+	console.log('DESPAWN for '+pokemon_name+' is already verified');
+    }
+     pokemon_embed
       .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'
                +'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField(timer, pokemon_type+weather_boost, false)
