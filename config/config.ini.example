@@ -58,7 +58,7 @@ host = localhost
 username = username
 password = password
 port = 3306
-rdm_db_name = rdmdb
+db_name = rdmdb
 
 # Remove any pokestops that have been upgraded to gyms daily.
 Remove_Upgraded_Pokestops = ENABLED
