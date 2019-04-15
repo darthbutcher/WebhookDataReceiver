@@ -100,15 +100,19 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
           mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
           secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
           veri = MAIN.emotes.checkYes;
+          embed(veri, time, mins, secs);
         } else {
           console.log('DESPAWN for '+pokemon_name+' is not verified');
+	  embed(veri, time, mins, secs);
         }
-        embed(veri, time, mins, secs);
+	embed(veri, time, mins, secs);
       });
     } else {
       embed(verified,hide_time,hide_mins,hide_secs);;
       console.log('DESPAWN for '+pokemon_name+' is already verified');
     }
+
+
     function embed(veri, time, mins, secs) {
     pokemon_embed
     .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
