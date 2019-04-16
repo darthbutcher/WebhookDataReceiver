@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // GET STATIC MAP TILE
   let img_url = '';
@@ -29,7 +29,7 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
     case quest.template.indexOf('hard') >= 0: embed_color = 'ff0000'; break;
     default: embed_color = '00ccff';
   }
-  let roleID = '';
+  //let roleID = '';
   // CREATE RICH EMBED
   if(!quest_url){ quest_url = quest.url; }
   let quest_embed = new Discord.RichEmbed()
@@ -48,7 +48,7 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
 
   // CHECK DISCORD CONFIG
   if(MAIN.config.QUEST.Discord_Feeds == 'ENABLED'){
-    MAIN.Send_Embed('quest', 0, roleID, server, quest_embed, channel.id);
+    MAIN.Send_Embed('quest', 0, role_id, server, quest_embed, channel.id);
   } else{ console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.'); }
   return;
 }
