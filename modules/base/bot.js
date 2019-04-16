@@ -327,7 +327,8 @@ MAIN.Get_Sprite = (form, id) => {
   }
 
   if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
-    switch (MAIN.forms[id][form]) {
+if (form != 0 ){
+switch (MAIN.forms[id][form]) {
       case 'Alolan':
       extension = '-a'+extension;
       break;
@@ -337,9 +338,8 @@ MAIN.Get_Sprite = (form, id) => {
       default:
       extension = extension;
     }
-  }
+  }}
   sprite_url =  sprite_url+pad(id,3)+extension;
-  //console.log(sprite_url);
   return sprite_url;
 }
 
