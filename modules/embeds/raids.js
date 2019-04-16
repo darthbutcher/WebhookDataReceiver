@@ -190,4 +190,3 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       }, 5000); break;
   } return;
 }
-
