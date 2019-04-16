@@ -325,7 +325,7 @@ MAIN.Get_Sprite = (form, id) => {
     } else { extension = '_00'+extension; }
     sprite_url = sprite_url+'pokemon_icon_';
   }
-
+  if (form != 0 ){
   if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
     switch (MAIN.forms[id][form]) {
       case 'Alolan':
@@ -337,6 +337,7 @@ MAIN.Get_Sprite = (form, id) => {
       default:
       extension = extension;
     }
+  }
   }
   sprite_url =  sprite_url+pad(id,3)+extension;
   //console.log(sprite_url);
