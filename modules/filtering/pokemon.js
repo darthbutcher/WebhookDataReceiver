@@ -2,7 +2,7 @@ delete require.cache[require.resolve('../embeds/pokemon.js')];
 const Send_Pokemon = require('../embeds/pokemon.js');
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // VARIABLES
   let internal_value = (sighting.individual_defense+sighting.individual_stamina+sighting.individual_attack)/45;
@@ -15,7 +15,13 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     let geofences = pokemon_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(pokemon_channel[0]);
     let filter = MAIN.Filters.get(pokemon_channel[1].filter);
-    if (pokemon_channel[1].roleid) { let role_id = '<@&'+pokemon_channel[1].roleid+'>'; } else { let role_id = ''; }
+    if (pokemon_channel[1].roleid) {
+	if (pokemon_channel[1].roleid == 'here' || pokemon_channel[1].roleid == 'everyone'){
+	  role_id = '@'+pokemon_channel[1].roleid;
+	} else {
+	  role_id = '<@&'+pokemon_channel[1].roleid+'>';
+    	}
+    } else { role_id = ''; }
 
 
     // CHECK FILTER GEOFENCES
