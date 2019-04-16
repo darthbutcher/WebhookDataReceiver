@@ -103,8 +103,8 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         } else {
           console.log('DESPAWN for '+pokemon_name+' is not verified');
         }
-embed(veri, time, mins, secs);
-send_embed();
+        embed(veri, time, mins, secs);
+        send_embed();
       });
     } else {
       embed(verified,hide_time,hide_mins,hide_secs);
@@ -114,24 +114,22 @@ send_embed();
 
 
     function embed(veri, time, mins, secs) {
-    pokemon_embed
-    .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-    .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
-    //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
-    .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                         +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+      pokemon_embed
+      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+      .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
+      //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
+      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
+      +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+      +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
     }
   }
 
-
   function send_embed(){
-  if(member){
-    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
-    return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
-  } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
-    return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
-  } else{ return; }}
-
-}
+    if(member){
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
+      return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
+    } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
+      return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
+    } else{ return; }}
+  }
