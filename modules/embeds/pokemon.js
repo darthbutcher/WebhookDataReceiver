@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // CHECK IF THE TARGET IS A USER
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
@@ -42,10 +42,6 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // Round IV
   internal_value = Math.round(internal_value);
 
-  // GET ROLEID
-  let roleID = '';
-  if (internal_value == 100 || pokemon_name == 'Unown'){ roleID = '@everyone'; } else { roleID = ''; }
-
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
 
@@ -70,9 +66,9 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     pokemon_embed
     .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
     .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-    +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-    +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
-    send_embed();
+                                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
+                                         +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+  send_embed();
   } else{
 
     if(sighting.cp == null){ return; }
@@ -125,12 +121,12 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   }
 
   function send_embed(){
-    if(member){
-      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
-      return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
-    } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
-      return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
-    } else{ return; }}
+  if(member){
+    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+member.user.tag+' ('+member.id+').'); }
+    return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
+  } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
+    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
+    return MAIN.Send_Embed('pokemon', 0, server, role_id, pokemon_embed, target.id);
+  } else{ return; }}
 
-  }
+}

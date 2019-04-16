@@ -2,7 +2,7 @@ delete require.cache[require.resolve('../embeds/raids.js')];
 const Send_Raid = require('../embeds/raids.js');
 const Discord = require('discord.js');
 
-module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Received a Raid.'); }
 
@@ -13,31 +13,16 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
 
   // UPDATE/INSERT ACTIVE RAIDS
   if(raid.level >= server.min_raid_lobbies){
+    let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
+    MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE boss_name = ?`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end, boss_name], function (error, record, fields) {
+      if(error){ console.error(error); }
+    });
     MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
-      if(record && record[0]){
-
-        //let embed = JSON.parse(record[0].embed);
-        //boss_name = embed.field[0].name.slice(0, -7);
-        //boss_name = boss_name.slice(2);
-
-        // UPDATE BOSS NAME
-        MAIN.pdb.query(`UPDATE active_raids SET boss_name = ? WHERE gym_id = ?`, [boss_name, gym_id], function (error, record, fields) {
-          if(error){ console.error(error); }
-        })
-
-        // UPDATE CHANNEL NAME
-        if(record[0].raid_channel){
-          let raid_channel = MAIN.channels.get(record[0].raid_channel);
-          raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
-        };
-      } else {
-
-        // INSERT INTO ACTIVE RAIDS
-        let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
-        MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?)`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end], function (error, record, fields) {
-          if(error){ console.error(error); }
-        });
-      }
+      // UPDATE CHANNEL NAME
+      if(record[0].raid_channel){
+        let raid_channel = MAIN.channels.get(record[0].raid_channel);
+        raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+      };
     });
   }
 
@@ -48,6 +33,13 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
     let geofences = raid_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(raid_channel[0]);
     let filter = MAIN.Filters.get(raid_channel[1].filter);
+    if (raid_channel[1].roleid) {
+      if (raid_channel[1].roleid == 'here' || raid_channel[1].roleid == 'everyone'){
+        role_id = '@'+raid_channel[1].roleid;
+      } else {
+        role_id = '<@&'+raid_channel[1].roleid+'>';
+      }
+    } else { role_id = ''; }
 
     // THROW ERRORS AND BREAK FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
@@ -62,11 +54,11 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
         // CHECK FOR EX ELIGIBLE REQUIREMENT
         if(filter.Ex_Eligible_Only == undefined || filter.Ex_Eligible_Only != true){
           if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
-          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone);
+          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id);
         }
         else if(filter.Ex_Eligible_Only == raid.ex_raid_eligible || filter.Ex_Eligible_Only == raid.sponsor_id){
           if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
-          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone);
+          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id);
         }
       }
       else{

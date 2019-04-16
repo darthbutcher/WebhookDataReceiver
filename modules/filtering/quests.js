@@ -2,7 +2,7 @@ delete require.cache[require.resolve('../embeds/quests.js')];
 const Send_Quest = require('../embeds/quests.js');
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // DETERMINE THE QUEST REWARD
   let  quest_reward = '', simple_reward = '';
@@ -50,6 +50,13 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     let geofences = quest_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(quest_channel[0]);
     let filter = MAIN.Filters.get(quest_channel[1].filter);
+    if (quest_channel[1].roleid) {
+      if (quest_channel[1].roleid == 'here' || quest_channel[1].roleid == 'everyone'){
+        role_id = '@'+quest_channel[1].roleid;
+      } else {
+        role_id = '<@&'+quest_channel[1].roleid+'>';
+      }
+    } else { role_id = ''; }
 
     // THROW ERRORS FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+quest_channel[0]+' does not appear to exist.'); }
@@ -64,7 +71,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
           if(filter.Rewards.indexOf(quest_reward) >= 0 || filter.Rewards.indexOf(simple_reward) >= 0){
 
             // PREPARE AND SEND TO DISCORDS
-            Send_Quest.run(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone);
+            Send_Quest.run(MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id);
           }
           else{ // DEBUG
             if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest did not pass the Reward Filter. '+channel.guild.name+'|'+quest_channel[1].filter);
