@@ -33,7 +33,13 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
     let geofences = raid_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(raid_channel[0]);
     let filter = MAIN.Filters.get(raid_channel[1].filter);
-    if (raid_channel[1].roleid) { let role_id = '<@&'+raid_channel[1].roleid+'>'; } else { let role_id = ''; }
+    if (raid_channel[1].roleid) {
+      if (raid_channel[1].roleid == 'here' || raid_channel[1].roleid == 'everyone'){
+        role_id = '@'+raid_channel[1].roleid;
+      } else {
+        role_id = '<@&'+raid_channel[1].roleid+'>';
+      }
+    } else { role_id = ''; }
 
     // THROW ERRORS AND BREAK FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
@@ -64,3 +70,4 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
     }
   });
 }
+

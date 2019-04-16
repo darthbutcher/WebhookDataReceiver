@@ -142,7 +142,7 @@ Discord_Feeds = ENABLED
 [POKEMON]
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
-subs_without_iv = DISABLED
+sub_without_iv = DISABLED
 
 [DEBUG]
 # Debugs will flood the console with logs.

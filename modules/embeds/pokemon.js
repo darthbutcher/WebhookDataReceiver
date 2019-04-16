@@ -42,10 +42,13 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   // Round IV
   internal_value = Math.round(internal_value);
 
+<<<<<<< HEAD
   // GET ROLEID
   //let roleID = '';
   //if (internal_value == 100 || pokemon_name == 'Unown'){ roleID = '@everyone'; } else { roleID = ''; }
 
+=======
+>>>>>>> 51b2cb9bf4621ca47e5f7d5222cea61b1dfe3f15
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
 
