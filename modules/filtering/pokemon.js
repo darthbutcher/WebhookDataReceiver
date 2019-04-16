@@ -16,11 +16,11 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     let channel = MAIN.channels.get(pokemon_channel[0]);
     let filter = MAIN.Filters.get(pokemon_channel[1].filter);
     if (pokemon_channel[1].roleid) {
-	if (pokemon_channel[1].roleid == 'here' || pokemon_channel[1].roleid == 'everyone'){
-	  role_id = '@'+pokemon_channel[1].roleid;
-	} else {
-	  role_id = '<@&'+pokemon_channel[1].roleid+'>';
-    	}
+      if (pokemon_channel[1].roleid == 'here' || pokemon_channel[1].roleid == 'everyone'){
+        role_id = '@'+pokemon_channel[1].roleid;
+      } else {
+        role_id = '<@&'+pokemon_channel[1].roleid+'>';
+      }
     } else { role_id = ''; }
 
 

@@ -27,9 +27,6 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
     default: defending_team = 'Uncontested Gym';
   }
 
-  //role ID mention
-  //let roleID ='';
-
   // GET RAID LEVEL
   let embed_color = '';
   switch(raid.level){

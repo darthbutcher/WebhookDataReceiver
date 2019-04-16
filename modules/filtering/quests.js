@@ -50,7 +50,13 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     let geofences = quest_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(quest_channel[0]);
     let filter = MAIN.Filters.get(quest_channel[1].filter);
-    if (quest_channel[1].roleid) { let role_id = '<@&'+quest_channel[1].roleid+'>'; } else { let role_id = ''; }
+    if (quest_channel[1].roleid) {
+      if (quest_channel[1].roleid == 'here' || quest_channel[1].roleid == 'everyone'){
+        role_id = '@'+quest_channel[1].roleid;
+      } else {
+        role_id = '<@&'+quest_channel[1].roleid+'>';
+      }
+    } else { role_id = ''; }
 
     // THROW ERRORS FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+quest_channel[0]+' does not appear to exist.'); }
