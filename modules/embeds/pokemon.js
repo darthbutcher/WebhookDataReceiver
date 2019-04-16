@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone) => {
+module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // CHECK IF THE TARGET IS A USER
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
@@ -43,8 +43,8 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   internal_value = Math.round(internal_value);
 
   // GET ROLEID
-  let roleID = '';
-  if (internal_value == 100 || pokemon_name == 'Unown'){ roleID = '@everyone'; } else { roleID = ''; }
+  //let roleID = '';
+  //if (internal_value == 100 || pokemon_name == 'Unown'){ roleID = '@everyone'; } else { roleID = ''; }
 
   // DESPAWN VERIFICATION
   let verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
@@ -131,7 +131,7 @@ send_embed();
     return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
   } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
     if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon_name+' to '+target.guild.name+' ('+target.id+').'); }
-    return MAIN.Send_Embed('pokemon', 0, server, roleID, pokemon_embed, target.id);
+    return MAIN.Send_Embed('pokemon', 0, server, role_id, pokemon_embed, target.id);
   } else{ return; }}
 
 }

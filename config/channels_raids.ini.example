@@ -11,6 +11,7 @@
 [458789990017662986]
 geofences = Tallahassee
 filter = Raids_Level5.json
+roleid = 530525516290326529
 
 [458790935908843520]
 geofences = Tallahassee
