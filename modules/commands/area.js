@@ -24,6 +24,7 @@ module.exports.run = async (MAIN, message, prefix, server) => {
                    +'`remove`  »  Remove an Area.')
     .setFooter('Type the action, no command prefix required.');
 
+
   message.channel.send(requestAction).catch(console.error).then( msg => {
 
     // DEFINE COLLECTOR AND FILTER

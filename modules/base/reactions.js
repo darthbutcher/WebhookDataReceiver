@@ -47,6 +47,7 @@ reactions.run = (MAIN, event) => {
                 MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
+	        // COUNT USERS IN LOBBY
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
                   lobby.forEach(function(row) {
                     lobby_count += row.count
@@ -97,7 +98,7 @@ reactions.run = (MAIN, event) => {
 
                     let mention = '<@&'+discord.raid_role+'> '
                     if (mention == "<@&> "){ mention = '' }
-                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing '+member_count+'. Make sure to coordinate a start time.', channel_embed).catch(console.error);
+                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing **'+member_count+'**. Make sure to coordinate a start time.', channel_embed).catch(console.error);
                     boss_name = embed.fields[0].name.slice(0, -7);
                     boss_name = boss_name.slice(2);
 

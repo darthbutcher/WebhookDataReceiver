@@ -91,20 +91,20 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         mins = hide_mins;
         secs = hide_secs;
         if (record[0].expire_timestamp_verified == 1) {
-          console.log('DESPAWN for '+pokemon_name+' is verified');
+          if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is verified');}
           time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
           mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
-          secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (hide_mins*60));
+          secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (mins*60));
           veri = MAIN.emotes.checkYes;
         } else {
-          console.log('DESPAWN for '+pokemon_name+' is not verified');
+          if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is not verified');}
         }
         embed(veri, time, mins, secs);
         send_embed();
       });
     } else {
       embed(verified,hide_time,hide_mins,hide_secs);
-      console.log('DESPAWN for '+pokemon_name+' is already verified');
+      //console.log('DESPAWN for '+pokemon_name+' is already verified');
       send_embed();
     }
 

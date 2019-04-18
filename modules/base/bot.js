@@ -319,14 +319,43 @@ function pad(num, size) {
 MAIN.Get_Sprite = (form, id) => {
   let sprite_url = MAIN.config.SPRITE_URL;
   let extension = '.png';
+  // SHUFFLE ICONS
   if (MAIN.config.SPRITE_TYPE == 'SHUFFLE') {
     if (form > 0 ){
       extension = '_'+form+extension;
     } else { extension = '_00'+extension; }
     sprite_url = sprite_url+'pokemon_icon_';
   }
-  if (form != 0 ){
-  if(MAIN.config.SPRITE_TYPE == 'DEFAULT'){
+  // ASSET ICONS
+  if (MAIN.config.SPRITE_TYPE == 'ASSETS') {
+    if (form > 0 ){
+          switch (MAIN.forms[id][form]) {
+     	   case 'Alolan':
+      	   extension = '_61'+extension;
+      	   break;
+      	   case 'Origin':
+      	   extension = '_12'+extension;
+      	   break;
+           case 'Sunny':
+           extension = '_12'+extension;
+           break;
+           case 'Rainy':
+           extension = '_13'+extension;
+           break;
+           case 'Snowy':
+           extension = '_14'+extension;
+           break;
+           case 'Normal':
+           extension = '_00'+extension;
+           break;
+      	   default:
+     	   extension = extension;
+    	   }
+    } else { extension = '_00'+extension; }
+    sprite_url = sprite_url+'pokemon_icon_';
+  }
+  // SEREBII ICONS
+  if ((form != 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
     switch (MAIN.forms[id][form]) {
       case 'Alolan':
       extension = '-a'+extension;
@@ -337,7 +366,6 @@ MAIN.Get_Sprite = (form, id) => {
       default:
       extension = extension;
     }
-  }
   }
   sprite_url =  sprite_url+pad(id,3)+extension;
   //console.log(sprite_url);
