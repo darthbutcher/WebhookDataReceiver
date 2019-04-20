@@ -79,8 +79,12 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     let move_type_2 = MAIN.emotes[MAIN.moves[sighting.move_2].type.toLowerCase()];
 
     // DETERMINE HEIGHT AND WEIGHT
-    let height = 'Height: '+Math.floor(sighting.height*100)/100+'m';
-    let weight = 'Weight: '+Math.floor(sighting.weight*100)/100+'kg';
+    let height = Math.floor(sighting.height*100)/100;
+    let weight = Math.floor(sighting.weight*100)/100;
+
+    // DETERMINE SIZE
+    let size = '';
+    size = MAIN.Get_Size(sighting.pokemon_id, height, weight);
 
     // VERIFY VERIFICATION FOR IV SCAN
     if (verified == MAIN.emotes.yellowQuestion) {
@@ -111,7 +115,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
     function embed(veri, time, mins, secs) {
       pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, height+' | '+weight+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
+      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, 'Ht: '+height+'m | Wt: '+weight+'kg | '+size+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
       .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
       //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
       .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '

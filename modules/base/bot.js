@@ -101,6 +101,8 @@ function load_data(){
   MAIN.pokemon = require('../../static/pokemon.json');
   delete require.cache[require.resolve('../../static/forms.json')];
   MAIN.forms = require('../../static/forms.json');
+  delete require.cache[require.resolve('../../static/base_stats.json')];
+  MAIN.base_stats = require('../../static/base_stats.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
   MAIN.gym_notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/rewards.json')];
@@ -396,27 +398,25 @@ MAIN.Get_Icon = (object, quest_reward) => {
 }
 
 // Get Size of Pokemon BIG Karp/Tiny Rat
-MAIN.Get_Size = (id, height, weight) => {
-        baseStats[] = getBaseStats(id);
-
-        let weightRatio = weight / baseStats[0];
-        let heightRatio = height / baseStats[1];
+MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight) => {
+        let weightRatio = pokemon_weight / MAIN.base_stats[pokemon_id].weight;
+        let heightRatio = pokemon_height / MAIN.base_stats[pokemon_id].height;
 
         let size = heightRatio + weightRatio;
 
         if (size < 1.5) {
-            return "tiny";
-        }
+            return '**tiny**';
+        } else
         if (size <= 1.75) {
-            return "small";
-        }
+            return 'small';
+        }else
         if (size < 2.25) {
-            return "normal";
-        }
+            return 'normal';
+        }else
         if (size <= 2.5) {
-            return "large";
-        }
-        return "big";
+            return 'large';
+        }else
+        return '**big**';
 }
 
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS
