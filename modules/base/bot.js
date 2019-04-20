@@ -395,6 +395,30 @@ MAIN.Get_Icon = (object, quest_reward) => {
   }); return questUrl;
 }
 
+// Get Size of Pokemon BIG Karp/Tiny Rat
+MAIN.Get_Size = (id, height, weight) => {
+        baseStats[] = getBaseStats(id);
+
+        let weightRatio = weight / baseStats[0];
+        let heightRatio = height / baseStats[1];
+
+        let size = heightRatio + weightRatio;
+
+        if (size < 1.5) {
+            return "tiny";
+        }
+        if (size <= 1.75) {
+            return "small";
+        }
+        if (size < 2.25) {
+            return "normal";
+        }
+        if (size <= 2.5) {
+            return "large";
+        }
+        return "big";
+}
+
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS
 MAIN.Static_Map_Tile = (lat,lon,type) => {
   return new Promise(function(resolve, reject) {
