@@ -10,6 +10,7 @@ reactions.run = (MAIN, event) => {
   let channel = MAIN.channels.get(event.d.channel_id);
   let user_list = '', discord = '';
   let lobby_count = 0;
+  let lobby_users = '';
   if(!member.user.bot && (event.d.emoji.id == MAIN.emotes.plusOneReact.id || event.d.emoji.id == MAIN.emotes.plusTwoReact.id || event.d.emoji.id == MAIN.emotes.plusThreeReact.id || event.d.emoji.id == MAIN.emotes.plusFourReact.id || event.d.emoji.id == MAIN.emotes.plusFiveReact.id || event.d.emoji.id == MAIN.emotes.cancelReact.id) ){
 
     let member_count = 0;
@@ -49,9 +50,11 @@ reactions.run = (MAIN, event) => {
                 });
 	        // COUNT USERS IN LOBBY
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
-                  lobby.forEach(function(row) {
-                    lobby_count += row.count
-                  })
+                  lobby.forEach(function(lobby) {
+                    lobby_count += lobby.count;
+		    console.log(lobby);
+                    lobby_users += '<@'+lobby.user_id+'> ';
+                  });
                   switch (member_count){
                     case 0:
                       interest = ' has *left* the raid. ';
@@ -64,7 +67,7 @@ reactions.run = (MAIN, event) => {
                       break;
                   }
                   // TAG USER IN EXISTING CHANNEL
-                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are now **'+lobby_count+'** interested. Make sure to coordinate a start time.').catch(console.error);
+                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are now **'+lobby_count+'** interested. '+lobby_users+'Make sure to coordinate a start time.').catch(console.error);
                   if(error){ console.error(error);}
                 });
               } else{
