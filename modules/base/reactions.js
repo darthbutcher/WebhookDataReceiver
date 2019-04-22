@@ -48,11 +48,13 @@ reactions.run = (MAIN, event) => {
                 MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                   if(error){ console.error(error); }
                 });
+		if (member_count == 0) { MAIN.pdb.query(`DELETE FROM lobby_members WHERE user_id = ?`, [member.id], function (error, lobby, fields) {
+                  if(error){ console.error(error); }
+                }); }
 	        // COUNT USERS IN LOBBY
                 MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
                   lobby.forEach(function(lobby) {
                     lobby_count += lobby.count;
-		    console.log(lobby);
                     lobby_users += '<@'+lobby.user_id+'> ';
                   });
                   switch (member_count){
@@ -98,10 +100,18 @@ reactions.run = (MAIN, event) => {
                     if(embed.fields[2]){
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
+		    channel_embed.setFooter(gym_id);
 
                     let mention = '<@&'+discord.raid_role+'> '
                     if (mention == "<@&> "){ mention = '' }
-                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing **'+member_count+'**. Make sure to coordinate a start time.', channel_embed).catch(console.error);
+                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing **'+member_count+'**. Make sure to coordinate a start time.', channel_embed)
+	.then( message => {
+	message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
+     }).catch(console.error);
                     boss_name = embed.fields[0].name.slice(0, -7);
                     boss_name = boss_name.slice(2);
 
@@ -157,12 +167,20 @@ reactions.startInterval = async (MAIN) => {
           if(embed.fields[2]){
             channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
           }
+          channel_embed.setFooter(active.gym_id);
 
           boss_name = embed.fields[0].name.slice(0, -7);
           boss_name = boss_name.slice(2);
           MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
 
-          MAIN.channels.get(record[0].raid_channel).send(channel_embed).catch(console.error);
+          MAIN.channels.get(record[0].raid_channel).send(channel_embed)
+        .then( message => {
+        message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
+     }).catch(console.error);
         }
       });
     });
