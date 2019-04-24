@@ -184,7 +184,7 @@ MAIN.Send_Embed = (type, raid_level, server, roleID, embed, channel_id) => {
 	message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
 	message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
     } })
-    .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); pokebotRestart(); });
+    .catch( error => { console.error('['+channel_id+'] ['+MAIN.BOTS[MAIN.Next_Bot].id+']',error); MAIN.restart(); });
 }
 
 // CHOOSE NEXT BOT AND SEND EMBED
@@ -710,6 +710,11 @@ MAIN.start = async (type) => {
   }
 }
 MAIN.start('startup');
+
+MAIN.restart = () => {
+  process.exit(1).catch(console.error);
+  return;
+}
 
 // INTERVAL FUNCTION TO SEND QUEST SUBSCRIPTION DMS
 setInterval(function() {

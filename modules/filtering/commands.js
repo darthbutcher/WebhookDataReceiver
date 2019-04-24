@@ -72,7 +72,7 @@ module.exports.run = async (MAIN, message) => {
           switch(message.content){
             case 'reload': if(message.member.hasPermission('ADMINISTRATOR')){ MAIN.start('reload'); } break;
             case 'purge': if(message.member.hasPermission('ADMINISTRATOR')){ MAIN.Purge_Channels(); } break;
-            case 'restart': if(message.member.hasPermission('ADMINISTRATOR')){ process.exit(1).catch(console.error); } break;
+            case 'restart': if(message.member.hasPermission('ADMINISTRATOR')){ MAIN.restart(); } break;
             case prefix+'pause': command = 'pause'; break;
             case prefix+'resume': command = 'resume'; break;
             case prefix+'help': command = 'help'; break;
