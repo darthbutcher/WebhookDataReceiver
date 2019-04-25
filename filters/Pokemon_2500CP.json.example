@@ -8,6 +8,7 @@
 	"min_cp": 2450,
 	"max_cp": 2500,
 	"gender": "All",
+        "size": "All",
 	"Bulbasaur": "True",
 	"Ivysaur": "True",
 	"Venusaur": "True",

@@ -33,6 +33,11 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       else if(sighting.gender == 2){ gender = 'female'; }
       else{ gender = 'all'; }
 
+      // Determine Size
+      size = MAIN.Get_Size(sighting.pokemon_id, sighting.height, sighting.weight);
+      if (!filter.size) { filter.size = 'all'; }
+      if (filter.size.toLowerCase() == 'all') { size = 'all'; }
+
       switch(true){
         // CHECK IF FILTER EXISTS
         case !filter: console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); break;
@@ -83,6 +88,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.max_cp < sighting.cp: sightingFailed(MAIN, filter, 'CP'); break;
             case filter.min_level > sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.max_level < sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
+            case filter.size.toLowerCase() != size: sightingFailed(MAIN, filter, 'SIZE'); break;
             default:
               if(filter.gender.toLowerCase() == 'all' || filter.gender.toLowerCase() == gender){
                 Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
@@ -98,6 +104,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.max_cp < sighting.cp: sightingFailed(MAIN, filter, 'CP'); break;
             case filter.min_level > sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.max_level < sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
+            case filter.size.toLowerCase() != size: sightingFailed(MAIN, filter, 'SIZE'); break;
             default:
               if(filter.gender.toLowerCase() == 'all' || filter.gender.toLowerCase() == gender){
                 Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
@@ -111,4 +118,3 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 function sightingFailed(MAIN, filter, reason){
   if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [filtering/pokemon.js] Sighting failed '+filter.name+' because of '+reason+' check.'); } return;
 }
-

@@ -405,7 +405,7 @@ MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight) => {
         let size = heightRatio + weightRatio;
 
         if (size < 1.5) {
-            return '**tiny**';
+            return 'tiny';
         } else
         if (size <= 1.75) {
             return 'small';
@@ -416,7 +416,7 @@ MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight) => {
         if (size <= 2.5) {
             return 'large';
         }else
-        return '**big**';
+        return 'big';
 }
 
 // CHECK FOR OR CREATE MAP TILES FOR EMBEDS

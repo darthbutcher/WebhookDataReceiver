@@ -44,6 +44,11 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                 else if(sighting.gender == 2){ gender = 'female'; }
                 else{ gender = 'all'; }
 
+                // Determine Size
+                size = MAIN.Get_Size(sighting.pokemon_id, sighting.height, sighting.weight);
+                if (!sub.size) { sub.size = 'all'; }
+                if (sub.size.toLowerCase() == 'all') { size = 'all'; }
+
                 switch(true){
                   case sub.min_iv.length > 3:
                     // SPLIT THE IVs UP INTO INDIVIDUAL STATS
@@ -62,6 +67,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                       case sub.max_cp < sighting.cp: break;
                       case sub.min_lvl > sighting.pokemon_level: break;
                       case sub.max_lvl < sighting.pokemon_level: break;
+                      case sub.size.toLowerCase() != size: break;
                       default:
                         if(sub.gender == 'all' || sub.gender == gender){
                           Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
@@ -75,6 +81,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                       case sub.max_cp < sighting.cp: break;
                       case sub.min_lvl > sighting.pokemon_level: break;
                       case sub.max_lvl < sighting.pokemon_level: break;
+                      case sub.size.toLowerCase() != size: break;
                       default:
                         if(sub.gender == 'all' || sub.gender == gender){
                           Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);

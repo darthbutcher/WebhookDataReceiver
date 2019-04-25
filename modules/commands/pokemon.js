@@ -122,7 +122,8 @@ async function subscription_view(MAIN, message, nickname, prefix){
             embed_cp = pokemon.subscriptions[e].min_cp+'`/`'+pokemon.subscriptions[e].max_cp;
             embed_iv = pokemon.subscriptions[e].min_iv+'`/`'+pokemon.subscriptions[e].max_iv;
             embed_lvl = pokemon.subscriptions[e].min_lvl+'`/`'+pokemon.subscriptions[e].max_lvl;
-            pokemonSubs.addField(pokemon.subscriptions[e].name, 'CP: `'+embed_cp+'`\nIV: `'+embed_iv+'`\nLvl: `'+embed_lvl+'`\nGender: `'+pokemon.subscriptions[e].gender+'`', false);
+            if (!pokemon.subscriptions[e].size) { embed_size = 'ALL'; } else { embed_size = pokemon.subscriptions[e].size; }
+            pokemonSubs.addField(pokemon.subscriptions[e].name, 'CP: `'+embed_cp+'`\nIV: `'+embed_iv+'`\nLvl: `'+embed_lvl+'`\nGender: `'+pokemon.subscriptions[e].gender+'`\nSize: `'+embed_size+'`', false);
           }
         }
         else{
@@ -132,7 +133,8 @@ async function subscription_view(MAIN, message, nickname, prefix){
             embed_cp = pokemon.min_cp+'`/`'+pokemon.max_cp;
             embed_iv = pokemon.min_iv+'`/`'+pokemon.max_iv;
             embed_lvl = pokemon.min_lvl+'`/`'+pokemon.max_lvl;
-            pokemonSubs.addField(pokemon.name, 'CP: `'+embed_cp+'`\nIV: `'+embed_iv+'`\nLvl: `'+embed_lvl+'`\nGender: `'+pokemon.gender+'`', false);
+            if (!pokemon.size) { embed_size = 'ALL'; } else { embed_size = pokemon.size; }
+            pokemonSubs.addField(pokemon.name, 'CP: `'+embed_cp+'`\nIV: `'+embed_iv+'`\nLvl: `'+embed_lvl+'`\nGender: `'+pokemon.gender+'`\nSize: `'+embed_size+'`', false);
           });
         }
 
@@ -200,6 +202,11 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
     else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
 
+    // RETRIEVE SIZE FROM USER
+    sub.size = await sub_collector(MAIN,'Size',nickname,message,sub.name,'Please respond with \'big\', \'large\', \'normal\', \'small\', \'tiny\' or \'All\'.',sub);
+    if(sub.size.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+    else if(sub.size == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
+
     // RETRIEVE AREA CONFIMATION FROM USER
     sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
     if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
@@ -212,9 +219,10 @@ async function subscription_create(MAIN, message, nickname, prefix, advanced){
     sub.type = 'simple';
     sub.max_iv = 'ALL';
     sub.max_lvl = 'ALL';
-    sub.min_cp = 'ALL';
+    sub.min_cp = '1';
     sub.max_cp = 'ALL';
     sub.gender = 'ALL';
+    sub.size = 'ALL';
 
     // RETRIEVE MIN IV FROM USER
     sub.min_iv = await sub_collector(MAIN,'Minimum IV',nickname,message,sub.name,'Please respond with a IV number between 0 and 100 -OR- specify minimum Atk/Def/Sta (15/14/13) Values -OR- type \'All\'. Type \'Cancel\' to Stop.',sub);
@@ -471,6 +479,11 @@ async function subscription_modify(MAIN, message, nickname, prefix){
           if(sub.gender.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
           else if(sub.gender == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix); }
 
+          // RETRIEVE SIZE FROM USER
+          sub.size = await sub_collector(MAIN,'Size',nickname,message,sub.name,'Please respond with \'big\', \'large\', \'normal\', \'small\', \'tiny\' or \'All\'.',sub);
+          if(sub.size.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
+          else if(sub.size == 'time'){ return subscription_timedout(MAIN, nickname, message, prefix) }
+
           // CONFIRM AREAS
           sub.areas = await sub_collector(MAIN,'Area Filter',nickname,message,sub.name,'Please respond with \'Yes\' or \'No\'');
           if(sub.areas.toLowerCase() == 'cancel'){ return subscription_cancel(MAIN, nickname, message, prefix); }
@@ -535,7 +548,7 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
       case 'Confirm-Add':
         instruction = new Discord.RichEmbed()
           .setAuthor(nickname, message.member.user.displayAvatarURL)
-          .setTitle('Does all of this look correct?\nName: `'+sub.name+'`\nMin CP: `'+sub.min_cp+'`\nMax CP: `'+sub.max_cp+'`\nMin IV: `'+sub.min_iv+'`\nMax IV: `'+sub.max_iv+'`\nMin Lvl: `'+sub.min_lvl+'`\nMax Lvl: `'+sub.max_lvl+'`\nGender: `'+sub.gender+'`\nFilter By Areas: `'+sub.areas+'`')
+          .setTitle('Does all of this look correct?\nName: `'+sub.name+'`\nMin CP: `'+sub.min_cp+'`\nMax CP: `'+sub.max_cp+'`\nMin IV: `'+sub.min_iv+'`\nMax IV: `'+sub.max_iv+'`\nMin Lvl: `'+sub.min_lvl+'`\nMax Lvl: `'+sub.max_lvl+'`\nGender: `'+sub.gender+'`\nSize: `'+sub.size+'`\nFilter By Areas: `'+sub.areas+'`')
           .setFooter(requirements); break;
 
       case 'Confirm-Remove':
@@ -641,6 +654,17 @@ function sub_collector(MAIN,type,nickname,message,pokemon,requirements,sub){
           case type.indexOf('Gender')>=0:
             if(message.content.toLowerCase() == 'male'){ collector.stop('Male'); }
             else if(message.content.toLowerCase() == 'female'){ collector.stop('Female'); }
+            else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
+            else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); }
+            break;
+
+          // GENDER CONFIGURATION
+          case type.indexOf('Size')>=0:
+            if(message.content.toLowerCase() == 'big'){ collector.stop('Big'); }
+            else if(message.content.toLowerCase() == 'large'){ collector.stop('Large'); }
+            else if(message.content.toLowerCase() == 'normal'){ collector.stop('Normal'); }
+            else if(message.content.toLowerCase() == 'small'){ collector.stop('Small'); }
+            else if(message.content.toLowerCase() == 'tiny'){ collector.stop('Tiny'); }
             else if(message.content.toLowerCase() == 'all'){ collector.stop('ALL'); }
             else{ message.reply('`'+message.content+'` is an Invalid Input. '+requirements).then(m => m.delete(5000)).catch(console.error); }
             break;

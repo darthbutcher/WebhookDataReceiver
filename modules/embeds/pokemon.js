@@ -64,7 +64,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
     pokemon_embed
-    .addField('**'+pokemon_name+'** '+form_name+gender,verified+': '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
+    .addField('**'+pokemon_name+'** '+form_name+gender,verified+'| '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
     .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
                                          +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
                                          +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
@@ -84,7 +84,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
     // DETERMINE SIZE
     let size = '';
-    size = MAIN.Get_Size(sighting.pokemon_id, height, weight);
+    size = MAIN.Get_Size(sighting.pokemon_id, sighting.height, sighting.weight);
 
     // VERIFY VERIFICATION FOR IV SCAN
     if (verified == MAIN.emotes.yellowQuestion) {
