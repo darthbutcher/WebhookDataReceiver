@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports function(name,form,type,attack,defense,stamina,iv,level,cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
+module.exports = function(name,form,type,attack,defense,stamina,iv,level,cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
 
   let pokemon_embed = new Discord.RichEmbed()
   .setColor('00ccff')

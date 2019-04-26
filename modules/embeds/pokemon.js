@@ -62,7 +62,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
 
-  pokemon_embed = Embed_Config(pokemon_name,form_name,pokemon_type,gender,weather_boost,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url);
+  pokemon_embed = Embed_Config(pokemon_name,form_name,pokemon_type,gender,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url);
 
   send_embed();
   } else{
