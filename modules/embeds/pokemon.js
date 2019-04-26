@@ -1,4 +1,6 @@
 const Discord = require('discord.js');
+const Embed_Config = require('../../config/embed_pokemon.js');
+const Embed_IVConfig = require('../../config/embed_pokemon_iv.js');
 
 module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
@@ -32,6 +34,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   // GET SPRITE IMAGE
   let pokemon_url = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
+  let map_url = MAIN.config.FRONTEND_URL;
 
   // GET GENDER
   let gender = '';
@@ -57,17 +60,10 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     case 7: weather_boost = ' | '+MAIN.emotes.fog+' ***Boosted***'; break;
   }
 
-  let pokemon_embed = new Discord.RichEmbed()
-  .setImage(img_url)
-  .setColor('00ccff')
-  .setThumbnail(pokemon_url)
+  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv == 'ENABLED')){
 
-  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
-    pokemon_embed
-    .addField('**'+pokemon_name+'** '+form_name+gender,verified+'| '+hide_time+' (*'+hide_mins+'m '+hide_secs+'s*)\n'+pokemon_type+weather_boost)
-    .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-                                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-                                         +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
+  pokemon_embed = Embed_Config(pokemon_name,form_name,pokemon_type,gender,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
+
   send_embed();
   } else{
 
@@ -103,24 +99,12 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         } else {
           if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is not verified');}
         }
-        embed(veri, time, mins, secs);
+        pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,veri,time,mins,secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
         send_embed();
       });
     } else {
-      embed(verified,hide_time,hide_mins,hide_secs);
-      //console.log('DESPAWN for '+pokemon_name+' is already verified');
+      pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
       send_embed();
-    }
-
-
-    function embed(veri, time, mins, secs) {
-      pokemon_embed
-      .addField('**'+pokemon_name+'** '+form_name+sighting.individual_attack+'/'+sighting.individual_defense+'/'+sighting.individual_stamina+' ('+internal_value+'%)\n'+'Level '+sighting.pokemon_level+' | CP '+sighting.cp+gender, 'Ht: '+height+'m | Wt: '+weight+'kg | '+size+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-      .addField(veri+': '+time+' (*'+mins+'m '+secs+'s*) ', pokemon_type+weather_boost, false)
-      //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
-      .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+sighting.latitude+','+sighting.longitude+') | '
-      +'[Apple Maps](http://maps.apple.com/maps?daddr='+sighting.latitude+','+sighting.longitude+'&z=10&t=s&dirflg=d) | '
-      +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+sighting.latitude+'&lon='+sighting.longitude+'&zoom=15)',false);
     }
   }
 
@@ -134,4 +118,3 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   } else{ return; }}
 
 }
-

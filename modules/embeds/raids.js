@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const Embed_Config = require('../../config/embed_raids.js');
 
 module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
@@ -17,6 +18,8 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   if(MAIN.config.Map_Tiles == 'ENABLED'){
     img_url = await MAIN.Static_Map_Tile(raid.latitude, raid.longitude, 'raid');
   }
+
+  let map_url = MAIN.config.FRONTEND_URL;
 
   // DETERMINE GYM CONTROL
   let defending_team = '';
@@ -73,17 +76,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       }
 
       // CREATE THE EGG EMBED
-      raid_embed = new Discord.RichEmbed()
-        .setThumbnail(embed_thumb)
-        .setColor(embed_color)
-        .setAuthor(gym_name, raid.gym_url)
-	.setDescription(is_exclusive+gym_notes)
-        .setImage(img_url)
-        .addField('**Level '+raid.level+'** Raid', defending_team+raid_sponsor, false)
-        .addField('Hatches: '+hatch_time,embed_area, false)
-        .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
-                                             +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
-                                             +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false)
+      raid_embed = Embed_EggConfig(gym_name,raid.gym_url,raid.level,hatch_time,hatch_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,embed_thumb,embed_color,img_url,embed_area);
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(MAIN.config.Raid_Lobbies == 'ENABLED'){ raid_embed.setFooter(raid.gym_id); }
 
@@ -145,20 +138,10 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       let move_type_2 = MAIN.emotes[MAIN.moves[raid.move_2].type.toLowerCase()];
 
       // GET THE RAID BOSS SPRITE
-      let raid_url = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);
+      let raid_sprite = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);
 
       // CREATE THE RAID EMBED
-      raid_embed = new Discord.RichEmbed()
-        .setThumbnail(raid_url)
-        .setColor(embed_color)
-        .setImage(img_url)
-        .setAuthor(gym_name, raid.gym_url)
-        .setDescription(is_exclusive+gym_notes)
-        .addField('**'+pokemon_name+form_name+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-        .addField('Raid Ends: '+end_time,'Level '+raid.level+' | '+defending_team+raid_sponsor+'\nCounter(s): '+weaknesses,false)
-        .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+raid.latitude+','+raid.longitude+') | '
-                               +'[Apple Maps](http://maps.apple.com/maps?daddr='+raid.latitude+','+raid.longitude+'&z=10&t=s&dirflg=d) | '
-                               +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+raid.latitude+'&lon='+raid.longitude+'&zoom=15)',false);
+      raid_embed = Embed_Config(gym_name,raid.gym_url,raid.level,end_time,end_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,raid_sprite,embed_color,img_url,embed_area,pokemon_name,form_name,move_name_1,move_type_1,move_name_2,move_type_2,weaknesses)
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
 
