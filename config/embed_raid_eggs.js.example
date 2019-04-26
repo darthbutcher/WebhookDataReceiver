@@ -1,0 +1,22 @@
+const Discord = require('discord.js');
+
+module.exports = function(gym,url,level,time,mins,team,exraid,sponsor,notes,lat,lon,map_url,sprite,color,img,area,name,form,move_name_1,move_type_1,move_name_2,move_type_2,weaknesses) {
+
+      // Set embed_color dynamic (color), or custom hex color ie 'f358fb'
+      embed_color = color;
+
+      // CREATE THE EGG EMBED
+      let raid_embed = new Discord.RichEmbed()
+        .setColor(embed_color)
+        .setThumbnail(sprite)
+        .setAuthor(gym, url)
+        .setDescription(exraid+notes)
+        .addField('**Level '+level+'** Raid', team+sponsor, false)
+        .addField('Hatches: '+time,area, false)
+        .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
+                                             +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
+                                             +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
+        .setImage(img);
+
+ return raid_embed;
+}
