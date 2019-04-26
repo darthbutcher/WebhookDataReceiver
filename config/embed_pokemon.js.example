@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports.run = function (name,form,type,gender,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
+module.exports = function (name,form,type,gender,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
 
   let pokemon_embed = new Discord.RichEmbed()
   .setColor('00ccff')
