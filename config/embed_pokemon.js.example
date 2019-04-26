@@ -1,0 +1,15 @@
+const Discord = require('discord.js');
+
+module.exports.run = async (name,form,type,gender,weather_boost,lat,lon,map_url,img,sprite) => {
+
+  let pokemon_embed = new Discord.RichEmbed()
+  .setColor('00ccff')
+  .setThumbnail(sprite)
+  .addField('**'+name+'** '+form+gender,verified+'| '+time+' (*'+mins+'m '+secs+'s*)\n'+type+weather_boost)
+  .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
+  +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
+  +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
+  .setImage(img);
+
+  return pokemon_embed;
+}
