@@ -99,11 +99,11 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         } else {
           if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is not verified');}
         }
-        pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,veri,time,mins,secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url);
+        pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,veri,time,mins,secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
         send_embed();
       });
     } else {
-      pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url);
+      pokemon_embed = Embed_IVConfig(pokemon_name,form_name,pokemon_type,sighting.individual_attack,sighting.individual_defense,sighting.individual_stamina,internal_value,sighting.pokemon_level,sighting.cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
       send_embed();
     }
   }

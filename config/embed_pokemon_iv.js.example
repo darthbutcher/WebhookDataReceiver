@@ -1,14 +1,14 @@
 const Discord = require('discord.js');
 
-module.exports.run = async (name,form,type,attack,defense,stamina,iv,level,cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite) => {
+module.exports function(name,form,type,attack,defense,stamina,iv,level,cp,gender,height,weight,size,move_name_1,move_type_1,move_name_2,move_type_2,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
 
   let pokemon_embed = new Discord.RichEmbed()
   .setColor('00ccff')
-  .setThumbnail(sprite);
+  .setThumbnail(sprite)
   .addField('**'+name+'** '+form+attack+'/'+defense+'/'+stamina+' ('+iv+'%)\n'+'Level '+level+' | CP '+cp+gender, 'Ht: '+height+'m | Wt: '+weight+'kg | '+size+'\n'+move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
   .addField(verified+'| '+time+' (*'+mins+'m '+secs+'s*) ', type+weather_boost, false)
   //.addField('**Max CP**'+MAIN.Get_CP(sighting.id, sighting.form, 40))
-  .addField(embed_area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
+  .addField(area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
   +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
   +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
   .setImage(img);
