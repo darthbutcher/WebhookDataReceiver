@@ -60,7 +60,7 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     case 7: weather_boost = ' | '+MAIN.emotes.fog+' ***Boosted***'; break;
   }
 
-  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv != 'DISABLED')){
+  if(has_iv == false || (sighting.cp == null && MAIN.config.POKEMON.sub_without_iv == 'ENABLED')){
 
   pokemon_embed = Embed_Config(pokemon_name,form_name,pokemon_type,gender,weather_boost,verified,hide_time,hide_mins,hide_secs,sighting.latitude,sighting.longitude,map_url,img_url,pokemon_url,embed_area);
 

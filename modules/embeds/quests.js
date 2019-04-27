@@ -1,4 +1,5 @@
 const Discord = require('discord.js');
+const Embed_Config = require('../../config/embed_quests.js');
 
 module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
@@ -7,6 +8,8 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
   if(MAIN.config.Map_Tiles == 'ENABLED'){
     img_url = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
   }
+
+  let map_url = MAIN.config.FRONTEND_URL;
 
   // GET THE QUEST TASK
   let quest_task = await get_quest_task(MAIN, quest);
@@ -30,17 +33,9 @@ module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, m
     default: embed_color = '00ccff';
   }
 
-  // CREATE RICH EMBED
+  // CREATE QUEST EMBED
   if(!quest_url){ quest_url = quest.url; }
-  let quest_embed = new Discord.RichEmbed()
-    .setColor(embed_color).setThumbnail(quest_url)
-    .addField( quest_reward+'  |  '+embed_area, quest_task, false)
-    .addField('Pokéstop:', quest.pokestop_name, false)
-    .setFooter('Expires: '+expire_time)
-    .setImage(img_url)
-    .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | '
-                           +'[Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=d) | '
-                           +'[Scan Map]('+MAIN.config.FRONTEND_URL+'?lat='+quest.latitude+'&lon='+quest.longitude+'&zoom=15)',false);
+  quest_embed = Embed_Config(quest.pokestop_name,quest_task,quest_reward,embed_color,quest_url,expire_time,img_url,embed_area,quest.latitude,quest.longitude,map_url);
 
   // LOGGING
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }
@@ -181,4 +176,3 @@ function get_quest_task(MAIN, quest){
   // RETURN THE TASK
   return quest_task;
 }
-
