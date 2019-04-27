@@ -8,7 +8,7 @@ module.exports.run = async (MAIN, message) => {
 
   if(message.channel.type == 'dm'){
 
-    MAIN.pdb.query("SELECT * FROM users WHERE user_id = ? && discord_id = ?", [message.member.id, message.guild.id], async function (error, user, fields) {
+    MAIN.pdb.query("SELECT * FROM users WHERE user_id = ? && discord_id = ?", [message.author.id, message.guild.id], async function (error, user, fields) {
       // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
       if(!user || !user[0]){
         return message.reply('Before you can create and modify subscriptions via DM, you must first use the subsciption channel in your scanner discord.');
@@ -16,7 +16,7 @@ module.exports.run = async (MAIN, message) => {
       else{
 
         // // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
-        let member = MAIN.guilds.get(user.discord_id).members.get(message.member.id);
+        let member = MAIN.guilds.get(user.discord_id).members.get(message.author.id);
         if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
         else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
@@ -54,18 +54,18 @@ module.exports.run = async (MAIN, message) => {
         if(MAIN.config.Tidy_Channel == 'ENABLED'){ message.delete(); }
 
         // FETCH THE GUILD MEMBER AND CHECK IF A DONOR
-        let member = MAIN.guilds.get(server.id).members.get(message.member.id);
+        let member = MAIN.guilds.get(server.id).members.get(message.author.id);
         if(member.hasPermission('ADMINISTRATOR')){ /* DO NOTHING */ }
         else if(server.donor_role && !member.roles.has(server.donor_role)){ return; }
 
         // LOAD DATABASE RECORD
-        MAIN.pdb.query('SELECT * FROM users WHERE user_id = ? AND discord_id = ?', [message.member.id, server.id], async function (error, user, fields) {
+        MAIN.pdb.query('SELECT * FROM users WHERE user_id = ? AND discord_id = ?', [message.author.id, server.id], async function (error, user, fields) {
 
           // CHECK IF THE USER HAS AN EXISTING RECORD IN THE USER TABLE
           if(!user || !user[0]){ await MAIN.Save_Sub(message,server); }
 
           // DO NOT ALLOW MULTIPLE DISCORD SUBSCRIPTIONS
-          if(user[0] && user[0].discord_id != message.guild.id && message.member.id != '329584924573040645'){ return; }
+          if(user[0] && user[0].discord_id != message.guild.id && message.author.id != '329584924573040645'){ return; }
 
           // FIND THE COMMAND AND SEND TO THE MODULE
           let command = '';
