@@ -76,7 +76,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       }
 
       // CREATE THE EGG EMBED
-      raid_embed = Embed_Config(gym_name,raid.gym_url,raid.level,hatch_time,hatch_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,embed_thumb,embed_color,img_url,embed_area);
+      raid_embed = Embed_EggConfig(gym_name,raid.gym_url,raid.level,hatch_time,hatch_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,embed_thumb,embed_color,img_url,embed_area);
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(MAIN.config.Raid_Lobbies == 'ENABLED'){ raid_embed.setFooter(raid.gym_id); }
 
