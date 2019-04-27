@@ -12,7 +12,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     if(users && users[0]){
       users.forEach((user,index) => {
 
-        FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
+        //FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
         let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
         switch(true){
           case !member: proceed = false; break;

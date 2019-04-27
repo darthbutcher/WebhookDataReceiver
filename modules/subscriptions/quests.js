@@ -46,7 +46,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     if(users && users[0]){
       users.forEach((user,index) => {
 
-        FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
+        //FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
         let member = MAIN.guilds.get(server.id).members.get(user.user_id);
         if(!member){ proceed = false; }
         else if(member.hasPermission('ADMINISTRATOR')){ proceed = true; }
