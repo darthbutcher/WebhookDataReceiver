@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const Embed_Config = require('../../config/embed_raids.js');
+const Embed_EggConfig = require('../../config/embed_raid_eggs.js');
 
 module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
