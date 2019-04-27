@@ -13,13 +13,13 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
     if(users && users[0]){
       users.forEach((user,index) => {
 
-        // FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
-        // let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
-        // switch(true){
-        //   case !member: proceed = false; break;
-        //   case member.hasPermission('ADMINISTRATOR'): proceed = true; break;
-        //   default: if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
-        // }
+        FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
+        let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
+        switch(true){
+          case !member: proceed = false; break;
+          case member.hasPermission('ADMINISTRATOR'): proceed = true; break;
+          default: if(server.donor_role && !member.roles.has(server.donor_role)){ proceed = false; }
+        }
 
         // DEFINE VARIABLES
         let user_areas = user.geofence.split(',');
