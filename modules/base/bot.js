@@ -675,7 +675,7 @@ let check_time = moment();
 check_time = moment.tz(check_time, 'America/Los_Angeles').set({hour:23,minute:40,second:0,millisecond:0});
 check_time = moment.tz(check_time, MAIN.config.TIMEZONE).format('HH:mm:ss');
 Ontime({ cycle: check_time }, async function(ot) {
-  if(MAIN.config.DB.Remove_Upgraded_Pokestops == 'ENABLED'){
+  if(MAIN.config.rdmDB.Remove_Upgraded_Pokestops == 'ENABLED'){
     await MAIN.rdmdb.query('UPDATE gym INNER JOIN pokestop ON gym.id = pokestop.id SET gym.name = pokestop.name, gym.url = pokestop.url WHERE gym.id = pokestop.id', function (error, record, fields) {
       if(error){ console.error(error); }
     });
@@ -683,13 +683,13 @@ Ontime({ cycle: check_time }, async function(ot) {
       if(error){ console.error(error); }
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ran Query to remove Upgraded Pokestops.');
   }
-  if(MAIN.config.DB.Remove_Unseen_Pokestops == 'ENABLED'){
+  if(MAIN.config.rdmDB.Remove_Unseen_Pokestops == 'ENABLED'){
     MAIN.rdmdb.query('DELETE FROM pokestop WHERE updated < UNIX_TIMESTAMP()-90000', function (error, record, fields) {
       if(error){ console.error(error); }
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ran Query to remove Stale Pokestops.');
   }
-  if(MAIN.config.DB.Trim_Pokemon_Table == 'ENABLED'){
-    let prune_time = parseInt(MAIN.config.DB.Trim_Days)*86400;
+  if(MAIN.config.rdmDB.Trim_Pokemon_Table == 'ENABLED'){
+    let prune_time = parseInt(MAIN.config.rdmDB.Trim_Days)*86400;
     MAIN.rdmdb.query('DELETE FROM pokemon WHERE updated < UNIX_TIMESTAMP()-'+prune_time, function (error, record, fields) {
       if(error){ console.error(error); }
     }); console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Ontime] Ran Query to trim Pokemon table.');
