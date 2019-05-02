@@ -115,6 +115,7 @@ function get_quest_task(MAIN, quest){
 
     // CATCH WITH PINAP
     case quest.template.indexOf('berry_pinap') >= 0:
+    case quest.template.indexOf('t2_2019_berry_nanab_pkmn') >= 0:
       quest_task = 'Catch '+quest.target+' Pokémon With a Pinap Berry.'; break;
 
     // CATCH WITH RAZZ
