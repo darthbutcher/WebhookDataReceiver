@@ -1,6 +1,7 @@
 delete require.cache[require.resolve('../embeds/quests.js')];
 const Send_Quest = require('../embeds/quests.js');
 const Discord = require('discord.js');
+const Embed_Config = require('../../config/embed_quests.js');
 const moment = require('moment');
 
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
