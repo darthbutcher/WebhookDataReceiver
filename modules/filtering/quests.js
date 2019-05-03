@@ -5,7 +5,7 @@ const Discord = require('discord.js');
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   // DETERMINE THE QUEST REWARD
-  let  quest_reward = '', simple_reward = '';
+  let  quest_reward = '', simple_reward = '', form_name = '';
   switch(quest.rewards[0].type){
     // PLACEHOLDER
     case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
@@ -33,8 +33,12 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
 
     // ENCOUNTER REWARDS
     case 7:
-      simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
-      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter'; break;
+      form = quest.rewards[0].info.form_id;
+      if (form > 0){
+        form_name = ' ['+MAIN.forms[quest.rewards[0].info.pokemon_id][form]+']';
+      }
+      simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name;
+      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name+' Encounter'; break;
       if(quest.rewards[0].info.shiny == true){
         simple_reward = 'Shiny '+simple_reward;
         quest_reward = 'Shiny '+quest_reward;
@@ -84,4 +88,3 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     }
   }); return;
 }
-

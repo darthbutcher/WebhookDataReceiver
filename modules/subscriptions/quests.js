@@ -6,7 +6,7 @@ const moment = require('moment');
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
 
   // DETERMINE THE QUEST REWARD
-  let  quest_reward = '', simple_reward = '';
+  let  quest_reward = '', simple_reward = '', form_name = '';
   switch(quest.rewards[0].type){
     // PLACEHOLDER
     case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
@@ -28,12 +28,18 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     case 6: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);
     // ENCOUNTER REWARDS
     case 7:
-      simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name;
-      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+' Encounter';
+      form = quest.rewards[0].info.form_id;
+      if (form > 0){
+        form_name = ' ['+MAIN.forms[quest.rewards[0].info.pokemon_id][form]+']';
+      }
+      simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name;
+      quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name+' Encounter';
       if(quest.rewards[0].info.shiny == true){
         simple_reward = 'Shiny '+simple_reward;
         quest_reward = 'Shiny '+quest_reward;
-      } break;
+      }
+
+      break;
   }
 
   // GET THE QUEST TASK
@@ -91,6 +97,9 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
   if(MAIN.config.Map_Tiles == 'ENABLED'){
     img_url = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
   }
+
+  // GET MAP URL FROM CONFIG
+  let map_url = MAIN.config.FRONTEND_URL;
 
   // DECLARE VARIABLES
   let expireTime = MAIN.Bot_Time(null, 'quest', timezone);
@@ -172,15 +181,9 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
     default: embed_color = '00ccff';
   }
 
-  // CREATE RICH EMBED
+  // CREATE QUEST EMBED
   if(!quest_url){ quest_url = quest.url; }
-  let quest_embed = new Discord.RichEmbed()
-    .setColor(embed_color).setThumbnail(quest_url)
-    .addField( quest_reward+'  |  '+embed_area, quest_task, false)
-    .addField('Pokéstop:', quest.pokestop_name, false)
-    .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+quest.latitude+','+quest.longitude+') | [Apple Maps](http://maps.apple.com/maps?daddr='+quest.latitude+','+quest.longitude+'&z=10&t=s&dirflg=w) | [Waze](https://waze.com/ul?ll='+quest.latitude+','+quest.longitude+'&navigate=yes)')
-    .setFooter('Expires: '+expireTime)
-    .setImage(img_url);
+  quest_embed = Embed_Config(quest.pokestop_name,quest_task,quest_reward,embed_color,quest_url,expire_time,img_url,embed_area,quest.latitude,quest.longitude,map_url);
 
   // CHECK DISCORD CONFIG
   if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
