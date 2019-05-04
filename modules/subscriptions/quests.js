@@ -101,7 +101,7 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
   let map_url = MAIN.config.FRONTEND_URL;
 
   // DECLARE VARIABLES
-  let expireTime = MAIN.Bot_Time(null, 'quest', timezone);
+  let expire_time = MAIN.Bot_Time(null, 'quest', timezone);
 
   // GET REWARD ICON
   let quest_url = '';
