@@ -1,3 +1,5 @@
+const Discord = require('discord.js');
+
 module.exports.run = async (MAIN, message) => {
 
   // DEFINE VARIABLES
@@ -43,11 +45,13 @@ module.exports.run = async (MAIN, message) => {
     //     let cmd = MAIN.Commands.get(command);
     //     if(cmd){ return cmd.run(MAIN, message, prefix, server); }
     //   }
-    // }); return;
+    // });
+    return;
   }
   else{
     // CHECK EACH DISCORD FOR THE SUB CHANNEL
     MAIN.Discord.Servers.forEach( async (server,index) => {
+      // CHECK FOR SERVER COMMAND CHANNEL, ONLY RESPOND TO COMMANDS IN THAT CHANNEL
       if(server.command_channels.indexOf(message.channel.id) >= 0){
 
         // DELETE THE MESSAGE
@@ -90,6 +94,39 @@ module.exports.run = async (MAIN, message) => {
           if(cmd){ return cmd.run(MAIN, message, prefix, server); }
         });
       }
-    }); return;
-  } return;
+    });
+
+    // CHECK FOR ACTIVE RAID CHANNELS FOR RAID COMMANDS
+    MAIN.pdb.query(`SELECT * FROM active_raids WHERE active = ?`, ['true'], function (error, raids, fields) {
+      if(error){ console.error(error);}
+      raids.forEach( function(raids) {
+        if(message.channel.id == raids.raid_channel){
+
+          switch (message.content.toLowerCase()) {
+            // USER HAS ARRIVED AT THE RAID
+            case 'I\'m here':
+            case 'here': command = 'here'; break;
+            // USER IS INTERESTED
+            case 'interested': command = 'interested'; break;
+            // USER HAS INDICATED THEY'RE ON THE WAY
+            case 'coming':
+            case 'on the way':
+            case 'omw': command = 'coming'; break;
+            // USER IS NO LONGER INTERESTED AND LEFT THE RAID
+            case 'leave':
+            case 'not coming':
+            case 'not interested': command = 'leave'; break;
+            default: command = ''; break;
+          }
+          // SEND TO THE COMMAND FUNCTION
+          let cmd = MAIN.Commands.get(command);
+          if(cmd){ return cmd.run(MAIN, message, raids); }
+        }
+      });
+      return;
+    });
+
+    return;
+  }
+  return; // FALL BACK RETURN
 }

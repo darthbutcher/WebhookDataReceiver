@@ -1,5 +1,5 @@
 {
-  "LATEST": 12,
+  "LATEST": 13,
   "1": [{
       "sql": "",
       "data": "",
@@ -142,6 +142,13 @@
       "data": "",
       "gLog": "Alter user_id in lobby_members",
       "bLog": "[Pokébot] Failed to modify lobby_members"
+    }
+  ],
+  "13": [{
+      "sql": "ALTER TABLE lobby_members ADD COLUMN arrived varchar(35) DEFAULT 'interested'",
+      "data": "",
+      "gLog": "ADD arrived column",
+      "bLog": "[Pokébot] Failed to add arrived column"
     }
   ]
 }

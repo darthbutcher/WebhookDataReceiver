@@ -38,9 +38,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
       if(quest.rewards[0].info.shiny == true){
         simple_reward = 'Shiny '+simple_reward;
         quest_reward = 'Shiny '+quest_reward;
-      }
-
-      break;
+      } break;
   }
 
   // GET THE QUEST TASK
