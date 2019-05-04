@@ -133,7 +133,7 @@ async function subscription_view(MAIN, message, nickname, prefix){
             embed_cp = pokemon.min_cp+'`/`'+pokemon.max_cp;
             embed_iv = pokemon.min_iv+'`/`'+pokemon.max_iv;
             embed_lvl = pokemon.min_lvl+'`/`'+pokemon.max_lvl;
-            embed_areas = sub.areas;
+            embed_areas = pokemon.areas;
             if (!pokemon.size) { embed_size = 'ALL'; } else { embed_size = pokemon.size; }
             pokemonSubs.addField(pokemon.name, 'CP: `'+embed_cp+'`\nIV: `'+embed_iv+'`\nLvl: `'+embed_lvl+'`\nGender: `'+pokemon.gender+'`\nSize: `'+embed_size+'`\nAreas: `'+embed_areas+'`', false);
           });
