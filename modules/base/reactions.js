@@ -61,6 +61,7 @@ reactions.run = (MAIN, event) => {
                 // SET THE CATEGORY ID
                 new_channel.setParent(category).then( new_channel => {
                   new_channel.lockPermissions();
+                  new_channel.setPosition(0);
                   let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                   let channel_embed = new Discord.RichEmbed()

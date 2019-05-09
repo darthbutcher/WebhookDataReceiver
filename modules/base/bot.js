@@ -227,6 +227,7 @@ MAIN.webhookParse = async (PAYLOAD) => {
               if(InsideGeojson.polygon(geo.geometry.coordinates, [data.message.longitude,data.message.latitude])){
                 switch(geo.properties.sub_area){
                   case 'true': sub_area = geo.properties.name;
+                  break;
                   default: main_area = geo.properties.name;
                 }
               }
