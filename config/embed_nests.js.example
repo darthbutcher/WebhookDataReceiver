@@ -1,0 +1,15 @@
+const Discord = require('discord.js');
+module.exports = function (name,form,type,color,avg,time,nest_name,submitter,lat,lon,map_url,img,sprite) {
+
+  let nest_embed = new Discord.RichEmbed()
+  .setColor(color)
+  .setThumbnail(sprite)
+  .addField('**'+name+'** '+form+' Nest\n'+type+'\nAvg Spawns: '+avg,'Submitted By: '+submitter)
+  .addField(nest_name+':','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
+  +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
+  +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
+  .setImage(img)
+  .setFooter('Nest Location Updated on: '+time);
+
+  return nest_embed;
+}

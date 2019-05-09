@@ -59,6 +59,14 @@ MAIN.pdb = MySQL.createConnection({
   database : MAIN.config.DB.db_name
 });
 
+MAIN.pmsf = MySQL.createConnection({
+  host: MAIN.config.pmsfDB.host,
+  user: MAIN.config.pmsfDB.username,
+  password: MAIN.config.pmsfDB.password,
+  port: MAIN.config.pmsfDB.port,
+  database : MAIN.config.pmsfDB.db_name
+});
+
 // LOAD CHANNELS
 const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', 'utf-8'));
 const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.ini', 'utf-8'));
@@ -308,7 +316,8 @@ MAIN.Bot_Time = (time,type,timezone) => {
     case '2': return moment().tz(timezone).format('HHmm');
     case '3': return moment(time).tz(timezone).format('HHmm');
     case 'quest': return moment().tz(timezone).format('dddd, MMMM Do')+' @ Midnight';
-    case 'stamp': return moment().format('HH:mmA')
+    case 'stamp': return moment().format('HH:mmA');
+    case 'nest': return moment.unix(time).tz(timezone).format('MMM Do YYYY hA')
   }
 }
 
@@ -456,9 +465,10 @@ MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
 
 // CREAT GYM AND POKEMON NAME ARRAY
 setTimeout(function() { load_arrays(); }, 21600000);
-MAIN.gym_array = []; MAIN.pokemon_array = [];
+MAIN.gym_array = []; MAIN.pokemon_array = []; MAIN.park_array = [];
 function load_arrays(){
   MAIN.pokemon_array = Object.keys(MAIN.pokemon).map(i => MAIN.pokemon[i].name);
+  // Gym Names Array
   MAIN.rdmdb.query(`SELECT * FROM gym WHERE name is not NULL`, function (error, gyms, fields){
     if(gyms){
       gyms.forEach((gym,index) => {
@@ -466,6 +476,17 @@ function load_arrays(){
         record.name = gym.name; record.id = gym.id;
         record.lat = gym.lat; record.lon = gym.lon;
         MAIN.gym_array.push(record);
+      }); return;
+    } else{ return; }
+  });
+  // Nest Names Array
+  MAIN.pmsf.query(`SELECT * FROM nests WHERE name != 'Unknown Areaname'`, function (error, parks, fields){
+    if(parks){
+      parks.forEach((park,index) => {
+        let record = {};
+        record.name = park.name; record.id = park.nest_id;
+        record.lat = park.lat; record.lon = park.lon;
+        MAIN.park_array.push(record);
       }); return;
     } else{ return; }
   });

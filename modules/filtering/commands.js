@@ -86,6 +86,10 @@ module.exports.run = async (MAIN, message) => {
             case prefix+'raid': command = 'raid'; break;
             case prefix+'q':
             case prefix+'quest': command = 'quest'; break;
+            case prefix+'n':
+            case prefix+'nest': command = 'nest'; break;
+            case prefix+'s':
+            case prefix+'stats': command = 'stats'; break;
             default: if(message.content.startsWith(prefix)){ command = message.content.slice(prefix.length); }
           }
 
@@ -104,7 +108,7 @@ module.exports.run = async (MAIN, message) => {
 
           switch (message.content.toLowerCase()) {
             // USER HAS ARRIVED AT THE RAID
-            case 'I\'m here':
+            case 'i\'m here':
             case 'here': command = 'here'; break;
             // USER IS INTERESTED
             case 'interested': command = 'interested'; break;

@@ -44,11 +44,34 @@ reactions.run = (MAIN, event) => {
 
               // CHECK IF THE RAID IS ALREADY ACTIVE
               if(record[0].active == 'true'){
-                let cmd = MAIN.Commands.get('interested');
-                if ( member_count == 0 ) {
-                  cmd = MAIN.Commands.get('leave');
-                }
-                cmd.run(MAIN, event, record[0], member_count);
+                // INSERT USER IN LOBBY
+                MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
+                  if(error){ console.error(error); }
+                });
+		if (member_count == 0) { MAIN.pdb.query(`DELETE FROM lobby_members WHERE user_id = ?`, [member.id], function (error, lobby, fields) {
+                  if(error){ console.error(error); }
+                }); }
+	        // COUNT USERS IN LOBBY
+                MAIN.pdb.query(`SELECT * FROM lobby_members WHERE gym_id = ?`, [gym_id], function (error, lobby, fields) {
+                  lobby.forEach(function(lobby) {
+                    lobby_count += lobby.count;
+                    lobby_users += '<@'+lobby.user_id+'> ';
+                  });
+                  switch (member_count){
+                    case 0:
+                      interest = ' has *left* the raid. ';
+                      break;
+                    case 1:
+                      interest = ' has shown interest in the raid with **'+member_count+'** account! ';
+                      break;
+                    default:
+                      interest = ' has shown interest in the raid with **'+member_count+'** accounts! ';
+                      break;
+                  }
+                  // TAG USER IN EXISTING CHANNEL
+                  MAIN.channels.get(record[0].raid_channel).send(member+interest+'There are now **'+lobby_count+'** interested. '+lobby_users+'Make sure to coordinate a start time.').catch(console.error);
+                  if(error){ console.error(error);}
+                });
               } else{
 
                 // SET THE CHANNEL NAME
@@ -57,63 +80,63 @@ reactions.run = (MAIN, event) => {
                 // CREATE THE CHANNEL
                 guild.createChannel(channel_name, 'text').then( new_channel => {
 
-                let category = discord.raid_lobbies_category_id ? discord.raid_lobbies_category_id : channel.parent;
-                // SET THE CATEGORY ID
-                new_channel.setParent(category).then( new_channel => {
-                  new_channel.lockPermissions();
-                  new_channel.setPosition(0);
-                  let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
+		let category = discord.raid_lobbies_category_id ? discord.raid_lobbies_category_id : channel.parent;
+                  // SET THE CATEGORY ID
+                  new_channel.setParent(category).then( new_channel => {
+                    new_channel.lockPermissions();
+                    new_channel.setPosition(0);
+                    let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
-                  let channel_embed = new Discord.RichEmbed()
+                    let channel_embed = new Discord.RichEmbed()
                     .setColor(embed.color)
                     .setThumbnail(embed.thumbnail.url)
                     .setAuthor(embed.author.name, embed.author.iconURL)
                     .setImage(embed.image.url);
-                  if(embed.fields[0]){
-                    channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
-                  }
-                  if(embed.fields[1]){
-                    channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
-                  }
-                  if(embed.fields[2]){
-                    channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
-                  }
-                  channel_embed.setFooter(gym_id);
+                    if(embed.fields[0]){
+                      channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
+                    }
+                    if(embed.fields[1]){
+                      channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
+                    }
+                    if(embed.fields[2]){
+                      channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
+                    }
+		    channel_embed.setFooter(gym_id);
 
-                  let mention = '<@&'+discord.raid_role+'> '
-                  if (mention == "<@&> "){ mention = '' }
-                  new_channel.send(member+' has shown interest for a raid in '+record[0].area+' at '+record[0].gym_name+'! They are bringing **'+member_count+'**. Make sure to coordinate a start time. '+mention, channel_embed)
-                    .then( message => {
-                    message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
-                    message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
-                    message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
-                    message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
-                    message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
-                    }).catch(console.error);
-                  boss_name = embed.fields[0].name.slice(0, -7);
-                  boss_name = boss_name.slice(2);
+                    let mention = '<@&'+discord.raid_role+'> '
+                    if (mention == "<@&> "){ mention = '' }
+                    new_channel.send(mention+member+' has shown interest in a raid! They are bringing **'+member_count+'**. Make sure to coordinate a start time.', channel_embed)
+	.then( message => {
+	message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
+	message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
+     }).catch(console.error);
+                    boss_name = embed.fields[0].name.slice(0, -7);
+                    boss_name = boss_name.slice(2);
 
-                  // UPDATE SQL RECORDS
-                  MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
-                    if(error){ console.error(error); }
+                    // UPDATE SQL RECORDS
+                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
+                      if(error){ console.error(error); }
+                    });
+                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
+                      if(error){ console.error(error); }
+                    });
+                    new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
                   });
-                  MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
-                    if(error){ console.error(error); }
-                  });
-                  new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
                 });
-              });
+              }
             }
-          }
-        });
-      } else{
-        guild.fetchMember(event.d.user_id).then( TARGET => {
-          return TARGET.send('Unable to create an Active Raid for '+raid.embeds[0].author.name+'. That Raid appears to have expired!').catch(console.error);
-        });
-      }
-    });
-  }); return;
- }
+          });
+        } else{
+          guild.fetchMember(event.d.user_id).then( TARGET => {
+            return TARGET.send('Unable to create an Active Raid for '+raid.embeds[0].author.name+'. That Raid appears to have expired!').catch(console.error);
+          });
+        }
+      });
+    }); return;
+  }
 }
 
 function getActiveRaids(MAIN){
@@ -132,10 +155,10 @@ reactions.startInterval = async (MAIN) => {
           let embed = JSON.parse(record[0].embed);
 
           let channel_embed = new Discord.RichEmbed()
-            .setColor(embed.color)
-            .setThumbnail(embed.thumbnail.url)
-            .setAuthor(embed.author.name, embed.author.iconURL)
-            .setImage(embed.image.url);
+          .setColor(embed.color)
+          .setThumbnail(embed.thumbnail.url)
+          .setAuthor(embed.author.name, embed.author.iconURL)
+          .setImage(embed.image.url);
           if(embed.fields[0]){
             channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
           }
@@ -152,13 +175,13 @@ reactions.startInterval = async (MAIN) => {
           MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
 
           MAIN.channels.get(record[0].raid_channel).send(channel_embed)
-            .then( message => {
-            message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
-            message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
-            message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
-            message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
-            message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
-          }).catch(console.error);
+        .then( message => {
+        message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusTwoReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusThreeReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
+        message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
+     }).catch(console.error);
         }
       });
     });

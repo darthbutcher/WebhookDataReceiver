@@ -59,16 +59,22 @@ username = username
 password = password
 port = 3306
 db_name = rdmdb
-
 # Remove any pokestops that have been upgraded to gyms daily.
 Remove_Upgraded_Pokestops = ENABLED
-
 # Remove any pokestops not seen in 24 hours that may have been removed daily.
 Remove_Unseen_Pokestops = ENABLED
-
 # Trim the Pokemon Table. Choose the max age you want to keep. Query runs daily at 23:00
 Trim_Pokemon_Table = ENABLED
 Trim_Days = 7
+
+[pmsfDB]
+# RDM DATABASE CREDENTIALS
+host = localhost
+username = username
+password = password
+port = 3306
+db_name = pmsf
+Search = ENABLED
 
 [TOKENS]
 # BOT TOKENS
