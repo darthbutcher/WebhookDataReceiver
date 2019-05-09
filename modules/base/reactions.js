@@ -60,12 +60,15 @@ reactions.run = (MAIN, event) => {
                   switch (member_count){
                     case 0:
                       interest = ' has *left* the raid. ';
+                      member.removeRole(guild.roles.get(record[0].role_id));                   
                       break;
                     case 1:
                       interest = ' has shown interest in the raid with **'+member_count+'** account! ';
+                      member.addRole(guild.roles.get(record[0].role_id));    
                       break;
                     default:
                       interest = ' has shown interest in the raid with **'+member_count+'** accounts! ';
+                      member.addRole(guild.roles.get(record[0].role_id));    
                       break;
                   }
                   // TAG USER IN EXISTING CHANNEL
@@ -85,6 +88,11 @@ reactions.run = (MAIN, event) => {
                   new_channel.setParent(category).then( new_channel => {
                     new_channel.lockPermissions();
                     new_channel.setPosition(0);
+
+                   guild.createRole({name: channel_name}).then(new_role => {
+
+                    new_channel.overwritePermissions(new_role,  {READ_MESSAGES: true, READ_MESSAGE_HISTORY: true, SEND_MESSAGES: true, EMBED_LINKS: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, ATTACH_FILES: true});
+
                     let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
 
                     let channel_embed = new Discord.RichEmbed()
@@ -101,10 +109,11 @@ reactions.run = (MAIN, event) => {
                     if(embed.fields[2]){
                       channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
                     }
-		    channel_embed.setFooter(gym_id);
+        channel_embed.setFooter(gym_id);
+        
+        member.addRole(new_role).then(member => {
 
-                    let mention = '<@&'+discord.raid_role+'> '
-                    if (mention == "<@&> "){ mention = '' }
+                    let mention = discord.raid_role ? '<@&'+discord.raid_role+'> ': '';                    
                     new_channel.send(mention+member+' has shown interest in a raid! They are bringing **'+member_count+'**. Make sure to coordinate a start time.', channel_embed)
 	.then( message => {
 	message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
@@ -117,7 +126,7 @@ reactions.run = (MAIN, event) => {
                     boss_name = boss_name.slice(2);
 
                     // UPDATE SQL RECORDS
-                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, gym_id], function (error, raids, fields) {
+                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ?, role_id = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, new_role.id, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
                     MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
@@ -126,9 +135,14 @@ reactions.run = (MAIN, event) => {
                     new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
                   });
                 });
+              });
+            });
               }
+            
             }
+          
           });
+       
         } else{
           guild.fetchMember(event.d.user_id).then( TARGET => {
             return TARGET.send('Unable to create an Active Raid for '+raid.embeds[0].author.name+'. That Raid appears to have expired!').catch(console.error);

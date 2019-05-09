@@ -1,5 +1,5 @@
 {
-  "LATEST": 13,
+  "LATEST": 14,
   "1": [{
       "sql": "",
       "data": "",
@@ -150,5 +150,11 @@
       "gLog": "ADD arrived column",
       "bLog": "[Pokébot] Failed to add arrived column"
     }
-  ]
+  ],
+  "14": [{
+    "sql": "ALTER TABLE active_raids ADD COLUMN role_id TEXT;",
+    "data": "",
+    "gLog": "Add role_id column to active_raids",
+    "bLog": "[Pokébot] Failed to add role_id column"
+  }]
 }

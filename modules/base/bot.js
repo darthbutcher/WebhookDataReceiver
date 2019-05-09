@@ -782,7 +782,9 @@ setInterval(function() {
     if(active_raids[0]){
       active_raids.forEach( async (raid,index) => {
         let raid_channel = MAIN.channels.get(raid.raid_channel);
-        if(raid_channel){ raid_channel.delete().catch(console.error); }
+        let raid_role = '';
+        if(raid_channel) { raid_role = raid_channel.guild.roles.get(raid.role_id); raid_channel.delete().catch(console.error); }        
+        if(raid_role){ raid_role.delete().catch(console.error); }
       });
       MAIN.pdb.query(`DELETE FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-900`, function (error, active_raids, fields) { if(error){ console.error; } });
     }
