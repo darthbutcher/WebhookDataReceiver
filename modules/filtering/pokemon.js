@@ -33,7 +33,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       else if(sighting.gender == 2){ gender = 'female'; }
       else{ gender = 'all'; }
 
-      if(filter.gender != gender) { return; }      
+      if(filter.gender != gender && filter.gender != 'all') { return; }      
 
       // Determine Size
       size = MAIN.Get_Size(sighting.pokemon_id, sighting.height, sighting.weight);
