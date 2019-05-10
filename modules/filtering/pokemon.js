@@ -33,6 +33,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       else if(sighting.gender == 2){ gender = 'female'; }
       else{ gender = 'all'; }
 
+      if(filter.gender != gender) { return; }      
+
       // Determine Size
       size = MAIN.Get_Size(sighting.pokemon_id, sighting.height, sighting.weight);
       if (!filter.size) { filter.size = 'all'; }
@@ -49,7 +51,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         case filter.Post_Without_IV:
           switch(true){
             case sighting.cp > 0: break;
-            case filter[MAIN.pokemon[sighting.pokemon_id].name] == 'False': break;
+            case filter[MAIN.pokemon[sighting.pokemon_id].name] == 'False': break;            
             default:
               Send_Pokemon.run(MAIN, false, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id); break;
           }
@@ -89,10 +91,9 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.min_level > sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.max_level < sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.size.toLowerCase() != size: sightingFailed(MAIN, filter, 'SIZE'); break;
-            default:
-              if(filter.gender.toLowerCase() == 'all' || filter.gender.toLowerCase() == gender){
+            default:             
                 Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
-              }
+             
           } break;
 
         // SEND SIGHTING THROUGH ALL FILTERS
