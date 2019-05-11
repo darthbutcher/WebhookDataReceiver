@@ -1,5 +1,7 @@
 delete require.cache[require.resolve('../embeds/pokemon.js')];
 const Send_Pokemon = require('../embeds/pokemon.js');
+delete require.cache[require.resolve('../embeds/pvp.js')];
+const Send_PvP = require('../embeds/pvp.js');
 const Discord = require('discord.js');
 
 module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, server, timezone, role_id) => {
@@ -15,6 +17,13 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     let geofences = pokemon_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(pokemon_channel[0]);
     let filter = MAIN.Filters.get(pokemon_channel[1].filter);
+
+    // CHECK IF FILTER EXISTS
+    if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); return; }
+
+    // CHECK IF CHANNEL EXISTS
+    if(!channel){console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+pokemon_channel[0]+' does not appear to exist.'); return; }
+
     if (pokemon_channel[1].roleid) {
       if (pokemon_channel[1].roleid == 'here' || pokemon_channel[1].roleid == 'everyone'){
         role_id = '@'+pokemon_channel[1].roleid;
@@ -40,13 +49,24 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       if (!filter.size) { filter.size = 'all'; }
       if (filter.size.toLowerCase() == 'all') { size = 'all'; }
 
+      if(filter.min_cp_range && filter.max_cp_range)
+      {
+        // no need to calculate possible CP if current CP wasn't provided
+        if(!sighting.cp) return;
+        if(sighting.cp > filter.max_cp_range) { return sightingFailed(MAIN, filter, "CP Range"); }    
+        let form_name = '';
+        if (sighting.form > 0){
+           form_name = MAIN.forms[sighting.pokemon_id][sighting.form];
+           if(form_name == "Normal") { form_name = "" }
+           if(form_name == "Alolan") { form_name = "_1" }
+        }                    
+        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, form_name, filter.min_cp_range, filter.max_cp_range);
+        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }                
+        return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, possible_cps);    
+        
+      }
+
       switch(true){
-        // CHECK IF FILTER EXISTS
-        case !filter: console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); break;
-
-        // CHECK IF CHANNEL EXISTS
-        case !channel: console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The channel '+pokemon_channel[0]+' does not appear to exist.'); break;
-
         // POST WITHOUT IV IF ENABLED
         case filter.Post_Without_IV:
           switch(true){
@@ -118,4 +138,63 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
 function sightingFailed(MAIN, filter, reason){
   if(MAIN.debug.Pokemon == 'ENABLED'){ console.info('[DEBUG] [filtering/pokemon.js] Sighting failed '+filter.name+' because of '+reason+' check.'); } return;
+}
+
+
+function CalculatePossibleCPs(MAIN, pokemonID, attack, defense, stamina, level, form, minCP, maxCP)
+{
+  let possibleCPs = [];
+
+  for(var i = level; i <= 40; i += .5)
+  {
+    let currentCP = CalculateCP(MAIN, pokemonID, attack, defense, stamina, i, form);
+    if(currentCP >= minCP && currentCP <= maxCP)
+    {      
+      possibleCPs.push({pokemonID:pokemonID, attack:attack, defense:defense, stamina:stamina, level:i, cp:currentCP});
+    }
+    if(currentCP > maxCP) { i = 41; }
+  }
+
+  // IF no data about possible evolutions just return now rather than moving on
+  if(!MAIN.evolutions[pokemonID])
+  {    
+    return possibleCPs;
+  }
+  
+  for(var i = 0; i < MAIN.evolutions[pokemonID].length; i++)
+  {    
+    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.evolutions[pokemonID][i],attack, defense, stamina, level, form, minCP, maxCP));    
+  }  
+  return possibleCPs;
+}
+
+function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level, form)
+{
+	let CP = 0;
+
+	let remainder = level % 1;
+	level = Math.floor(level);	
+	
+	
+	let cpIndex = ((level * 2) - 2) + (remainder * 2);
+	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
+  
+	let pokemonAttack = MAIN.base_stats[pokemonID+form].attack;
+	let pokemonDefense = MAIN.base_stats[pokemonID+form].defense;
+	let pokemonStamina = MAIN.base_stats[pokemonID+form].stamina;
+
+	let attackMultiplier = pokemonAttack + parseInt(attack);
+	let defenseMultiplier = Math.pow(pokemonDefense + parseInt(defense),.5);
+	let staminaMultiplier = Math.pow(pokemonStamina + parseInt(stamina),.5);
+	CPMultiplier = Math.pow(CPMultiplier,2);
+
+	CP = (attackMultiplier * defenseMultiplier * staminaMultiplier * CPMultiplier) / 10;
+
+	CP = Math.floor(CP);
+
+	//CP floor is 10
+	if(CP < 10)  {CP = 10}
+	
+
+	return CP;
 }

@@ -111,6 +111,10 @@ function load_data(){
   MAIN.forms = require('../../static/forms.json');
   delete require.cache[require.resolve('../../static/base_stats.json')];
   MAIN.base_stats = require('../../static/base_stats.json');
+  delete require.cache[require.resolve('../../static/evolutions.json')];
+  MAIN.evolutions = require('../../static/evolutions.json');
+  delete require.cache[require.resolve('../../static/cp_multiplier.json')];
+  MAIN.cp_multiplier = require('../../static/cp_multiplier.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
   MAIN.gym_notes = require('../../static/gyms.json');
   delete require.cache[require.resolve('../../static/rewards.json')];
