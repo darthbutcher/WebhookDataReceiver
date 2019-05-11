@@ -3,6 +3,7 @@ const Discord=require('discord.js');
 module.exports.run = async (MAIN, message, raids, count) => {
   // HANDLE CHANNEL COMMANDS
   try {
+    guild = MAIN.guilds.get(message.guild.id);
     member = message.author.id;
   }
   // HANDLE EMOJI REACTIONS
@@ -13,7 +14,7 @@ module.exports.run = async (MAIN, message, raids, count) => {
   channel = raids.raid_channel;
   // RESET LOBBY COUNT
   lobby_count = 0;
-  lobby_users = '';
+  lobby_users = '<@&'+raids.role_id+'>';
   present_users = 0;
   transit_users = 0;
   member_count = 0;
@@ -23,10 +24,10 @@ module.exports.run = async (MAIN, message, raids, count) => {
   const user_search = function(){
     return new Promise( function(resolve, reject){
       MAIN.pdb.query(`SELECT * FROM lobby_members WHERE user_id = ?`, [member], function (error, user, fields) {
-              if(fields === undefined){
-                  reject(new Error("Error fields is undefined"));
-              }else{
-                  resolve(user[0]);
+              if(user === undefined || fields === undefined){
+                reject(new Error("Error fields is undefined"));
+              } else{
+                resolve(user[0]);
               }
           }
       )}
@@ -37,6 +38,8 @@ module.exports.run = async (MAIN, message, raids, count) => {
   if (results === undefined) {
     return MAIN.channels.get(channel).send('<@'+member+'> You have not expressed interest in this raid, no need to leave.').catch(console.error);
   } else {
+    // REMOVE ROLE AND DELETE FROM lobby_members
+    guild.members.get(member).removeRole(guild.roles.get(raids.role_id));
     MAIN.pdb.query(`DELETE FROM lobby_members WHERE user_id = ?`, [member], function (error, lobby, fields) {
       if(error){ console.error(error); }
     });
@@ -48,12 +51,11 @@ module.exports.run = async (MAIN, message, raids, count) => {
         if (lobby.arrived == 'here') { present_users += lobby.count; }
         if (lobby.arrived == 'coming') { transit_users += lobby.count; }
         lobby_count += lobby.count;
-        lobby_users += '<@'+lobby.user_id+'> ';
       });
     return MAIN.channels.get(channel).send('<@'+member+'>'+interest+'There are:\n```\n'+transit_users+' accounts on the way.\n'+present_users+' accounts at the raid\n'+lobby_count+' total accounts interested```'+lobby_users).catch(console.error);
     });
   }
 }).catch(function(err){
- console.error();("Promise rejection error: "+err);
+ console.error();(err);
  });
 }

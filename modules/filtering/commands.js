@@ -108,13 +108,14 @@ module.exports.run = async (MAIN, message) => {
 
           switch (message.content.toLowerCase()) {
             // USER HAS ARRIVED AT THE RAID
-            case 'i\'m here':
+            case 'i\’m here':
             case 'here': command = 'here'; break;
             // USER IS INTERESTED
             case 'interested': command = 'interested'; break;
             // USER HAS INDICATED THEY'RE ON THE WAY
             case 'coming':
             case 'on the way':
+            case 'on my way!':
             case 'omw': command = 'coming'; break;
             // USER IS NO LONGER INTERESTED AND LEFT THE RAID
             case 'leave':
@@ -129,7 +130,6 @@ module.exports.run = async (MAIN, message) => {
       });
       return;
     });
-
     return;
   }
   return; // FALL BACK RETURN
