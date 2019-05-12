@@ -25,8 +25,8 @@
   },
   "electric": {
     "immunes": [""],
-    "weaknesses": ["Ground"],
-    "strengths": ["Electric","Flying","Steel"],
+    "weaknesses": ["Ground"],    
+    "resistances": ["Electric","Flying","Steel"],
     "strengths":["Water","Flying"]
   },
   "ice": {

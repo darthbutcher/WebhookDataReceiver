@@ -49,6 +49,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       if (!filter.size) { filter.size = 'all'; }
       if (filter.size.toLowerCase() == 'all') { size = 'all'; }
 
+      // PVP Filtering
       if(filter.min_cp_range && filter.max_cp_range)
       {
         // no need to calculate possible CP if current CP wasn't provided
@@ -60,8 +61,18 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
            if(form_name == "Normal") { form_name = "" }
            if(form_name == "Alolan") { form_name = "_1" }
         }                    
-        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, form_name, filter.min_cp_range, filter.max_cp_range);
-        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }                
+        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);
+        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
+
+        for(var i = 0; i < possible_cps.length; i++)
+        {
+          let pvpRanks = CalculateTopRanks(MAIN, sighting.pokemon_id+form_name, filter.max_cp_range);
+          let rank = pvpRanks[sighting.individual_attack][sighting.individual_defense][sighting.individual_stamina];
+
+          possible_cps[i].rank = rank.rank;
+          possible_cps[i].percent = rank.percent;
+        }        
+
         return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, possible_cps);    
         
       }
@@ -141,13 +152,13 @@ function sightingFailed(MAIN, filter, reason){
 }
 
 
-function CalculatePossibleCPs(MAIN, pokemonID, attack, defense, stamina, level, form, minCP, maxCP)
+function CalculatePossibleCPs(MAIN, pokemonID, attack, defense, stamina, level, minCP, maxCP)
 {
   let possibleCPs = [];
 
   for(var i = level; i <= 40; i += .5)
   {
-    let currentCP = CalculateCP(MAIN, pokemonID, attack, defense, stamina, i, form);
+    let currentCP = CalculateCP(MAIN, pokemonID, attack, defense, stamina, i);
     if(currentCP >= minCP && currentCP <= maxCP)
     {      
       possibleCPs.push({pokemonID:pokemonID, attack:attack, defense:defense, stamina:stamina, level:i, cp:currentCP});
@@ -163,12 +174,12 @@ function CalculatePossibleCPs(MAIN, pokemonID, attack, defense, stamina, level, 
   
   for(var i = 0; i < MAIN.evolutions[pokemonID].length; i++)
   {    
-    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.evolutions[pokemonID][i],attack, defense, stamina, level, form, minCP, maxCP));    
+    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.evolutions[pokemonID][i],attack, defense, stamina, level, minCP, maxCP));    
   }  
   return possibleCPs;
 }
 
-function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level, form)
+function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level)
 {
 	let CP = 0;
 
@@ -179,9 +190,9 @@ function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level, form)
 	let cpIndex = ((level * 2) - 2) + (remainder * 2);
 	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
   
-	let pokemonAttack = MAIN.base_stats[pokemonID+form].attack;
-	let pokemonDefense = MAIN.base_stats[pokemonID+form].defense;
-	let pokemonStamina = MAIN.base_stats[pokemonID+form].stamina;
+	let pokemonAttack = MAIN.base_stats[pokemonID].attack;
+	let pokemonDefense = MAIN.base_stats[pokemonID].defense;
+	let pokemonStamina = MAIN.base_stats[pokemonID].stamina;
 
 	let attackMultiplier = pokemonAttack + parseInt(attack);
 	let defenseMultiplier = Math.pow(pokemonDefense + parseInt(defense),.5);
@@ -197,4 +208,116 @@ function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level, form)
 	
 
 	return CP;
+}
+
+function CalculateTopRanks(MAIN, pokemonID, cap)
+{      
+    let currentPokemon = InitializeBlankPokemon();
+    let bestStat = {attack: 0, defense: 0, stamina: 0, value: 0};
+    let arrayToSort = [];
+   
+    for(a = 0; a <= 15; a++)
+    {
+        for(d = 0; d <= 15; d++)
+        {
+            for(s = 0; s <= 15; s++)
+            {
+                let currentStat = CalculateBestPvPStat(MAIN, pokemonID,a,d,s, cap);
+
+                if(currentStat > bestStat.value)
+                {
+                    bestStat = {attack: a, defense: d, stamina: s, value: currentStat.value, level: currentStat.level};
+                }
+
+                currentPokemon[a][d][s] = {value: currentStat.value, level: currentStat.level }                
+
+                arrayToSort.push({attack:a, defense:d, stamina:s, value:currentStat.value});
+                
+            }
+        }
+    }
+
+    arrayToSort.sort(function(a,b) {
+        return b.value - a.value;
+    });
+
+    let best = arrayToSort[0].value;
+    
+    for(var i = 0; i < arrayToSort.length; i++)
+    {
+        let percent = PrecisionRound((arrayToSort[i].value / best) * 100, 2);
+        arrayToSort[i].percent = percent;
+        currentPokemon[arrayToSort[i].attack][arrayToSort[i].defense][arrayToSort[i].stamina].percent = percent;
+        currentPokemon[arrayToSort[i].attack][arrayToSort[i].defense][arrayToSort[i].stamina].rank = i+1;
+    }
+    
+    return currentPokemon;  
+    
+}
+
+function CalculateBestPvPStat(MAIN, pokemonID, attack, defense, stamina, cap)
+{
+    let bestStat = 0;
+    let level = 0;
+    for(var i = 1; i <= 40; i += .5)
+    {
+        let CP = CalculateCP(MAIN, pokemonID,attack, defense, stamina, i);
+        if(CP <= cap)
+        {
+            let stat = CalculatePvPStat(MAIN, pokemonID, i, attack, defense, stamina);
+            if(stat > bestStat)
+            {
+                bestStat = stat;
+                level = i;   
+            }
+        }
+    }
+
+    return {value: bestStat, level: level};
+}
+
+function CalculatePvPStat(MAIN, pokemonID, level, attack, defense, stamina)
+{
+    let remainder = level % 1;
+	level = Math.floor(level);	
+    let cpIndex = ((level * 2) - 2) + (remainder * 2);
+
+    attack = (attack + MAIN.base_stats[pokemonID].attack) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+    defense = (defense + MAIN.base_stats[pokemonID].defense) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+    stamina = (stamina + MAIN.base_stats[pokemonID].stamina) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+
+    product = attack * defense * Math.floor(stamina);
+
+    product = Math.round(product);
+
+    return product;
+}
+
+function InitializeBlankPokemon()
+{
+    let newPokemon = {};
+
+    for(var a = 0; a <= 15; a++)
+    {
+        newPokemon[a] = {};
+
+        for(var d = 0; d <= 15; d++)
+        {
+            newPokemon[a][d] = {};
+
+            for(var s = 0; s <= 15; s++)
+            {
+                newPokemon[a][d][s] = {};
+            }
+        }
+    }
+
+    return newPokemon;
+
+}
+
+function PrecisionRound(number, precision) 
+{
+	var factor = Math.pow(10, precision);
+	return Math.round(number * factor) / factor;
 }
