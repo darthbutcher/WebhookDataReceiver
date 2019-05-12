@@ -66,7 +66,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
         for(var i = 0; i < possible_cps.length; i++)
         {
-          let pvpRanks = CalculateTopRanks(MAIN, sighting.pokemon_id+form_name, filter.max_cp_range);
+          let pvpRanks = CalculateTopRanks(MAIN, possible_cps[i].pokemonID, filter.max_cp_range);
           let rank = pvpRanks[sighting.individual_attack][sighting.individual_defense][sighting.individual_stamina];
 
           possible_cps[i].rank = rank.rank;
