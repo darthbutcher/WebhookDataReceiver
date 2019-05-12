@@ -61,8 +61,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
            if(form_name == "Normal") { form_name = "" }
            if(form_name == "Alolan") { form_name = "_1" }
         }                    
-        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);
-        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
+        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);        
 
         for(var i = 0; i < possible_cps.length; i++)
         {
@@ -71,7 +70,12 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
           possible_cps[i].rank = rank.rank;
           possible_cps[i].percent = rank.percent;
-        }        
+        }
+
+        possible_cps = FilterPossibleCPsByRank(possible_cps, filter.min_pvp_rank);
+        possible_cps = FilterPossibleCPsByPercent(possible_cps, filter.min_pvp_percent);
+        
+        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
 
         return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, possible_cps);    
         
@@ -320,4 +324,32 @@ function PrecisionRound(number, precision)
 {
 	var factor = Math.pow(10, precision);
 	return Math.round(number * factor) / factor;
+}
+
+function FilterPossibleCPsByRank(possibleCPs, minRank = 4096)
+{
+  let returnCPs = [];
+
+  for(var i = 0; i < possibleCPs.length; i++)
+  {
+    if(possibleCPs[i].rank <= minRank)
+    {
+      returnCPs.push(possibleCPs[i]);
+    }
+  }
+  return returnCPs;
+}
+
+function FilterPossibleCPsByPercent(possibleCPs, minPercent = 0)
+{
+  let returnCPs = [];
+
+  for(var i = 0; i < possibleCPs.length; i++)
+  {
+    if(possibleCPs[i].percent >= minPercent)
+    {
+      returnCPs.push(possibleCPs[i]);
+    }
+  }
+  return returnCPs;
 }
