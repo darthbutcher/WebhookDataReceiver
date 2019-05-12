@@ -314,7 +314,7 @@
       "resolved": "https://registry.npmjs.org/detect-libc/-/detect-libc-1.0.3.tgz",
       "version": "1.0.3"
     },
-    "discord.js": "github:discordjs/discord.js#11.4-dev",
+    "discord.js": "^11.5.0",
     "ecc-jsbn": {
       "integrity": "sha1-OoOpBOVDUyh4dMVkt1SThoSamMk=",
       "requires": {

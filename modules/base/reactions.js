@@ -57,10 +57,12 @@ reactions.run = (MAIN, event) => {
                   });
                 } else {
                   // SET THE CHANNEL NAME
-                let channel_name = record[0].gym_name
+                  boss_name = JSON.parse(record[0].embed).fields[0].name.slice(0, -7);
+                  boss_name = boss_name.slice(2);
+                  let channel_name = boss_name+'_'+record[0].gym_name
 
                 // CREATE THE CHANNEL
-                guild.createChannel(channel_name, 'text').then( new_channel => {
+                guild.createChannel(channel_name, { type: 'text', }).then( new_channel => {
                   let category = discord.raid_lobbies_category_id ? discord.raid_lobbies_category_id : channel.parent;
                   // SET THE CATEGORY ID
                   new_channel.setParent(category).then( new_channel => {
@@ -100,9 +102,6 @@ reactions.run = (MAIN, event) => {
                       message.react(MAIN.emotes.plusFourReact.id).catch(console.error).then( reaction => {
                       message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
                     }).catch(console.error);
-                    boss_name = embed.fields[0].name.slice(0, -7);
-                    boss_name = boss_name.slice(2);
-
                     // UPDATE SQL RECORDS
                     MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ?, role_id = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, new_role.id, gym_id], function (error, raids, fields) {
                       if(error){ console.error(error); }
@@ -110,7 +109,6 @@ reactions.run = (MAIN, event) => {
                     MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
                       if(error){ console.error(error); }
                     });
-                    new_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
                   });
                 });
               });
