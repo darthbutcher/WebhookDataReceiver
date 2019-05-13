@@ -55,6 +55,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         // no need to calculate possible CP if current CP wasn't provided
         if(!sighting.cp) return;
         if(sighting.cp > filter.max_cp_range) { return sightingFailed(MAIN, filter, "CP Range"); }    
+        if(filter[MAIN.pokemon[sighting.pokemon_id].name] != 'True') { return sightingFailed(MAIN, filter, "Pokemon: "+sighting.pokemon_id+" set to False"); }
         let form_name = '';
         if (sighting.form > 0){
            form_name = MAIN.forms[sighting.pokemon_id][sighting.form];
@@ -66,23 +67,32 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
            }          
 
         }                    
-        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);        
+        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);
+        let unique_cps = {};
 
-        for(var i = 0; i < possible_cps.length; i++)
+        for(var i = possible_cps.length - 1; i >= 0; i--)
         {
-          let pvpRanks = CalculateTopRanks(MAIN, possible_cps[i].pokemonID, filter.max_cp_range);
-          let rank = pvpRanks[sighting.individual_attack][sighting.individual_defense][sighting.individual_stamina];
+          if(!unique_cps[possible_cps[i].pokemonID])
+          {
+            unique_cps[possible_cps[i].pokemonID] = {};
 
-          possible_cps[i].rank = rank.rank;
-          possible_cps[i].percent = rank.percent;
+            let pvpRanks = CalculateTopRanks(MAIN, possible_cps[i].pokemonID, filter.max_cp_range);
+            let rank = pvpRanks[sighting.individual_attack][sighting.individual_defense][sighting.individual_stamina];
+
+
+            unique_cps[possible_cps[i].pokemonID].rank = rank.rank;
+            unique_cps[possible_cps[i].pokemonID].percent = rank.percent;
+            unique_cps[possible_cps[i].pokemonID].level = rank.level;
+            unique_cps[possible_cps[i].pokemonID].cp = possible_cps[i].cp;
+          }
         }
 
-        possible_cps = FilterPossibleCPsByRank(possible_cps, filter.min_pvp_rank);
-        possible_cps = FilterPossibleCPsByPercent(possible_cps, filter.min_pvp_percent);
+        unique_cps = FilterPossibleCPsByRank(unique_cps, filter.min_pvp_rank);
+        unique_cps = FilterPossibleCPsByPercent(unique_cps, filter.min_pvp_percent);
         
-        if(possible_cps.length == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
+        if(Object.keys(unique_cps) == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
 
-        return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, possible_cps);    
+        return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, unique_cps);    
         
       }
 
@@ -337,13 +347,13 @@ function PrecisionRound(number, precision)
 
 function FilterPossibleCPsByRank(possibleCPs, minRank = 4096)
 {
-  let returnCPs = [];
+  let returnCPs = {};
 
-  for(var i = 0; i < possibleCPs.length; i++)
+  for(var pokemon in possibleCPs)
   {
-    if(possibleCPs[i].rank <= minRank)
+    if(possibleCPs[pokemon].rank <= minRank)
     {
-      returnCPs.push(possibleCPs[i]);
+      returnCPs[pokemon] = possibleCPs[pokemon];
     }
   }
   return returnCPs;
@@ -351,13 +361,13 @@ function FilterPossibleCPsByRank(possibleCPs, minRank = 4096)
 
 function FilterPossibleCPsByPercent(possibleCPs, minPercent = 0)
 {
-  let returnCPs = [];
+  let returnCPs = {};
 
-  for(var i = 0; i < possibleCPs.length; i++)
+  for(var pokemon in possibleCPs)
   {
-    if(possibleCPs[i].percent >= minPercent)
+    if(possibleCPs[pokemon].percent >= minPercent)
     {
-      returnCPs.push(possibleCPs[i]);
+      returnCPs[pokemon] = possibleCPs[pokemon];
     }
   }
   return returnCPs;
