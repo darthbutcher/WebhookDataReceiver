@@ -403,6 +403,43 @@ MAIN.Get_CP = (pokemon, form, level) => {
   return cp;
 }
 
+MAIN.Get_Area = (MAIN, lat, lon, discord) => {
+  return new Promise(async function(resolve, reject) {
+    if(InsideGeojson.polygon(discord.geofence, [lon,lat])){
+
+      // DEFINE AND DETERMINE TIMEZONE
+      let timezone = GeoTz(discord.geofence[0][1][1], discord.geofence[0][1][0])[0]; discord_match = true;
+
+      // DEFINE AREAS FROM GEOFENCE FILE
+      let main_area = '', sub_area = '', embed_area = '';
+      if(discord.geojson_file){
+        let geofence = await MAIN.Geofences.get(discord.geojson_file);
+        await geofence.features.forEach((geo,index) => {
+          if(InsideGeojson.polygon(geo.geometry.coordinates, [lon,lat])){
+            switch(geo.properties.sub_area){
+              case 'true': sub_area = geo.properties.name;
+              break;
+              default: main_area = geo.properties.name;
+            }
+          }
+        });
+      }
+      // ASSIGN AREA TO VARIABLES
+      if(sub_area){ embed_area = sub_area; }
+      if(main_area && !sub_area){ embed_area = main_area; }
+      if(!sub_area && !main_area){ embed_area = discord.name; }
+
+      let area = { main_area: main_area, embed_area: embed_area }
+
+    return resolve(area);
+
+
+  }
+  not = 'Searched loaction not in your discords.json or geofence file';
+  return reject(not);
+});
+}
+
 // GET QUEST REWARD ICON
 MAIN.Get_Icon = (object, quest_reward) => {
   let questUrl = '';
@@ -787,7 +824,7 @@ setInterval(function() {
       active_raids.forEach( async (raid,index) => {
         let raid_channel = MAIN.channels.get(raid.raid_channel);
         let raid_role = '';
-        if(raid_channel) { raid_role = raid_channel.guild.roles.get(raid.role_id); raid_channel.delete().catch(console.error); }        
+        if(raid_channel) { raid_role = raid_channel.guild.roles.get(raid.role_id); raid_channel.delete().catch(console.error); }
         if(raid_role){ raid_role.delete().catch(console.error); }
       });
       MAIN.pdb.query(`DELETE FROM active_raids WHERE expire_time < UNIX_TIMESTAMP()-900`, function (error, active_raids, fields) { if(error){ console.error; } });

@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
 const Embed_Config = require('../../config/embed_nests.js');
 
-module.exports.run = async (MAIN, target, nest, server, timezone) => {
+module.exports.run = async (MAIN, target, nest, server, embed_area, timezone) => {
   MAIN.pdb.query(`SELECT * FROM users WHERE user_id = ?`, [target.author.id], function (error, user, fields){
     user.forEach(async function(user) {
       // CHECK IF THE TARGET IS A USER
@@ -96,7 +96,7 @@ module.exports.run = async (MAIN, target, nest, server, timezone) => {
         submitter = 'Map Scanned';
       }
 
-      nest_embed = Embed_Config(pokemon_name,form_name,pokemon_type,pokemon_color,pokemon_avg,submit_time,nest_name,submitter,nest.lat,nest.lon,map_url,img_url,pokemon_url);
+      nest_embed = Embed_Config(pokemon_name,form_name,pokemon_type,pokemon_color,pokemon_avg,submit_time,nest_name,submitter,nest.lat,nest.lon,embed_area,map_url,img_url,pokemon_url);
       //MAIN.Send_Embed('nest', 0, server, role_id, nest_embed, target.channel.id);
       return MAIN.Send_DM(user.discord_id, user.user_id,nest_embed, user.bot);
     })
