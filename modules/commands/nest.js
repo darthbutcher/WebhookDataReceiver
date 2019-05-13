@@ -1,10 +1,8 @@
 const GeoTz = require('geo-tz');
 const Discord = require('discord.js');
 const Send_Nest = require('../embeds/nests.js');
-const InsideGeojson = require('point-in-geopolygon');
 
 module.exports.run = async (MAIN, message, prefix, discord) => {
-
   // DECLARE VARIABLES
   let nickname = '', park = '';
 
@@ -22,40 +20,47 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 }
 
-async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
-  MAIN.pmsf.query(`SELECT * FROM nests WHERE pokemon_id = ?`, [pokemon], function (error, nests, fields) {
+function pokemon_view(MAIN, message, nickname, name, search_area, prefix, discord){
+  new Promise(async function(resolve, reject) {
+  MAIN.pmsf.query(`SELECT * FROM nests WHERE pokemon_id = ?`, [pokemon],function (error, nests, fields) {
       let nest_found = false;
-      nests.forEach(function(nest) {
+      asyncForEach(nests, async (nest) => {
         let timezone = GeoTz(discord.geofence[0][1][1], discord.geofence[0][1][0])[0]; discord_match = true;
-        Send_Nest.run(MAIN, message, nest, discord, timezone);
-        message.reply('Nest sent as a message, check your inbox.')
-        .then(m => m.delete(5000)).catch(console.error);
-        nest_found = true;
-      });
-      if (nest_found === false) {
+        area = await MAIN.Get_Area(MAIN, nest.lat,nest.lon, discord).catch(console.log);
+        if (area){
+        if (search_area == area.embed_area || search_area == 'ALL') {
+          Send_Nest.run(MAIN, message, nest, discord, area.embed_area, timezone);
+          message.reply('Nest sent as a message, check your inbox.')
+          .then(m => m.delete(5000)).catch(console.error);
+          nest_found = true;
+      }}
+      }).then( not => { if (nest_found === false) {
         message.reply('No known nest, please retry.')
-        .then(m => m.delete(5000)).catch(console.error);
-      }
+        .then(m => m.delete(5000)).catch(console.error)
+      } })
       return;
   });
+});
 }
 
-async function park_view(MAIN, message, nickname, park, prefix, discord){
-  MAIN.pmsf.query(`SELECT * FROM nests WHERE name LIKE ?`, [park], function (error, nests, fields) {
+function park_view(MAIN, message, nickname, name, search_area, prefix, discord){
+  new Promise(async function(resolve, reject) {
+  MAIN.pmsf.query(`SELECT * FROM nests WHERE name LIKE ?`, [park],function (error, nests, fields) {
       let nest_found = false;
-      nests.forEach(function(nest) {
+      asyncForEach(nests, async (nest) => {
         let timezone = GeoTz(discord.geofence[0][1][1], discord.geofence[0][1][0])[0]; discord_match = true;
-        Send_Nest.run(MAIN, message, nest, discord, timezone);
+        embed_area = await MAIN.Get_Area(MAIN, nest.lat,nest.lon, discord);
+        Send_Nest.run(MAIN, message, nest, discord, embed_area, timezone);
         message.reply('Nest sent as a message, check your inbox.')
         .then(m => m.delete(5000)).catch(console.error);
         nest_found = true;
-      });
-      if (nest_found === false) {
+      }).then( not => { if (nest_found === false) {
         message.reply('No known nest, please retry.')
-        .then(m => m.delete(5000)).catch(console.error);
-      }
+        .then(m => m.delete(5000)).catch(console.error)
+      } })
       return;
   });
+});
 }
 
 function subscription_timedout(MAIN, nickname, message, prefix){
@@ -96,7 +101,7 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
   });
 
   // COLLECTOR HAS BEEN ENDED
-  collector.on('end', (collected,reason) => {
+  collector.on('end', async (collected,reason) => {
 
     // DELETE ORIGINAL MESSAGE
     msg.delete();
@@ -111,15 +116,23 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
        if(cmd){ return cmd.run(MAIN, message, prefix, discord); }
       break;
       case 'park':
-        park_view(MAIN, message, nickname, park, prefix, discord);
+        return park_view(MAIN, message, nickname, park, 'ALL', prefix, discord);
       break;
       default:
-        pokemon_view(MAIN, message, nickname, reason, prefix, discord);
-    } return;
+        return pokemon_view(MAIN, message, nickname, reason, 'ALL',prefix, discord);
+    }
+    return;
   });
 }
+
 const capitalize = (s) => {
  if (typeof s !== 'string') {return '';}
  s = s.toLowerCase();
  return s.charAt(0).toUpperCase() + s.slice(1)
+}
+
+async function asyncForEach(array, callback) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
+  }
 }
