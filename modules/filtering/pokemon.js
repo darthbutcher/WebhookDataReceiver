@@ -58,8 +58,13 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         let form_name = '';
         if (sighting.form > 0){
            form_name = MAIN.forms[sighting.pokemon_id][sighting.form];
-           if(form_name == "Normal") { form_name = "" }
-           if(form_name == "Alolan") { form_name = "_1" }
+           switch(form_name)
+           {
+            case "Normal":  form_name = ""; break;
+            case "Alolan":  form_name = "_1"; break;
+            default:  form_name = "";
+           }          
+
         }                    
         let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id+form_name, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);        
 
@@ -194,6 +199,10 @@ function CalculateCP(MAIN, pokemonID, attack , defense, stamina, level)
 	let cpIndex = ((level * 2) - 2) + (remainder * 2);
 	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
   
+  if(!MAIN.base_stats[pokemonID])
+  {
+    console.log("Can't find attack of Pokemon ID: "+pokemonID);
+  }
 	let pokemonAttack = MAIN.base_stats[pokemonID].attack;
 	let pokemonDefense = MAIN.base_stats[pokemonID].defense;
 	let pokemonStamina = MAIN.base_stats[pokemonID].stamina;
