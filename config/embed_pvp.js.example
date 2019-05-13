@@ -7,7 +7,7 @@ module.exports = function(name,form,type,attack,defense,stamina,iv,level,cp,gend
 
   for(var pokemon in possible_cps)
   {
-    pvpString += base_stats[pokemon].name+" Level "+possible_cps[pokemon].level+" CP "+possible_cps[pokemon].cp+" \n Rank: "+possible_cps[pokemon].rank+" "+possible_cps[pokemon].percent+"%\n";
+    pvpString += base_stats[pokemon].name+" Level "+possible_cps[pokemon].level+" CP "+possible_cps[pokemon].cp+" \n Rank: "+possible_cps[pokemon].rank+"("+possible_cps[pokemon].percent+"%)\n";
   }
 
   let pokemon_embed = new Discord.RichEmbed()
