@@ -47,3 +47,4 @@ files/nginx/*.conf
 oauth2-stripe/*.ini
 oauth2-stripe/*.js
 oauth2-stripe/templates
+config/*.js
