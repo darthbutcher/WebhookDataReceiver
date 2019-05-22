@@ -15,11 +15,11 @@ module.exports = function(p, possible_cps) {
   .setColor(p.color)
   .setThumbnail(p.sprite)
   .addField('**'+p.name+'** '+p.form+p.attack+'/'+p.defense+'/'+p.stamina+' ('+p.iv+'%)\n'
-           +'Level '+level+' | CP '+p.cp+p.gender, 'Ht: '+p.height+'m | Wt: '+p.weight+'kg | '+p.size+'\n'
+           +'Level '+p.level+' | CP '+p.cp+p.gender, 'Ht: '+p.height+'m | Wt: '+p.weight+'kg | '+p.size+'\n'
            +p.move_name_1+' '+p.move_type_1+' / '+p.move_name_2+' '+p.move_type_2, false)
   .addField(p.verified+'| '+p.time+' (*'+p.mins+'m '+p.secs+'s*) ', p.type+p.weather_boost, false)
   .addField("**Potential PvP CPs**", pvpString, false)
-  .addField(area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+p.lat+','+p.lon+') | '
+  .addField(p.area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+p.lat+','+p.lon+') | '
   +'[Apple Maps](http://maps.apple.com/maps?daddr='+p.lat+','+p.lon+'&z=10&t=s&dirflg=d) | '
   +'[Scan Map]('+p.map_url+'?lat='+p.lat+'&lon='+p.lon+'&zoom=15)',false)
   .setImage(p.map_img);
