@@ -1,4 +1,6 @@
 const Discord = require('discord.js');
+const Embed_Config = require('../../config/embed_raids.js');
+const Embed_EggConfig = require('../../config/embed_raid_eggs.js');
 const moment = require('moment-timezone');
 
 const reactions = {
@@ -23,7 +25,6 @@ reactions.run = (MAIN, event) => {
 
     // FETCH CHANNEL
     channel.fetchMessage(event.d.message_id).then( async raid => {
-
       let gym_id = raid.embeds[0].footer.text;
 
       await MAIN.Discord.Servers.forEach( async (server,index) => {
@@ -57,8 +58,8 @@ reactions.run = (MAIN, event) => {
                   });
                 } else {
                   // SET THE CHANNEL NAME
-                  boss_name = JSON.parse(record[0].embed).fields[0].name.slice(0, -7);
-                  boss_name = boss_name.slice(2);
+                  let gym = JSON.parse(record[0].embed);
+                  let boss_name = gym.boss;
                   let channel_name = boss_name+'_'+record[0].gym_name
 
                 // CREATE THE CHANNEL
@@ -66,30 +67,26 @@ reactions.run = (MAIN, event) => {
                   let category = discord.raid_lobbies_category_id ? discord.raid_lobbies_category_id : channel.parent;
                   // SET THE CATEGORY ID
                   new_channel.setParent(category).then( new_channel => {
-                    new_channel.lockPermissions();
-                    new_channel.setPosition(0);
+                  new_channel.lockPermissions();
+                  new_channel.setPosition(0);
 
-                   guild.createRole({name: channel_name}).then(new_role => {
+                    guild.createRole({name: channel_name}).then(new_role => {
 
                     new_channel.overwritePermissions(new_role,  {READ_MESSAGES: true, READ_MESSAGE_HISTORY: true, SEND_MESSAGES: true, EMBED_LINKS: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, ATTACH_FILES: true});
 
-                    let embed = JSON.parse(record[0].embed), channel_id = new_channel.id;
+                    channel_id = new_channel.id;
 
-                    let channel_embed = new Discord.RichEmbed()
-                    .setColor(embed.color)
-                    .setThumbnail(embed.thumbnail.url)
-                    .setAuthor(embed.author.name, embed.author.iconURL)
-                    .setImage(embed.image.url);
-                    if(embed.fields[0]){
-                      channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
+                    time_now = new Date().getTime();
+                    gym.hatch_mins = Math.floor((gym.start-(time_now/1000))/60);
+                    gym.end_mins = Math.floor((gym.end-(time_now/1000))/60);
+
+                    if (boss_name == 'Egg') {
+                      channel_embed = Embed_EggConfig(gym);
+                      channel_embed.setFooter(gym.id);
+                    } else {
+                      channel_embed = Embed_Config(gym);
+                      channel_embed.setFooter(gym.id);
                     }
-                    if(embed.fields[1]){
-                      channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
-                    }
-                    if(embed.fields[2]){
-                      channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
-                    }
-                    channel_embed.setFooter(gym_id);
 
                     member.addRole(new_role).then(member => {
 
@@ -103,10 +100,10 @@ reactions.run = (MAIN, event) => {
                       message.react(MAIN.emotes.cancelReact.id).catch(console.error) }) }) }) })
                     }).catch(console.error);
                     // UPDATE SQL RECORDS
-                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ?, role_id = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), embed.fields[0].name, new_role.id, gym_id], function (error, raids, fields) {
+                    MAIN.pdb.query(`UPDATE active_raids SET active = ?, channel_id = ?, initiated_by = ?, raid_channel = ?, created = ?, boss_name = ?, role_id = ? WHERE gym_id = ?`, ['true', channel.id, member.id, channel_id, moment().unix(), gym.boss, new_role.id, gym.id], function (error, raids, fields) {
                       if(error){ console.error(error); }
                     });
-                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym_id, member.id,member_count,member_count], function (error, lobby, fields) {
+                    MAIN.pdb.query(`INSERT INTO lobby_members (gym_id, user_id, count) VALUES (?,?,?) ON DUPLICATE KEY UPDATE count = ?`, [gym.id, member.id,member_count,member_count], function (error, lobby, fields) {
                       if(error){ console.error(error); }
                     });
                   });
@@ -139,26 +136,22 @@ reactions.startInterval = async (MAIN) => {
       MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ? AND active = ?`, [active.gym_id, 'true'], function (error, record, fields) {
         if(record[0] && active.embed != record[0].embed){
 
-          let embed = JSON.parse(record[0].embed);
+          let gym = JSON.parse(record[0].embed);
+          let boss_name = gym.boss;
+          let channel_name = boss_name+'_'+record[0].gym_name
 
-          let channel_embed = new Discord.RichEmbed()
-          .setColor(embed.color)
-          .setThumbnail(embed.thumbnail.url)
-          .setAuthor(embed.author.name, embed.author.iconURL)
-          .setImage(embed.image.url);
-          if(embed.fields[0]){
-            channel_embed.addField(embed.fields[0].name, embed.fields[0].value, false)
-          }
-          if(embed.fields[1]){
-            channel_embed.addField(embed.fields[1].name, embed.fields[1].value, false)
-          }
-          if(embed.fields[2]){
-            channel_embed.addField(embed.fields[2].name, embed.fields[2].value, false)
-          }
-          channel_embed.setFooter(active.gym_id);
+          time_now = new Date().getTime();
+          gym.hatch_mins = Math.floor((gym.start-(time_now/1000))/60);
+          gym.end_mins = Math.floor((gym.end-(time_now/1000))/60);
 
-          boss_name = embed.fields[0].name.slice(0, -7);
-          boss_name = boss_name.slice(2);
+          if (boss_name == 'Egg') {
+            channel_embed = Embed_EggConfig(gym);
+            channel_embed.setFooter(gym.id);
+          } else {
+            channel_embed = Embed_Config(gym);
+            channel_embed.setFooter(gym.id);
+          }
+
           MAIN.channels.get(record[0].raid_channel).setName(boss_name+'_'+record[0].gym_name).catch(console.error);
 
           MAIN.channels.get(record[0].raid_channel).send(channel_embed)

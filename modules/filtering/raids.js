@@ -2,7 +2,7 @@ delete require.cache[require.resolve('../embeds/raids.js')];
 const Send_Raid = require('../embeds/raids.js');
 const Discord = require('discord.js');
 
-module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timezone, role_id) => {
+module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server, timezone, role_id) => {
 
   if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Received a Raid.'); }
 
@@ -11,20 +11,7 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
   if(raid.cp > 0 || raid.is_exclusive == true){ type = 'Boss'; boss_name = MAIN.pokemon[raid.pokemon_id].name; }
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
-  // UPDATE/INSERT ACTIVE RAIDS
-  if(raid.level >= server.min_raid_lobbies){
-    let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
-    MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE boss_name = ?`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end, boss_name], function (error, record, fields) {
-      if(error){ console.error(error); }
-    });
-    MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
-      // UPDATE CHANNEL NAME
-      if(record[0].raid_channel){
-        let raid_channel = MAIN.channels.get(record[0].raid_channel);
-        raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
-      };
-    });
-  }
+  await raid_lobbies();
 
   // CHECK EACH FEED FILTER
   MAIN.Raid_Channels.forEach((raid_channel,index) => {
@@ -69,4 +56,21 @@ module.exports.run = (MAIN, raid, main_area, sub_area, embed_area, server, timez
       if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Did Not Meet Type or Level Filter for '+raid_channel[0]+'. Expected: '+filter.Boss_Levels+', Saw: '+type.toLowerCase()); }
     }
   });
+
+  function raid_lobbies(){
+    // UPDATE/INSERT ACTIVE RAIDS
+    if(raid.level >= server.min_raid_lobbies){
+      let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
+      MAIN.pdb.query(`INSERT INTO active_raids (gym_id, gym_name, guild_id, area, boss_name, active, end_time, expire_time) VALUES (?,?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE boss_name = ?`, [raid.gym_id, raid.gym_name, server.id, embed_area, boss_name, 'false', end_time, raid.end, boss_name], function (error, record, fields) {
+        if(error){ console.error(error); }
+      });
+      MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], async function (error, record, fields) {
+        // UPDATE CHANNEL NAME
+        if(record[0].raid_channel){
+          let raid_channel = MAIN.channels.get(record[0].raid_channel);
+          raid_channel.setName(boss_name+'_'+record[0].gym_name).catch(console.error);
+        };
+      });
+    }
+  }
 }

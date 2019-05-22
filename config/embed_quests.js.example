@@ -1,21 +1,21 @@
 const Discord = require('discord.js');
 
-module.exports = function (pokestop,task,reward,color,sprite,time,img,area,lat,lon,map_url) {
+module.exports = function (p) {
 
-  // Set embed_color dynamic (color), or custom hex color ie 'f358fb'
-  let embed_color = color;
+  // Set embed_color dynamic (p.color), or custom hex color ie 'f358fb'
+  let embed_color = p.color;
 
   // CREATE QUEST EMBED
   let quest_embed = new Discord.RichEmbed()
   .setColor(embed_color)
-  .setThumbnail(sprite)
-  .addField( reward+'  |  '+area, task, false)
-  .addField('Pokéstop:', pokestop, false)
-  .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
-                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
-                         +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
-  .setImage(img)
-  .setFooter('Expires: '+time);
+  .setThumbnail(p.sprite)
+  .addField( p.reward+'  |  '+p.area, p.task, false)
+  .addField('Pokéstop:', p.name, false)
+  .addField('Directions:','[Google Maps](https://www.google.com/maps?q='+p.lat+','+p.lon+') | '
+                         +'[Apple Maps](http://maps.apple.com/maps?daddr='+p.lat+','+p.lon+'&z=10&t=s&dirflg=d) | '
+                         +'[Scan Map]('+p.map_url+'?lat='+p.lat+'&lon='+p.lon+'&zoom=15)',false)
+  .setImage(p.map_img)
+  .setFooter('Expires: '+p.time);
 
   return quest_embed;
 }

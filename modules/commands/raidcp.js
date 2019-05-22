@@ -13,7 +13,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
-    .setTitle('What Pokémon do you want stats for?')
+    .setTitle('What Pokémon do you want a CP seatch string for?')
     .setFooter('Type the name of desired Poké, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
@@ -28,26 +28,45 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
   let guild = MAIN.guilds.get(message.guild.id);
 
-  message.reply('Searching... this may take a minute. Check your inbox if not in the channel.').then(m => m.delete(5000)).catch(console.error);
-  let search = '';
-  if (pokemon != 'ALL') {search = 'pokemon_id = ? AND '; }
-      MAIN.rdmdb.query(`SELECT * FROM pokemon WHERE `+search+`first_seen_timestamp >= UNIX_TIMESTAMP()-3600`, [pokemon], function (error, stats, fields) {
-        let pokemon_count = 0, role_id = '';
-        stats.forEach(function(stat) {
-          pokemon_count += 1;
-        });
-        if (pokemon == 'ALL'){ pokemon_name = 'ALL'; }
-        else { pokemon_name = MAIN.pokemon[pokemon].name; }
-        stat_message = 'There have been '+pokemon_count+' '+pokemon_name+' seen in the last hour.';
+  let result_string = '```', role_id = '';
+  let pokemon_name = MAIN.pokemon[pokemon].name;
+  let pokemon_color = '', form = '', level = 20;
+  let pokemon_type = '', weaknesses = '';
+  for(var atk = 15; atk >= 13; atk--) {
+    for(var def = 15; def >= 13; def--) {
+      for(var sta = 15; sta >= 13; sta--) {
+        iv_percent = Math.round((atk + def + sta) / 45 * 100);
+        result_string += atk+','+def+','+sta+'  '+MAIN.CalculateCP(pokemon,form,atk,def,sta,level)+' CP  '+iv_percent+'%\n';
+      }
+    }
+  }
+  result_string += '```';
+  MAIN.pokemon[pokemon].types.forEach((type) => {
+    pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+    MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
+      if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+        weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+      }
+    });
+    pokemon_color = MAIN.Get_Color(type, pokemon_color);
+  });
+  pokemon_type = pokemon_type.slice(0,-3);
+  weaknesses = weaknesses.slice(0,-1);
 
-        if(discord.spam_channels.indexOf(message.channel.id) >= 0){
-          return message.reply(stat_message);
-        } else {
-          guild.fetchMember(message.author.id).then( TARGET => {
-            return TARGET.send(stat_message).catch(console.error);
-          });
-        }
-      });
+  let sprite = await MAIN.Get_Sprite(form, pokemon);
+  let chart_embed = new Discord.RichEmbed()
+  .setColor(pokemon_color)
+  .setThumbnail(sprite)
+  .setTitle('**'+pokemon_name+'** '+pokemon_type)
+  .setDescription('**(ATK,DEF,STA)\t\t LvL'+level+' CP\t\t%**'+result_string);
+
+  if(discord.spam_channels.indexOf(message.channel.id) >= 0){
+    return MAIN.Send_Embed('chart', 0, discord, role_id, chart_embed, message.channel.id);
+  } else {
+    guild.fetchMember(message.author.id).then( TARGET => {
+      return TARGET.send(chart_embed).catch(console.error);
+    });
+  }
 }
 
 async function initiate_collector(MAIN, source, message, msg, nickname, prefix, discord){
@@ -63,8 +82,6 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
-   if (pokemon == 'All'){ collector.stop('ALL'); }
-
    for (key in MAIN.pokemon) {
       if (MAIN.pokemon[key].name === pokemon) {
         pokemon = key;
@@ -89,8 +106,7 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
       }
       case 'retry':
        message.reply('Please check your spelling, and retry.').then(m => m.delete(5000)).catch(console.error);
-       let cmd = MAIN.Commands.get('stats');
-       if(cmd){ return cmd.run(MAIN, message, prefix, discord); }
+       break;
       break;
       default:
         pokemon_view(MAIN, message, nickname, reason, prefix, discord);

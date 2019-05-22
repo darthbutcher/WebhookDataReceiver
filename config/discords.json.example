@@ -5,6 +5,7 @@
       "geojson_file": "tallahassee.json",
       "donor_role": "277658037982986240",
       "command_channels": "492517376177471488",
+      "spam_channels": "",
       "purge_channels": "ENABLED",
       "channels_to_purge": ["537460180451983371","537460213956214785","522251205334794260"],
       "min_raid_lobbies": "3",

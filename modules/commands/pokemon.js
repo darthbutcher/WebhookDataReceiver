@@ -713,6 +713,7 @@ function initiate_collector(MAIN, source, message, msg, nickname, prefix){
   // FILTER COLLECT EVENT
   collector.on('collect', message => {
     switch(message.content.toLowerCase()){
+      case 'advanced':
       case 'add advanced':
       case 'add adv': collector.stop('advanced'); break;
       case 'add': collector.stop('add'); break;

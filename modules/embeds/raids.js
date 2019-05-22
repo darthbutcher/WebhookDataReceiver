@@ -8,80 +8,78 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
 
   // VARIABLES
-  let time_now = new Date().getTime();
-  let hatch_time = MAIN.Bot_Time(raid.start, '1', timezone);
-  let end_time = MAIN.Bot_Time(raid.end, '1', timezone);
-  let hatch_mins = Math.floor((raid.start-(time_now/1000))/60);
-  let end_mins = Math.floor((raid.end-(time_now/1000))/60);
+  let gym = { id: raid.gym_id, level: raid.level, form: '', notes: '', type: '', weaknesses: '', exraid: '', sprite: ''};
+  gym.lat = raid.latitude, gym.lon = raid.longitude, gym.map_img = '';
+  gym.area = embed_area;
 
-  // GET STATIC MAP TILE
-  let img_url = '';
-  if(MAIN.config.Map_Tiles == 'ENABLED'){
-    img_url = await MAIN.Static_Map_Tile(raid.latitude, raid.longitude, 'raid');
-  }
+  // CHECK FOR GYM NAME AND NOTES
+  if(!raid.gym_name){ gym.name = 'No Name'; }
+  else{ gym.name = raid.gym_name; }
 
-  let map_url = MAIN.config.FRONTEND_URL;
-
-  // DETERMINE GYM CONTROL
-  let defending_team = '';
-  switch(raid.team_id){
-    case 1: defending_team = MAIN.emotes.mystic+' Gym'; break;
-    case 2: defending_team = MAIN.emotes.valor+' Gym'; break;
-    case 3: defending_team = MAIN.emotes.instinct+' Gym'; break;
-    default: defending_team = 'Uncontested Gym';
-  }
-
-  // GET RAID LEVEL
-  let embed_color = '';
-  switch(raid.level){
-    case 1:
-    case 2: embed_color = 'f358fb'; break;
-    case 3:
-    case 4: embed_color = 'ffd300'; break;
-    case 5: embed_color = '5b00de'; break;
-  }
+  if (!MAIN.gym_notes[gym.id]) {
+    if(MAIN.config.DEBUG.Raids == 'ENABLED') {console.log('[Pokébot] [Embed] [raids.js] GYM Has no note in gyms.json, add note.');}
+  } else { gym_notes = MAIN.gym_notes[gym.id].description; }
 
   // CHECK IF SPONSORED GYM
-  let raid_sponsor = '';
-  if(raid.sponsor_id == true){ raid_sponsor = ' | '+MAIN.emotes.exPass+' Eligible'; }
+  gym.sponsor = '';
+  if(raid.sponsor_id == true){ gym.sponsor = ' | '+MAIN.emotes.exPass+' Eligible'; }
   if(raid.ex_raid_eligible == true){ raid_sponsor = ' | '+MAIN.emotes.exPass+' Eligible'; }
 
   // CHECK IF EXCLUSIVE RAID
-  let is_exclusive = '';
-  if(raid.is_exclusive == true){ is_exclusive = '**EXRaid Invite Only** '; }
+  if(raid.is_exclusive == true){ gmy.is_exclusive = '**EXRaid Invite Only** '; }
 
-  // CHECK FOR GYM NAME
-  let gym_name = '';
-  if(!raid.gym_name){ gym_name = 'No Name'; }
-  else{ gym_name = raid.gym_name; }
+  // DETERMINE GYM CONTROL
+  switch(raid.team_id){
+    case 1: gym.team = MAIN.emotes.mystic+' Gym'; break;
+    case 2: gym.team = MAIN.emotes.valor+' Gym'; break;
+    case 3: gym.team = MAIN.emotes.instinct+' Gym'; break;
+    default: gym.team = 'Uncontested Gym';
+  }
+
+  // GET RAID COLOR
+  switch(raid.level){
+    case 1:
+    case 2: gym.color = 'f358fb'; break;
+    case 3:
+    case 4: gym.color = 'ffd300'; break;
+    case 5: gym.color = '5b00de'; break;
+  }
+
+  time_now = new Date().getTime();
+  gym.start = raid.start, gym.end = raid.end;
+  gym.hatch_time = MAIN.Bot_Time(raid.start, '1', timezone);
+  gym.end_time = MAIN.Bot_Time(raid.end, '1', timezone);
+  gym.hatch_mins = Math.floor((raid.start-(time_now/1000))/60);
+  gym.end_mins = Math.floor((raid.end-(time_now/1000))/60);
+
+  // GET STATIC MAP TILE
+  if(MAIN.config.Map_Tiles == 'ENABLED'){
+    gym.map_img = await MAIN.Static_Map_Tile(raid.latitude, raid.longitude, 'raid');
+  }
+  gym.map_url = MAIN.config.FRONTEND_URL;
 
   // DETERMINE IF IT'S AN EGG OR A RAID
-  let embed_thumb = '', raid_embed = '', db_embed = '', gym_id = raid.gym_id;
-
-  let gym_notes = '';
-  if (!MAIN.gym_notes[gym_id]) {
-    if(MAIN.config.DEBUG.Raids == 'ENABLED') {console.log('[Pokébot] [Embed] [raids.js] GYM Has no note in gyms.json, add note.');}
-  } else { gym_notes = MAIN.gym_notes[gym_id].description; }
-
   switch(raid_type){
 
     case 'Egg':
+      gym.boss = 'Egg';
 
       // GET EGG IMAGE
       switch(raid.level){
         case 1:
-        case 2: embed_thumb = 'https://i.imgur.com/ABNC8aP.png'; break;
+        case 2: gym.sprite = 'https://i.imgur.com/ABNC8aP.png'; break;
         case 3:
-        case 4: embed_thumb = 'https://i.imgur.com/zTvNq7j.png'; break;
-        case 5: embed_thumb = 'https://i.imgur.com/jaTCRXJ.png'; break;
+        case 4: gym.sprite = 'https://i.imgur.com/zTvNq7j.png'; break;
+        case 5: gym.sprite = 'https://i.imgur.com/jaTCRXJ.png'; break;
       }
 
       // CREATE THE EGG EMBED
-      raid_embed = Embed_EggConfig(gym_name,raid.gym_url,raid.level,hatch_time,hatch_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,embed_thumb,embed_color,img_url,embed_area);
-      // ADD FOOTER IF RAID LOBBIES ARE ENABLED
-      if(MAIN.config.Raid_Lobbies == 'ENABLED'){ raid_embed.setFooter(raid.gym_id); }
+      raid_embed = await Embed_EggConfig(gym);
 
-      // CHECK CONFIGS AND SEND TO USER OR FEEDif (MAIN.config.DEBUG.Raids == 'ENABLED')
+      // ADD FOOTER IF RAID LOBBIES ARE ENABLED
+      if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(gym.id); }
+
+      // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
         if(MAIN.config.DEBUG.Raids == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+member.user.tag+' ('+member.id+').'); }
         MAIN.Send_DM(server.id, member.id, raid_embed, target.bot);
@@ -89,62 +87,55 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         if(MAIN.config.DEBUG.Raids == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a Level '+raid.level+' Raid Egg to '+target.guild.name+' ('+target.id+').'); }
         MAIN.Send_Embed('raid', raid.level, server, role_id, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
-
-      // STRINGIFY THE EMBED
-      db_embed = JSON.stringify(raid_embed);
-
-      setTimeout(function() {
-        // CHECK FOR RAID LOBBIES
-        if(raid.level >= server.min_raid_lobbies ){
-
+      // CHECK FOR RAID LOBBIES
+      setTimeout(async function() {
+        if(MAIN.config.Raid_Lobbies == 'ENABLED'){
+          db_embed = await JSON.stringify(gym);
           // UPDATE BOSS NAME
-          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
+          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym.id], function (error, record, fields) {
             if(error){ console.error(error); }
           });
         }
-      }, 5000); break;
+      }, 3000); break;
 
     // RAID IS A BOSS
     case 'Boss':
-
-      // DETERMINE POKEMON NAME AND TYPE
-      let pokemon_type = '', weaknesses = '';
-      let pokemon_name = MAIN.pokemon[raid.pokemon_id].name;
-
-      // DETERMINE POKEMON FORM
-      form = raid.form;
-      let form_name = '';
-      if (form > 0){
-        form_name = ' ['+MAIN.forms[raid.pokemon_id][form]+']';
+      // DETERMINE POKEMON NAME AND FORM
+      gym.boss = MAIN.pokemon[raid.pokemon_id].name;
+      if (raid.form > 0){
+        gym.form = '['+MAIN.forms[raid.pokemon_id][raid.form]+']';
       }
 
+
+      // DETERMINE POKEMON TYPE
       await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {
-        pokemon_type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
+        gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
         MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
-          if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
-            weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+          if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+            gym.weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
           }
         });
       });
-      pokemon_type = pokemon_type.slice(0,-3);
-      weaknesses = weaknesses.slice(0,-1);
+      gym.type = gym.type.slice(0,-3);
+      gym.weaknesses = gym.weaknesses.slice(0,-1);
 
       if(!MAIN.moves[raid.move_1]){ console.error('Move ID #'+raid.move_1+' not found in pokemon.json. Please report to the Discord.'); }
       if(!MAIN.moves[raid.move_2]){ console.error('Move ID #'+raid.move_2+' not found in pokemon.json. Please report to the Discord.'); }
 
       // DETERMINE MOVE NAMES AND TYPES
-      let move_name_1 = MAIN.moves[raid.move_1].name;
-      let move_type_1 = MAIN.emotes[MAIN.moves[raid.move_1].type.toLowerCase()];
-      let move_name_2 = MAIN.moves[raid.move_2].name;
-      let move_type_2 = MAIN.emotes[MAIN.moves[raid.move_2].type.toLowerCase()];
+      gym.move_name_1 = MAIN.moves[raid.move_1].name;
+      gym.move_type_1 = MAIN.emotes[MAIN.moves[raid.move_1].type.toLowerCase()];
+      gym.move_name_2 = MAIN.moves[raid.move_2].name;
+      gym.move_type_2 = MAIN.emotes[MAIN.moves[raid.move_2].type.toLowerCase()];
 
       // GET THE RAID BOSS SPRITE
-      let raid_sprite = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);
+      gym.sprite = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);
 
       // CREATE THE RAID EMBED
-      raid_embed = Embed_Config(gym_name,raid.gym_url,raid.level,end_time,end_mins,defending_team,is_exclusive,raid_sponsor,gym_notes,raid.latitude,raid.longitude,map_url,raid_sprite,embed_color,img_url,embed_area,pokemon_name,form_name,move_name_1,move_type_1,move_name_2,move_type_2,weaknesses)
+      raid_embed = await Embed_Config(gym)
+
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
-      if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(raid.gym_id); }
+      if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(gym.id); }
 
       // CHECK CONFIGS AND SEND TO USER OR FEED
       if(member && MAIN.config.RAID.Subscriptions == 'ENABLED'){
@@ -154,23 +145,20 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
         if(MAIN.config.DEBUG.Raids == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [raids.js] Sent a '+pokemon_name+' Raid Boss to '+target.guild.name+' ('+target.id+').'); }
         MAIN.Send_Embed('raid', raid.level, server, role_id, raid_embed, target.id);
       } else{ console.info('[Pokébot] Raid ignored due to Disabled Discord Feed setting.'); }
-
-      // STRINGIFY THE EMBED
-      db_embed = JSON.stringify(raid_embed);
-
       // CHECK FOR RAID LOBBIES
       setTimeout( async function() {
-        if(raid.level >= server.min_raid_lobbies ){
-          MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym_id], function (error, record, fields) {
+        if(MAIN.config.Raid_Lobbies == 'ENABLED'){
+          db_embed = await JSON.stringify(gym);
+          MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym.id], function (error, record, fields) {
             if(record[0]){
-
               // UPDATE EMBED
-              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym_id], function (error, record, fields) {
+              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym.id], function (error, record, fields) {
                 if(error){ console.error(error); }
               });
             }
           });
         }
-      }, 5000); break;
-  } return;
+      }, 3000); break;
+  }
+  return;
 }

@@ -1,6 +1,9 @@
 # Enable or Disable Console Logs
 CONSOLE_LOGS = ENABLED
 
+# Time mins remain for encounter to not post
+TIME_REMAIN = 1
+
 # CHECK FOR DONORS
 Donor_Check = DISABLED
 
@@ -141,7 +144,6 @@ Rewards[] = Sandshrew
 Rewards[] = Spinda
 
 [RAID]
-# Subscriptions are disabled by default because the code is incomplete.
 Subscriptions = ENABLED
 Discord_Feeds = ENABLED
 
@@ -150,6 +152,10 @@ Subscriptions = ENABLED
 Discord_Feeds = ENABLED
 sub_without_iv = DISABLED
 
+[POKEMON]
+Subscriptions = DISABLED
+Discord_Feeds = ENABLED
+
 [DEBUG]
 # Debugs will flood the console with logs.
 # It is best to only have one enabled at at time if you are having a problem.
@@ -157,5 +163,6 @@ sub_without_iv = DISABLED
 Quests = DISABLED
 Pokemon = DISABLED
 Raids = DISABLED
+Lure = DISABLED
 Subscriptions = DISABLED
 Area = DISABLED

@@ -71,6 +71,7 @@ MAIN.pmsf = MySQL.createConnection({
 const raid_channels = ini.parse(fs.readFileSync('./config/channels_raids.ini', 'utf-8'));
 const pokemon_channels = ini.parse(fs.readFileSync('./config/channels_pokemon.ini', 'utf-8'));
 const quest_channels = ini.parse(fs.readFileSync('./config/channels_quests.ini', 'utf-8'));
+const lure_channels = ini.parse(fs.readFileSync('./config/channels_lure.ini', 'utf-8'));
 
 // DEFINE AND LOAD MODULES
 var Raid_Feed, Raid_Subscription, Emojis, Quest_Feed, Commands;
@@ -90,6 +91,10 @@ function load_data(){
   Pokemon_Feed = require('../filtering/pokemon.js');
   delete require.cache[require.resolve('../subscriptions/pokemon.js')];
   Pokemon_Subscription = require('../subscriptions/pokemon.js');
+  delete require.cache[require.resolve('../filtering/lure.js')];
+  Lure_Feed = require('../filtering/lure.js');
+  //delete require.cache[require.resolve('../subscriptions/lure.js')];
+  //Lure_Subscription = require('../subscriptions/lure.js');
   delete require.cache[require.resolve('./emojis.js')];
   Emojis = require('./emojis.js');
   delete require.cache[require.resolve('../filtering/commands.js')];
@@ -138,6 +143,11 @@ function load_data(){
   MAIN.Quest_Channels = [];
   for (var key in quest_channels){ MAIN.Quest_Channels.push([key, quest_channels[key]]); }
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+MAIN.Quest_Channels.length+' Quest Channels.');
+
+  // LOAD LURE FEED CHANNELS
+  MAIN.Lure_Channels = [];
+  for (var key in lure_channels){ MAIN.Lure_Channels.push([key, lure_channels[key]]); }
+  console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Loaded '+MAIN.Lure_Channels.length+' Lure Channels.');
 
   // LOAD COMMANDS
   MAIN.Commands = new Discord.Collection();
@@ -220,7 +230,7 @@ MAIN.webhookParse = async (PAYLOAD) => {
   await PAYLOAD.forEach( async (data,index) => {
 
     // IGNORE IF NOT A SPECIFIED OBJECT
-    if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest'){
+    if(data.type == 'pokemon' || data.type == 'raid' || data.type == 'quest' || data.type == 'pokestop'){
 
       proper_data = true;
 
@@ -250,13 +260,16 @@ MAIN.webhookParse = async (PAYLOAD) => {
           if(sub_area){ embed_area = sub_area; }
           if(main_area && !sub_area){ embed_area = main_area; }
           if(!sub_area && !main_area){ embed_area = server.name; }
-
           // SEND TO OBJECT MODULES
       		switch(data.type){
             // SEND TO POKEMON MODULES
       			case 'pokemon':
+              if (data.message.cp > 0){
+                MAIN.Timer_Verification(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
+              } else {
               Pokemon_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone);
               Pokemon_Subscription.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
+             }
             // SEND TO RAIDS MODULES
       			case 'raid':
               Raid_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone);
@@ -265,6 +278,9 @@ MAIN.webhookParse = async (PAYLOAD) => {
       			case 'quest':
               Quest_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone);
               Quest_Subscription.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
+      			case 'pokestop':
+              Lure_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
+              //Lure_Subscription.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
       		}
         }
       }); return;
@@ -302,8 +318,9 @@ MAIN.Save_Sub = (message,server) => {
     let quest_time = moment(), timezone = GeoTz(server.geofence[0][0][1], server.geofence[0][0][0]);
     quest_time = moment.tz(quest_time, timezone[0]).set({hour: split[0], minute: split[1] ,second:0 ,millisecond:0});
     quest_time = moment.tz(quest_time, MAIN.config.TIMEZONE).format('HH:mm');
-    MAIN.pdb.query('INSERT INTO users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-      [message.member.id, message.member.user.tag.replace(/[\W]+/g,''), server.name, , , , 'ACTIVE', next_bot, quest_time, message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE'], function (error, user, fields) {
+    user_name = message.member.user.tag.replace(/[\W]+/g,'');
+    MAIN.pdb.query('INSERT INTO users (user_id, user_name, geofence, pokemon, quests, raids, status, bot, alert_time, discord_id, pokemon_status, raids_status, quests_status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE user_name = ?',
+      [message.member.id, user_name, server.name, , , , 'ACTIVE', next_bot, quest_time, message.guild.id, 'ACTIVE', 'ACTIVE', 'ACTIVE', user_name], function (error, user, fields) {
       if(error){ return console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] UNABLE TO ADD USER TO users TABLE',error); }
       else{
         MAIN.sqlFunction('UPDATE info SET user_next_bot = ?',[next_bot],undefined,undefined);
@@ -345,42 +362,24 @@ MAIN.Get_Sprite = (form, id) => {
   // ASSET ICONS
   if (MAIN.config.SPRITE_TYPE == 'ASSETS') {
     if (form > 0 ){
-          switch (MAIN.forms[id][form]) {
-     	   case 'Alolan':
-      	   extension = '_61'+extension;
-      	   break;
-      	   case 'Origin':
-      	   extension = '_12'+extension;
-      	   break;
-           case 'Sunny':
-           extension = '_12'+extension;
-           break;
-           case 'Rainy':
-           extension = '_13'+extension;
-           break;
-           case 'Snowy':
-           extension = '_14'+extension;
-           break;
-           case 'Normal':
-           extension = '_00'+extension;
-           break;
-      	   default:
-     	   extension = extension;
-    	   }
+      switch (MAIN.forms[id][form]) {
+        case 'Alolan': extension = '_61'+extension; break;
+        case 'Origin': extension = '_12'+extension; break;
+        case 'Sunny': extension = '_12'+extension; break;
+        case 'Rainy': extension = '_13'+extension; break;
+        case 'Snowy': extension = '_14'+extension; break;
+        case 'Normal': extension = '_00'+extension; break;
+        default: extension = extension;
+      }
     } else { extension = '_00'+extension; }
     sprite_url = sprite_url+'pokemon_icon_';
   }
   // SEREBII ICONS
   if ((form != 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
     switch (MAIN.forms[id][form]) {
-      case 'Alolan':
-      extension = '-a'+extension;
-      break;
-      case 'Origin':
-      extension = '-o'+extension;
-      break;
-      default:
-      extension = extension;
+      case 'Alolan': extension = '-a'+extension; break;
+      case 'Origin': extension = '-o'+extension; break;
+      default: extension = extension;
     }
   }
   sprite_url =  sprite_url+pad(id,3)+extension;
@@ -388,19 +387,61 @@ MAIN.Get_Sprite = (form, id) => {
   return sprite_url;
 }
 
-// POKEMON CPs
-MAIN.Get_CP = (pokemon, form, level) => {
-  if (form > 28) { pokemon = pokemon+form }
-  let cpmult = cp_multiplier[level]
-  let atk = base_stats[pokemon].attack
-  let def = base_stats[pokemon].defense
-  let sta = base_stats[pokemon].stamina
+MAIN.Get_Color = (type, color) => {
+  if(!color){
+    switch (type.toLowerCase()) {
+      case 'fairy': color = 'e898e8'; break;
+      case 'ghost': color = '705898'; break;
+      case 'grass': color = '78c850'; break;
+      case 'water': color = '6890f0'; break;
+      case 'bug': color = 'a8b820'; break;
+      case 'fighting': color = 'c03028'; break;
+      case 'electric': color = 'f8d030'; break;
+      case 'rock': color = 'b8a038'; break;
+      case 'fire': color = 'f08030'; break;
+      case 'flying': color = 'a890f0'; break;
+      case 'ice': color = '98d8d8'; break;
+      case 'ground': color = 'e0c068'; break;
+      case 'steel': color = 'b8b8d0'; break;
+      case 'dragon': color = '7038f8'; break;
+      case 'poison': color = 'a040a0'; break;
+      case 'psychic': color = 'f85888'; break;
+      case 'dark': color = '705848'; break;
+      case 'normal': color = '8a8a59'; break;
+    }
+  }
+  return color;
+}
 
-  let cp = Math.max(10, Math.floor((atk + ivatk) *
-    ((def + ivdef) ** 0.5) *
-    ((sta + ivsta) ** 0.5) *
-    ((cpmult ** 2) / 10)))
-  return cp;
+// POKEMON CPs
+MAIN.CalculateCP = (pokemon, form, iv_atk, iv_def, iv_sta, level) => {
+  if (form > 28) { pokemon = pokemon+form }
+	let cp = 0;
+
+	let remainder = level % 1;
+	level = Math.floor(level);
+
+
+	let cpIndex = ((level * 2) - 2) + (remainder * 2);
+	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
+
+	let base_atk = MAIN.base_stats[pokemon].attack;
+	let base_def = MAIN.base_stats[pokemon].defense;
+	let base_sta = MAIN.base_stats[pokemon].stamina;
+
+	let attackMultiplier = base_atk + parseInt(iv_atk);
+	let defenseMultiplier = Math.pow(base_def + parseInt(iv_def),.5);
+	let staminaMultiplier = Math.pow(base_sta + parseInt(iv_sta),.5);
+	CPMultiplier = Math.pow(CPMultiplier,2);
+
+	cp = (attackMultiplier * defenseMultiplier * staminaMultiplier * CPMultiplier) / 10;
+
+	cp = Math.floor(cp);
+
+	//CP floor is 10
+	if(cp < 10)  {cp = 10}
+
+	return cp;
 }
 
 MAIN.Get_Area = (MAIN, lat, lon, discord) => {
@@ -438,6 +479,34 @@ MAIN.Get_Area = (MAIN, lat, lon, discord) => {
   not = 'Searched loaction not in your discords.json or geofence file';
   return reject(not);
 });
+}
+
+MAIN.Timer_Verification = (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
+  // VERIFY VERIFICATION FOR IV SCAN
+  let time_now = new Date().getTime();
+  pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
+  if (sighting.disappear_time_verified == 'false' || Math.floor((sighting.disappear_time-(time_now/1000))/60) < MAIN.config.TIME_REMAIN) {
+    let verified = true;
+    if (sighting.disappear_time_verified == 'false') { verified = false; }
+    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+      if(error){ console.error(error); }
+      if (record[0].expire_timestamp_verified == 1) {
+        if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is verified');}
+        sighting.disappear_time = record[0].expire_timestamp;
+        sighting.disappear_time_verified = 'true';
+        //if (Math.floor((sighting.disappear_time-(time_now/1000))/60) > MAIN.config.TIME_REMAIN && verified != false) { console.log('Verified for < than '+MAIN.config.TIME_REMAIN+' min '+pokemon_name+' '+Math.floor((sighting.disappear_time-(time_now/1000))/60)+' '+sighting.encounter_id); }
+      } else {
+        if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is not verified');}
+      }
+      Pokemon_Feed.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
+      Pokemon_Subscription.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
+    });
+  } else {
+    Pokemon_Feed.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
+    Pokemon_Subscription.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
+  }
+
+
 }
 
 // GET QUEST REWARD ICON

@@ -1,22 +1,22 @@
 const Discord = require('discord.js');
 
-module.exports = function(gym,url,level,time,mins,team,exraid,sponsor,notes,lat,lon,map_url,sprite,color,img,area,name,form,move_name_1,move_type_1,move_name_2,move_type_2,weaknesses) {
+module.exports = function(r) {
 
       // Set embed_color dynamic (color), or custom hex color ie 'f358fb'
-      embed_color = color;
+      embed_color = g.color;
 
       // CREATE THE RAID EMBED
       let raid_embed = new Discord.RichEmbed()
         .setColor(embed_color)
-        .setThumbnail(sprite)
-        .setAuthor(gym, url)
-        .setDescription(exraid+notes)
-        .addField('**'+name+form+'** Raid', move_name_1+' '+move_type_1+' / '+move_name_2+' '+move_type_2, false)
-        .addField('Raid Ends: '+time,'Level '+level+' | '+team+sponsor+'\nCounter(s): '+weaknesses,false)
-        .addField(area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
-                               +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
-                               +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
-        .setImage(img);
+        .setThumbnail(g.sprite)
+        .setAuthor(g.name, g.url)
+        .setDescription(g.exraid+g.notes)
+        .addField('**'+g.boss+'** '+g.form+' Raid', g.move_name_1+' '+g.move_type_1+' / '+g.move_name_2+' '+g.move_type_2, false)
+        .addField('Raid Ends: '+g.end_time+' (*'+g.end_mins+' Mins*)','Level '+g.level+' | '+g.team+g.sponsor+'\nCounter(s): '+g.weaknesses,false)
+        .addField(g.area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+g.lat+','+g.lon+') | '
+                               +'[Apple Maps](http://maps.apple.com/maps?daddr='+g.lat+','+g.lon+'&z=10&t=s&dirflg=d) | '
+                               +'[Scan Map]('+g.map_url+'?lat='+g.lat+'&lon='+g.lon+'&zoom=15)',false)
+        .setImage(g.map_img);
 
  return raid_embed;
 }

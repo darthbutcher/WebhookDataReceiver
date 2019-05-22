@@ -89,122 +89,6 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
   }); return;
 }
 
-async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user, timezone){
-
-  // GET STATIC MAP TILE
-  let img_url = '';
-  if(MAIN.config.Map_Tiles == 'ENABLED'){
-    img_url = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
-  }
-
-  // GET MAP URL FROM CONFIG
-  let map_url = MAIN.config.FRONTEND_URL;
-
-  // DECLARE VARIABLES
-  let expire_time = MAIN.Bot_Time(null, 'quest', timezone);
-
-  // GET REWARD ICON
-  let quest_url = '';
-  if(quest_reward.indexOf('Encounter')>=0){
-    quest_url = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id);
-  } else{ quest_url = await MAIN.Get_Icon(quest, quest_reward); }
-
-  // DETERMINE THE QUEST TASK
-  let quest_task = '';
-  switch(true){
-    // CATCHING SPECIFIC POKEMON
-    case quest.template.indexOf('catch')>=0:
-      if(quest.conditions && quest.conditions[0]){
-        if(quest.conditions[0].info && quest.conditions[0].info.pokemon_type_ids){
-          quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
-        } else{ quest_task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.'; }
-      } else{ quest_task = 'Catch '+quest.target+' Pokémon.'; } break;
-    // LANDING SPECIFIC THROWS
-    case quest.template.indexOf('great') >= 0:
-    case quest.template.indexOf('curveball') >= 0:
-    case quest.template.indexOf('excellent') >= 0:
-    case quest.template.indexOf('land') >= 0:
-      if(quest.conditions[1]){ quest_task = 'Throw '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[1].type]+'(s).'; }
-      else if(quest.target > 1){ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throws in a Row.'; }
-      else{ quest_task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throw.'; } break;
-    // COMPLETE RAIDS
-    case quest.template.indexOf('raid') >= 0:
-      if(!quest.conditions[0]){ quest_task='Battle in '+quest.target+' Raid.'; }
-      else if(quest.conditions[0].type == 6){ quest_task = 'Battle in '+quest.target+' Raid(s).'; }
-      else{ quest_task='Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
-    // SEND GIFTS TO FRIENDS
-    case quest.template.indexOf('gifts') >= 0:
-      quest_task = 'Send '+quest.target+' Gift(s).'; break;
-    // GYM BATTLING
-    case quest.template.indexOf('gym') >= 0:
-      if(quest.target > 1){ quest_task = 'Battle '+quest.target+' Times in a Gym.'; }
-      else{ quest_task = 'Battle '+quest.target+' Time in a Gym.'; } break;
-    // BERRY GYM POKEMON
-    case quest.template.indexOf('berry') >= 0:
-      quest_task = 'Berry Pokémon '+quest.target+' Time(s) in a Gym.'; break;
-    // HATCH EGGS
-    case quest.template.indexOf('hatch') >= 0:
-      if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
-      else{ quest_task = 'Hatch '+quest.target+' Egg.'; } break;
-    // SPIN POKESTOPS
-    case quest.template.indexOf('spin') >= 0:
-      quest_task = 'Spin '+quest.target+' Pokéstops.'; break;
-    // EVOLVE POKEMON
-    case quest.template.indexOf('evolve') >= 0:
-      quest_task = 'Evolve '+quest.target+' Pokémon.'; break;
-    // BUDDY TASKS
-    case quest.template.indexOf('buddy') >= 0:
-      quest_task = 'Get '+quest.target+' Buddy Walking Candy.'; break;
-    // POWER UP POKEMON
-    case quest.template.indexOf('powerup') >= 0:
-      quest_task = 'Power Up '+quest.target+' Pokémon.'; break;
-    // TRADE POKEMON
-    case quest.template.indexOf('trade') >= 0:
-      quest_task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
-    // TRANSFER POKEMON
-    case quest.template.indexOf('transfer') >= 0:
-      quest_task = 'Transfer '+quest.target+' Pokémon.'; break;
-    // USE SPECIFIC CHARGE MOVES
-    case quest.template.indexOf('charge') >= 0:
-      if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
-      else{ quest_task = 'Use a Super Effective Charge Move '+quest.target+' Time.'; } break;
-    default: return console.error('NO CASE FOR THIS QUEST ('+quest.pokestop_id+')', quest);
-  }
-
-  // GET EMBED COLOR BASED ON QUEST DIFFICULTY
-  let embed_color = '';
-  switch(true){
-    case quest.template.indexOf('easy') >= 0: embed_color = '00ff00'; break;
-    case quest.template.indexOf('moderate') >= 0: embed_color = 'ffff00'; break;
-    case quest.template.indexOf('hard') >= 0: embed_color = 'ff0000'; break;
-    default: embed_color = '00ccff';
-  }
-
-  // CREATE QUEST EMBED
-  if(!quest_url){ quest_url = quest.url; }
-  quest_embed = Embed_Config(quest.pokestop_name,quest_task,quest_reward,embed_color,quest_url,expire_time,img_url,embed_area,quest.latitude,quest.longitude,map_url);
-
-  // CHECK DISCORD CONFIG
-  if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
-    // CHECK THE TIME VERSUS THE USERS SET SUBSCRIPTION TIME
-    let time_now = new Date().getTime(); let todays_date = moment(time_now).format('MM/DD/YYYY');
-    let db_date = moment(todays_date+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
-
-    // DEFINE VARIABLES
-    let quest_object = JSON.stringify(quest);
-    quest_embed = JSON.stringify(quest_embed);
-
-    // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
-    return MAIN.pdb.query(`INSERT INTO quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      [user.user_id, user.user_name.replace(/[\W]+/g,''), quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
-        if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO quest_alerts',error); }
-        else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions-Quest] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
-    });
-  } else{
-    return console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.');
-  } return;
-}
-
 function get_quest_task(MAIN, quest){
   // DETERMINE THE QUEST TASK
   let quest_task = '';
@@ -336,4 +220,122 @@ function get_quest_task(MAIN, quest){
 
   // RETURN THE TASK
   return quest_task;
+}
+
+async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, sub_area, embed_area, server, user, timezone){
+  let pokestop = {name: quest.pokestop_name, reward: quest_reward, area: embed_area};
+  pokestop.lat = quest.latitude, pokestop.lon = quest.longitude;
+
+  // GET STATIC MAP TILE
+  pokestop.map_img = '';
+  if(MAIN.config.Map_Tiles == 'ENABLED'){
+    pokestop.map_img = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
+  }
+
+  // GET MAP URL FROM CONFIG
+  pokestop.map_url = MAIN.config.FRONTEND_URL;
+
+  // DECLARE VARIABLES
+  pokestop.time = MAIN.Bot_Time(null, 'quest', timezone);
+
+  // GET REWARD ICON
+  pokestop.sprite = '';
+  if(quest_reward.indexOf('Encounter')>=0){
+    pokestop.sprite = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id);
+  } else{ pokestop.sprite = await MAIN.Get_Icon(quest, quest_reward); }
+
+  // DETERMINE THE QUEST TASK
+  pokestop.task = '';
+  switch(true){
+    // CATCHING SPECIFIC POKEMON
+    case quest.template.indexOf('catch')>=0:
+      if(quest.conditions && quest.conditions[0]){
+        if(quest.conditions[0].info && quest.conditions[0].info.pokemon_type_ids){
+          pokestop.task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
+        } else{ pokestop.task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.'; }
+      } else{ pokestop.task = 'Catch '+quest.target+' Pokémon.'; } break;
+    // LANDING SPECIFIC THROWS
+    case quest.template.indexOf('great') >= 0:
+    case quest.template.indexOf('curveball') >= 0:
+    case quest.template.indexOf('excellent') >= 0:
+    case quest.template.indexOf('land') >= 0:
+      if(quest.conditions[1]){ pokestop.task = 'Throw '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[1].type]+'(s).'; }
+      else if(quest.target > 1){ pokestop.task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throws in a Row.'; }
+      else{ pokestop.task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throw.'; } break;
+    // COMPLETE RAIDS
+    case quest.template.indexOf('raid') >= 0:
+      if(!quest.conditions[0]){ pokestop.task = 'Battle in '+quest.target+' Raid.'; }
+      else if(quest.conditions[0].type == 6){ pokestop.task = 'Battle in '+quest.target+' Raid(s).'; }
+      else{ pokestop.task = 'Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
+    // SEND GIFTS TO FRIENDS
+    case quest.template.indexOf('gifts') >= 0:
+      pokestop.task = 'Send '+quest.target+' Gift(s).'; break;
+    // GYM BATTLING
+    case quest.template.indexOf('gym') >= 0:
+      if(quest.target > 1){ pokestop.task = 'Battle '+quest.target+' Times in a Gym.'; }
+      else{ pokestop.task = 'Battle '+quest.target+' Time in a Gym.'; } break;
+    // BERRY GYM POKEMON
+    case quest.template.indexOf('berry') >= 0:
+      pokestop.task = 'Berry Pokémon '+quest.target+' Time(s) in a Gym.'; break;
+    // HATCH EGGS
+    case quest.template.indexOf('hatch') >= 0:
+      if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
+      else{ pokestop.task = 'Hatch '+quest.target+' Egg.'; } break;
+    // SPIN POKESTOPS
+    case quest.template.indexOf('spin') >= 0:
+      pokestop.task = 'Spin '+quest.target+' Pokéstops.'; break;
+    // EVOLVE POKEMON
+    case quest.template.indexOf('evolve') >= 0:
+      pokestop.task = 'Evolve '+quest.target+' Pokémon.'; break;
+    // BUDDY TASKS
+    case quest.template.indexOf('buddy') >= 0:
+      pokestop.task = 'Get '+quest.target+' Buddy Walking Candy.'; break;
+    // POWER UP POKEMON
+    case quest.template.indexOf('powerup') >= 0:
+      pokestop.task = 'Power Up '+quest.target+' Pokémon.'; break;
+    // TRADE POKEMON
+    case quest.template.indexOf('trade') >= 0:
+      pokestop.task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
+    // TRANSFER POKEMON
+    case quest.template.indexOf('transfer') >= 0:
+      pokestop.task = 'Transfer '+quest.target+' Pokémon.'; break;
+    // USE SPECIFIC CHARGE MOVES
+    case quest.template.indexOf('charge') >= 0:
+      if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
+      else{ pokestop.task = 'Use a Super Effective Charge Move '+quest.target+' Time.'; } break;
+    default: return console.error('NO CASE FOR THIS QUEST ('+quest.pokestop_id+')', quest);
+  }
+
+  // GET EMBED COLOR BASED ON QUEST DIFFICULTY
+  pokestop.color = '';
+  switch(true){
+    case quest.template.indexOf('easy') >= 0: pokestop.color = '00ff00'; break;
+    case quest.template.indexOf('moderate') >= 0: pokestop.color = 'ffff00'; break;
+    case quest.template.indexOf('hard') >= 0: pokestop.color = 'ff0000'; break;
+    default: pokestop.color = '00ccff';
+  }
+
+  // CREATE QUEST EMBED
+  if(!pokestop.sprite){ pokestop.sprite = quest.url; }
+  quest_embed = Embed_Config(pokestop);
+
+  // CHECK DISCORD CONFIG
+  if(MAIN.config.QUEST.Subscriptions == 'ENABLED'){
+    // CHECK THE TIME VERSUS THE USERS SET SUBSCRIPTION TIME
+    let time_now = new Date().getTime(); let todays_date = moment(time_now).format('MM/DD/YYYY');
+    let db_date = moment(todays_date+' '+user.alert_time, 'MM/DD/YYYY H:mm').valueOf()
+
+    // DEFINE VARIABLES
+    let quest_object = JSON.stringify(quest);
+    quest_embed = JSON.stringify(quest_embed);
+
+    // SAVE THE ALERT TO THE ALERT TABLE FOR FUTURE DELIVERY
+    return MAIN.pdb.query(`INSERT INTO quest_alerts (user_id, user_name, quest, embed, area, bot, alert_time, discord_id) VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [user.user_id, user.user_name.replace(/[\W]+/g,''), quest_object, quest_embed, embed_area, user.bot, db_date, server.id], function (error, alert, fields) {
+        if(error){ console.error('[Pokébot] UNABLE TO ADD ALERT TO quest_alerts',error); }
+        else if(MAIN.logging == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Subscriptions-Quest] Stored a '+quest_reward+' Quest Alert for '+user.user_name+'.'); }
+    });
+  } else{
+    return console.info('[Pokébot] '+quest_reward+' Quest ignored due to Disabled Discord Feed Setting.');
+  } return;
 }

@@ -10,6 +10,6 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
   if(MAIN.config.pmsfDB.Search == 'ENABLED'){ quest_help.addField('`'+prefix+'nest` |  `'+prefix+'n` ', 'Initializes Nest Search.', false); }
   quest_help.addField('`'+prefix+'stats` |  `'+prefix+'s` ', 'Initializes Pokémon stats lookup.', false);
   quest_help.addField('`'+prefix+'area`', 'Shows Area subscription options.', false)
-    .addField('`'+prefix+'pause` | `'+prefix+'resume`', 'Pause or Resume ALL subscription alerts.', false);
+  quest_help.addField('`'+prefix+'pause` | `'+prefix+'resume`', 'Pause or Resume ALL subscription alerts.', false);
   return message.channel.send(quest_help).catch(console.error);
 }

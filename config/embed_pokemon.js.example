@@ -1,15 +1,15 @@
 const Discord = require('discord.js');
 
-module.exports = function (name,form,type,gender,weather_boost,verified,time,mins,secs,lat,lon,map_url,img,sprite,area) {
+module.exports = function (p) {
 
   let pokemon_embed = new Discord.RichEmbed()
-  .setColor('00ccff')
-  .setThumbnail(sprite)
-  .addField('**'+name+'** '+form+gender,verified+'| '+time+' (*'+mins+'m '+secs+'s*)\n'+type+weather_boost)
-  .addField(area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+lat+','+lon+') | '
-  +'[Apple Maps](http://maps.apple.com/maps?daddr='+lat+','+lon+'&z=10&t=s&dirflg=d) | '
-  +'[Scan Map]('+map_url+'?lat='+lat+'&lon='+lon+'&zoom=15)',false)
-  .setImage(img);
+  .setColor(p.color)
+  .setThumbnail(p.sprite)
+  .addField('**'+p.name+'** '+p.form+p.gender,p.verified+'| '+p.time+' (*'+p.mins+'m '+p.secs+'s*)\n'+p.type+p.weather_boost)
+  .addField(area+' | Directions:','[Google Maps](https://www.google.com/maps?q='+p.lat+','+p.lon+') | '
+  +'[Apple Maps](http://maps.apple.com/maps?daddr='+p.lat+','+p.lon+'&z=10&t=s&dirflg=d) | '
+  +'[Scan Map]('+p.map_url+'?lat='+p.lat+'&lon='+p.lon+'&zoom=15)',false)
+  .setImage(p.map_img);
 
   return pokemon_embed;
 }

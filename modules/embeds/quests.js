@@ -2,40 +2,40 @@ const Discord = require('discord.js');
 const Embed_Config = require('../../config/embed_quests.js');
 
 module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id) => {
+  let pokestop = {name: quest.pokestop_name, reward: quest_reward, area: embed_area};
+  pokestop.lat = quest.latitude, pokestop.lon = quest.longitude;
 
   // GET STATIC MAP TILE
-  let img_url = '';
+  pokestop.map_img = '';
   if(MAIN.config.Map_Tiles == 'ENABLED'){
-    img_url = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
+    pokestop.map_img = await MAIN.Static_Map_Tile(quest.latitude, quest.longitude, 'quest');
   }
 
-  let map_url = MAIN.config.FRONTEND_URL;
+  pokestop.map_url = MAIN.config.FRONTEND_URL;
 
   // GET THE QUEST TASK
-  let quest_task = await get_quest_task(MAIN, quest);
+  pokestop.task = await get_quest_task(MAIN, quest);
 
   // DECLARE VARIABLES
-  let expire_time = MAIN.Bot_Time(null, 'quest', timezone);
+  pokestop.time = MAIN.Bot_Time(null, 'quest', timezone);
 
   // GET REWARD ICON
-  let quest_url = '';
   if(quest_reward.indexOf('Encounter') >= 0){
     if(quest.rewards[0].info && quest.rewards[0].info.shiny == true){ quest_url = await MAIN.Get_Sprite('shiny', quest.rewards[0].info.pokemon_id); }
-    else{ quest_url = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id); }
-  } else{ quest_url = await MAIN.Get_Icon(quest, quest_reward); }
+    else{ pokestop.sprite = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id); }
+  } else{ pokestop.sprite = await MAIN.Get_Icon(quest, quest_reward); }
 
   // GET EMBED COLOR BASED ON QUEST DIFFICULTY
-  let embed_color = '';
   switch(true){
-    case quest.template.indexOf('easy') >= 0: embed_color = '00ff00'; break;
-    case quest.template.indexOf('moderate') >= 0: embed_color = 'ffff00'; break;
-    case quest.template.indexOf('hard') >= 0: embed_color = 'ff0000'; break;
-    default: embed_color = '00ccff';
+    case quest.template.indexOf('easy') >= 0: pokestop.color = '00ff00'; break;
+    case quest.template.indexOf('moderate') >= 0: pokestop.color = 'ffff00'; break;
+    case quest.template.indexOf('hard') >= 0: pokestop.color = 'ff0000'; break;
+    default: pokestop.color = '00ccff';
   }
 
   // CREATE QUEST EMBED
-  if(!quest_url){ quest_url = quest.url; }
-  quest_embed = Embed_Config(quest.pokestop_name,quest_task,quest_reward,embed_color,quest_url,expire_time,img_url,embed_area,quest.latitude,quest.longitude,map_url);
+  if(!pokestop.sprite){ pokestop.sprite = quest.url; }
+  quest_embed = Embed_Config(pokestop);
 
   // LOGGING
   if(MAIN.debug.Quests == 'ENABLED'){ console.info('[DEBUG] [quests.js] '+quest_reward+' Quest PASSED Secondary Filters and Sent to '+channel.guild.name+' ('+channel.id+').'); }

@@ -13,7 +13,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
-    .setTitle('What Pokémon do you want stats for?')
+    .setTitle('What Pokémon do you want a CP seatch string for?')
     .setFooter('Type the name of desired Poké, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
@@ -22,32 +22,33 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
         return;
       }
   });
-
 }
 
 async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
   let guild = MAIN.guilds.get(message.guild.id);
+  
+  let search_string = pokemon+'&', form = '', role_id = '';
+  for(var level = 1; level <= 40; level++) {
+    search_string += 'cp'+MAIN.CalculateCP(pokemon,form,15,15,15,level)+',';
+  }
+  search_string = search_string.slice(0,-1);
+  if(discord.spam_channels.indexOf(message.channel.id) >= 0){
+    return MAIN.Send_Embed('cp', 0, discord, search_string, role_id, message.channel.id);
+  } else {
+    guild.fetchMember(message.author.id).then( TARGET => {
+      return TARGET.send(search_string).catch(console.error);
+    });
+  }
+}
 
-  message.reply('Searching... this may take a minute. Check your inbox if not in the channel.').then(m => m.delete(5000)).catch(console.error);
-  let search = '';
-  if (pokemon != 'ALL') {search = 'pokemon_id = ? AND '; }
-      MAIN.rdmdb.query(`SELECT * FROM pokemon WHERE `+search+`first_seen_timestamp >= UNIX_TIMESTAMP()-3600`, [pokemon], function (error, stats, fields) {
-        let pokemon_count = 0, role_id = '';
-        stats.forEach(function(stat) {
-          pokemon_count += 1;
-        });
-        if (pokemon == 'ALL'){ pokemon_name = 'ALL'; }
-        else { pokemon_name = MAIN.pokemon[pokemon].name; }
-        stat_message = 'There have been '+pokemon_count+' '+pokemon_name+' seen in the last hour.';
-
-        if(discord.spam_channels.indexOf(message.channel.id) >= 0){
-          return message.reply(stat_message);
-        } else {
-          guild.fetchMember(message.author.id).then( TARGET => {
-            return TARGET.send(stat_message).catch(console.error);
-          });
-        }
-      });
+function subscription_timedout(MAIN, nickname, message, prefix){
+  let subscription_cancel = new Discord.RichEmbed().setColor('00ff00')
+    .setAuthor(nickname, message.member.user.displayAvatarURL)
+    .setTitle('Your Subscription Has Timed Out.')
+    .setFooter('You can type \'view\', \'add\', \'add adv\', \'remove\', or \'edit\'.');
+  message.channel.send(subscription_cancel).then( msg => {
+    return initiate_collector(MAIN, 'time', message, msg, nickname, prefix, discord);
+  });
 }
 
 async function initiate_collector(MAIN, source, message, msg, nickname, prefix, discord){
@@ -63,8 +64,6 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
-   if (pokemon == 'All'){ collector.stop('ALL'); }
-
    for (key in MAIN.pokemon) {
       if (MAIN.pokemon[key].name === pokemon) {
         pokemon = key;
