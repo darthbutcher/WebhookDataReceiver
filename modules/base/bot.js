@@ -647,43 +647,84 @@ MAIN.on('ready', () => {
 });
 ALPHA.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Alpha ('+ALPHA.user.tag+') is logged in.');
-  return ALPHA.user.setPresence({ status: 'invisible' });
+
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return ALPHA.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 BRAVO.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Bravo ('+BRAVO.user.tag+') is logged in.');
-  return BRAVO.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return BRAVO.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 CHARLIE.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Charlie ('+CHARLIE.user.tag+') is logged in.');
-  return CHARLIE.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return CHARLIE.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 DELTA.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Delta ('+DELTA.user.tag+') is logged in.');
-  return DELTA.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return DELTA.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 ECHO.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Echo ('+ECHO.user.tag+') is logged in.');
-  return ECHO.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return ECHO.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 FOXTROT.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Foxtrot ('+FOXTROT.user.tag+') is logged in.');
-  return FOXTROT.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return FOXTROT.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 GULF.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Gulf ('+GULF.user.tag+') is logged in.');
-  return GULF.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return GULF.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 HOTEL.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Hotel ('+HOTEL.user.tag+') is logged in.');
-  return HOTEL.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return HOTEL.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 INDIA.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] India ('+INDIA.user.tag+') is logged in.');
-  return INDIA.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return INDIA.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 JULIET.on('ready', () => {
   console.log('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Start-Up] Juliet ('+JULIET.user.tag+') is logged in.');
-  return JULIET.user.setPresence({ status: 'invisible' });
+  if(MAIN.config.TOKENS.Hide_Bot_Tokens == 'ENABLED')
+  {
+    return JULIET.user.setPresence({ status: 'invisible' });
+  }
+  else return;
 });
 
 // LOG IN BOTS AND ADD TO BOT ARRAY

@@ -80,6 +80,7 @@ db_name = pmsf
 Search = ENABLED
 
 [TOKENS]
+Hide_Bot_Tokens = ENABLED
 # BOT TOKENS
 # You can add up to 15 BOT_TOKENS[]. Delete any unused.
 # The MAIN token cannot be in the BOT_TOKEN[] section.
