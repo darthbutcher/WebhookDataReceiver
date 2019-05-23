@@ -96,7 +96,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
             if(error){ console.error(error); }
           });
         }
-      }, 3000); break;
+      }, 5000); break;
 
     // RAID IS A BOSS
     case 'Boss':
@@ -158,7 +158,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
             }
           });
         }
-      }, 3000); break;
+      }, 5000); break;
   }
   return;
 }

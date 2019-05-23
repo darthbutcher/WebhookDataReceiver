@@ -27,7 +27,6 @@ module.exports.run = async (MAIN, target, lure, type, main_area, sub_area, embed
   pokestop.map_url = MAIN.config.FRONTEND_URL;
 
   // GET LURE TYPE, COLOR, AND SPRITE
-  console.log(type);
   switch(type){
     case 'Normal':
       pokestop.color = 'ec78ea';
@@ -58,6 +57,7 @@ module.exports.run = async (MAIN, target, lure, type, main_area, sub_area, embed
     if(MAIN.config.DEBUG.Lure == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [lure.js] Sent a '+pokestop.name+' to '+member.user.tag+' ('+member.id+').'); }
     return MAIN.Send_DM(server.id, member.id, lure_embed, target.bot);
   } else if(MAIN.config.LURE.Discord_Feeds == 'ENABLED'){
+    if (minutes < MAIN.config.TIME_REMAIN) { return console.error('Timer ('+minutes+') is less than '+MAIN.config.TIME_REMAIN+' '+pokestop.name); }
     if(MAIN.config.DEBUG.Lure == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [lure.js] Sent a '+pokestop.name+' to '+target.guild.name+' ('+target.id+').'); }
     return MAIN.Send_Embed('lure', 0, server, role_id, lure_embed, target.id);
   } else{ return; }}

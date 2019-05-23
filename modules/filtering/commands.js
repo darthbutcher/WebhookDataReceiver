@@ -149,7 +149,7 @@ module.exports.run = async (MAIN, message) => {
       });
   }
   MAIN.Discord.Servers.forEach( async (server,index) => {
-    if (server.id == message.guild.id && server.command_channels.indexOf(message.channel.id) <= 0){
+    if (server.id == message.guild.id && server.command_channels.indexOf(message.channel.id) < 0){
     switch (message.content) {
       case prefix+'nest': command = 'nest'; break;
       case prefix+'pokemonstats':

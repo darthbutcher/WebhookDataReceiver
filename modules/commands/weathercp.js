@@ -13,7 +13,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
-    .setTitle('What Pokémon do you want a CP seatch string for?')
+    .setTitle('What Pokémon do you want a CP search string for?')
     .setFooter('Type the name of desired Poké, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
@@ -35,7 +35,7 @@ async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
     for(var def = 15; def >= 13; def--) {
       for(var sta = 15; sta >= 13; sta--) {
         iv_percent = Math.round((atk + def + sta) / 45 * 100);
-        result_string += atk+','+def+','+sta+'  '+MAIN.CalculateCP(pokemon,form,atk,def,sta,level)+' CP  '+iv_percent+'%\n';
+        result_string += atk+','+def+','+sta+' '+MAIN.CalculateCP(pokemon,form,atk,def,sta,level)+' CP '+iv_percent+'%\n';
       }
     }
   }

@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
 
-module.exports = function(r) {
+module.exports = function(g) {
 
       // Set embed_color dynamic (color), or custom hex color ie 'f358fb'
       embed_color = g.color;
