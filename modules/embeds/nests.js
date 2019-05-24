@@ -41,6 +41,6 @@ module.exports.run = async (MAIN, message, nest, server, embed_area, timezone) =
         return MAIN.Send_Embed('nest', 0, server, role_id, nest_embed, message.channel.id);
       } else {
         guild.fetchMember(message.author.id).then( TARGET => {
-      return TARGET.send(nest_embed).catch(console.error);
+      return TARGET.send(nest_embed).catch(console.error); }
       }
 }
