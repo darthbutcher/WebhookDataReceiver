@@ -3,6 +3,7 @@ const Embed_Config = require('../../config/embed_nests.js');
 
 module.exports.run = async (MAIN, message, nest, server, embed_area, timezone) => {
       // CHECK IF THE TARGET IS A USER
+      let guild = MAIN.guilds.get(message.guild.id);
       let member = MAIN.guilds.get(server.id).members.get(message.author.id);
       let pokemon = {type: '', color: '', form: '', area: embed_area}, role_id ='';
 
@@ -39,6 +40,7 @@ module.exports.run = async (MAIN, message, nest, server, embed_area, timezone) =
       if(server.spam_channels.indexOf(message.channel.id) >= 0){
         return MAIN.Send_Embed('nest', 0, server, role_id, nest_embed, message.channel.id);
       } else {
-        return MAIN.Send_DM(message.guild.id, message.author.id,nest_embed, message.author.bot);
+        guild.fetchMember(message.author.id).then( TARGET => {
+      return TARGET.send(nest_embed).catch(console.error);
       }
 }
