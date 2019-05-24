@@ -90,9 +90,8 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       // CHECK FOR RAID LOBBIES
       setTimeout(async function() {
         if(MAIN.config.Raid_Lobbies == 'ENABLED'){
-          db_embed = await JSON.stringify(gym);
           // UPDATE BOSS NAME
-          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym.id], function (error, record, fields) {
+          MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [JSON.stringify(gym), gym.id], function (error, record, fields) {
             if(error){ console.error(error); }
           });
         }
@@ -148,11 +147,10 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       // CHECK FOR RAID LOBBIES
       setTimeout( async function() {
         if(MAIN.config.Raid_Lobbies == 'ENABLED'){
-          db_embed = await JSON.stringify(gym);
           MAIN.pdb.query(`SELECT * FROM active_raids WHERE gym_id = ?`, [gym.id], function (error, record, fields) {
             if(record[0]){
               // UPDATE EMBED
-              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [db_embed, gym.id], function (error, record, fields) {
+              MAIN.pdb.query(`UPDATE active_raids SET embed = ? WHERE gym_id = ?`, [JSON.stringify(gym), gym.id], function (error, record, fields) {
                 if(error){ console.error(error); }
               });
             }
