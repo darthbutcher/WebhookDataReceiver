@@ -22,6 +22,9 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
     pokemon.map_img = await MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon');
   }
 
+  // DESPAWN VERIFICATION
+  pokemon.verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
+
   // DEFINE VARIABLES
   pokemon.time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
   pokemon.mins = Math.floor((sighting.disappear_time-(time_now/1000))/60);
@@ -41,12 +44,10 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
   switch(sighting.gender){
     case 1: pokemon.gender = ' '+MAIN.emotes.male; break;
     case 2: pokemon.gender = ' '+MAIN.emotes.female; break;
+    default: pokemon.gender = '';
   }
   // Round IV
   pokemon.iv = Math.round(internal_value);
-
-  // DESPAWN VERIFICATION
-  pokemon.verified = sighting.disappear_time_verified ? MAIN.emotes.checkYes : MAIN.emotes.yellowQuestion;
 
   // GET WEATHER BOOST
   switch(sighting.weather){
@@ -77,9 +78,29 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
     pokemon.stamina = sighting.individual_stamina;
     pokemon.level = sighting.pokemon_level;
     pokemon.cp = sighting.cp;
+    pokemon.encounter_id = sighting.encounter_id;
 
-    pokemon_embed = Embed_Config(pokemon, possible_cps);
-    send_embed(pokemon.mins);
+    // RE-VERIFY TIMERS FOR NEGATIVE AND UNVERIFIED FOR IV SCAN
+    if (pokemon.verified == MAIN.emotes.yellowQuestion || pokemon.mins < 1 ) {
+      if(MAIN.config.DEBUG.Pokemon_Timers == 'ENABLED'){console.log('DESPAWN for '+pokemon.name+' is possibly inaccurate '+sighting.encounter_id);}
+      MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
+        if(error){ console.error(error); }
+        if (record[0].expire_timestamp_verified == 1) {
+          if(MAIN.config.DEBUG.Pokemon_Timers == 'ENABLED'){console.log('DESPAWN for '+pokemon.name+' is re-verified');}
+          pokemon.time = MAIN.Bot_Time(record[0].expire_timestamp, '1', timezone);
+          pokemon.mins = Math.floor((record[0].expire_timestamp-(time_now/1000))/60);
+          pokemon.secs = Math.floor((record[0].expire_timestamp-(time_now/1000)) - (pokemon.mins*60));
+          pokemon.verified = MAIN.emotes.checkYes;
+        } else {
+          if(MAIN.config.DEBUG.Pokemon_Timers == 'ENABLED'){console.log('DESPAWN for '+pokemon.name+' is not verified');}
+        }
+        pokemon_embed = Embed_Config(pokemon, possible_cps);
+        send_embed(pokemon.mins);
+      });
+    } else {
+      pokemon_embed = Embed_Config(pokemon, possible_cps);
+      send_embed(pokemon.mins);
+    }
 
 
     function send_embed(minutes){

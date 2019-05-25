@@ -198,7 +198,7 @@ MAIN.on('raw', event => {
 // CHOOSE NEXT BOT AND SEND EMBED
 MAIN.Send_Embed = (type, raid_level, server, roleID, embed, channel_id) => {
   if(MAIN.Next_Bot == MAIN.BOTS.length-1 && MAIN.BOTS[0]){ MAIN.Next_Bot = 0; } else{ MAIN.Next_Bot++; }
-	if(!MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id)) { console.log('Problem finding channel: '+channel_id+' using bot token: '+MAIN.BOTS[MAIN.Next_Bot].token); }
+  if(!MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id)) { console.log('Problem finding channel: '+channel_id+' using bot token: '+MAIN.BOTS[MAIN.Next_Bot].token); }
 	return MAIN.BOTS[MAIN.Next_Bot].channels.get(channel_id).send(roleID, embed)
     .then( message => { if(type == 'raid' && raid_level >= server.min_raid_lobbies && MAIN.config.Raid_Lobbies == 'ENABLED' ){
 	message.react(MAIN.emotes.plusOneReact.id).catch(console.error).then( reaction => {
@@ -265,12 +265,8 @@ MAIN.webhookParse = async (PAYLOAD) => {
       		switch(data.type){
             // SEND TO POKEMON MODULES
       			case 'pokemon':
-              if (data.message.cp > 0){
-                MAIN.Timer_Verification(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
-              } else {
               Pokemon_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone);
               Pokemon_Subscription.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone); break;
-             }
             // SEND TO RAIDS MODULES
       			case 'raid':
               Raid_Feed.run(MAIN, data.message, main_area, sub_area, embed_area, server, timezone);
@@ -480,34 +476,6 @@ MAIN.Get_Area = (MAIN, lat, lon, discord) => {
   not = 'Searched loaction not in your discords.json or geofence file';
   return reject(not);
 });
-}
-
-MAIN.Timer_Verification = (MAIN, sighting, main_area, sub_area, embed_area, server, timezone) => {
-  // VERIFY VERIFICATION FOR IV SCAN
-  let time_now = new Date().getTime();
-  pokemon_name = MAIN.pokemon[sighting.pokemon_id].name;
-  if (sighting.disappear_time_verified == 'false' || Math.floor((sighting.disappear_time-(time_now/1000))/60) < MAIN.config.TIME_REMAIN) {
-    let verified = true;
-    if (sighting.disappear_time_verified == 'false') { verified = false; }
-    MAIN.rdmdb.query('SELECT * FROM pokemon WHERE id = ?', [sighting.encounter_id], function (error, record, fields) {
-      if(error){ console.error(error); }
-      if (record[0].expire_timestamp_verified == 1) {
-        if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is verified');}
-        sighting.disappear_time = record[0].expire_timestamp;
-        sighting.disappear_time_verified = 'true';
-        //if (Math.floor((sighting.disappear_time-(time_now/1000))/60) > MAIN.config.TIME_REMAIN && verified != false) { console.log('Verified for < than '+MAIN.config.TIME_REMAIN+' min '+pokemon_name+' '+Math.floor((sighting.disappear_time-(time_now/1000))/60)+' '+sighting.encounter_id); }
-      } else {
-        if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){console.log('DESPAWN for '+pokemon_name+' is not verified');}
-      }
-      Pokemon_Feed.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
-      Pokemon_Subscription.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
-    });
-  } else {
-    Pokemon_Feed.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
-    Pokemon_Subscription.run(MAIN, sighting, main_area, sub_area, embed_area, server, timezone);
-  }
-
-
 }
 
 // GET QUEST REWARD ICON
