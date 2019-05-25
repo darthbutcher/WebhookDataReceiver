@@ -164,6 +164,7 @@ Discord_Feeds = ENABLED
 # Debug Target is the discord server you are debugging
 Quests = DISABLED
 Pokemon = DISABLED
+Pokemon_Timers = DISABLED 
 Raids = DISABLED
 Lure = DISABLED
 Subscriptions = DISABLED
