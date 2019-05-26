@@ -294,6 +294,10 @@ function CalculateBestPvPStat(MAIN, pokemonID, attack, defense, stamina, cap)
                 level = i;   
             }
         }
+        else if(CP > cap)
+        {
+          i = 41;
+        }
     }
 
     return {value: bestStat, level: level};

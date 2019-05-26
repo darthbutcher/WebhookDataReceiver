@@ -1,14 +1,14 @@
 const Discord = require('discord.js');
 const base_stats = require('../static/base_stats.json');
 
-module.exports = function(p, possible_cps) {
+module.exports = function(p) {
 
   let pvpString = "";
 
-  for(var pokemon in possible_cps)
+  for(var pokemon in p.possible_cps)
   {
-    pvpString += base_stats[pokemon].name+" Level "+possible_cps[pokemon].level+" CP "+possible_cps[pokemon].cp
-                +" \n Rank: "+possible_cps[pokemon].rank+"("+possible_cps[pokemon].percent+"%)\n";
+    pvpString += base_stats[pokemon].name+" Level "+p.possible_cps[pokemon].level+" CP "+p.possible_cps[pokemon].cp
+                +" \n Rank: "+p.possible_cps[pokemon].rank+"("+p.possible_cps[pokemon].percent+"%)\n";
   }
 
   let pokemon_embed = new Discord.RichEmbed()

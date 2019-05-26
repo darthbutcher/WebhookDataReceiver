@@ -79,6 +79,7 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
     pokemon.level = sighting.pokemon_level;
     pokemon.cp = sighting.cp;
     pokemon.encounter_id = sighting.encounter_id;
+    pokemon.possible_cps = possible_cps;
 
     // RE-VERIFY TIMERS FOR NEGATIVE AND UNVERIFIED FOR IV SCAN
     if (pokemon.verified == MAIN.emotes.yellowQuestion || pokemon.mins < 1 ) {
@@ -94,11 +95,11 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
         } else {
           if(MAIN.config.DEBUG.Pokemon_Timers == 'ENABLED'){console.log('DESPAWN for '+pokemon.name+' is not verified');}
         }
-        pokemon_embed = Embed_Config(pokemon, possible_cps);
+        pokemon_embed = Embed_Config(pokemon);
         send_embed(pokemon.mins);
       });
     } else {
-      pokemon_embed = Embed_Config(pokemon, possible_cps);
+      pokemon_embed = Embed_Config(pokemon);
       send_embed(pokemon.mins);
     }
 
