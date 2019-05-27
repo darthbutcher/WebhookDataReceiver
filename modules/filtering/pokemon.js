@@ -181,7 +181,7 @@ function CalculatePossibleCPs(MAIN, pokemonID, attack, defense, stamina, level, 
     if(currentCP >= minCP && currentCP <= maxCP)
     {      
       possibleCPs.push({pokemonID:pokemonID, attack:attack, defense:defense, stamina:stamina, level:i, cp:currentCP});
-      i = 41;
+      
     }
     if(currentCP > maxCP) { i = 41; }
   }
