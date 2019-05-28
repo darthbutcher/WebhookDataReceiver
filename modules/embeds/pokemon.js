@@ -73,10 +73,10 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
     if(sighting.cp == null){ return; }
     // DETERMINE MOVE NAMES AND TYPES
-    pokemon.move_name_1 = MAIN.moves[sighting.move_1].name;
-    pokemon.move_type_1 = MAIN.emotes[MAIN.moves[sighting.move_1].type.toLowerCase()];
-    pokemon.move_name_2 = MAIN.moves[sighting.move_2].name;
-    pokemon.move_type_2 = MAIN.emotes[MAIN.moves[sighting.move_2].type.toLowerCase()];
+    pokemon.move_name_1 = MAIN.pokemon['moves'][sighting.move_1].name;
+    pokemon.move_type_1 = MAIN.emotes[MAIN.pokemon['moves'][sighting.move_1].type.toLowerCase()];
+    pokemon.move_name_2 = MAIN.pokemon['moves'][sighting.move_2].name;
+    pokemon.move_type_2 = MAIN.emotes[MAIN.pokemon['moves'][sighting.move_2].type.toLowerCase()];
 
     // DETERMINE HEIGHT, WEIGHT AND SIZE
     pokemon.height = Math.floor(sighting.height*100)/100;

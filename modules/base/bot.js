@@ -104,8 +104,6 @@ function load_data(){
   // CACHE DATA FROM JSONS
   delete require.cache[require.resolve('../../static/en.json')];
   MAIN.proto = require('../../static/en.json');
-  delete require.cache[require.resolve('../../static/moves.json')];
-  MAIN.moves = require('../../static/moves.json');
   delete require.cache[require.resolve('../../static/database.json')];
   MAIN.db = require('../../static/database.json');
   delete require.cache[require.resolve('../../static/types.json')];
