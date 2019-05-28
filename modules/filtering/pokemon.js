@@ -57,7 +57,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         if(sighting.cp > filter.max_cp_range) { return sightingFailed(MAIN, filter, "CP Range"); }
         if(filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name] != 'True') { return sightingFailed(MAIN, filter, "Pokemon: "+sighting.pokemon_id+" set to False"); }
         let form_name = '', formID = sighting.form;
-        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id, sighting.form, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, filter.min_cp_range, filter.max_cp_range);
+        let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id, sighting.form, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, gender, filter.min_cp_range, filter.max_cp_range);
         let unique_cps = {};
 
         for(var i = possible_cps.length - 1; i >= 0; i--)
@@ -161,9 +161,16 @@ function sightingFailed(MAIN, filter, reason){
 }
 
 
-function CalculatePossibleCPs(MAIN, pokemonID, formID, attack, defense, stamina, level, minCP, maxCP)
+function CalculatePossibleCPs(MAIN, pokemonID, formID, attack, defense, stamina, level, gender, minCP, maxCP)
 {
-  let possibleCPs = [];
+
+  let possibleCPs = []; 
+
+  // Check for required gender on evolution
+  if(MAIN.masterfile.pokemon[pokemonID].gender_requirement  && MAIN.masterfile.pokemon[pokemonID].gender_requirement != gender) 
+  {     
+    return possibleCPs; 
+  }  
 
   for(var i = level; i <= 40; i += .5)
   {
@@ -191,8 +198,9 @@ function CalculatePossibleCPs(MAIN, pokemonID, formID, attack, defense, stamina,
       evolvedForm = MAIN.masterfile['pokemon'][pokemonID].evolved_form;
     } else { evolvedForm = formID; }
 
-    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.masterfile['pokemon'][pokemonID].evolutions[i], evolvedForm, attack, defense, stamina, level, minCP, maxCP));
+    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.masterfile['pokemon'][pokemonID].evolutions[i], evolvedForm, attack, defense, stamina, level, gender, minCP, maxCP));
   }
+
   return possibleCPs;
 }
 

@@ -11191,7 +11191,7 @@
       "thirdmove": 25,
       "evolution_item": "",
       "legendary": "",
-      "gender_requirement": "Female",
+      "gender_requirement": "female",
       "buddy_distance_evolve": ""
     },
     "414": {
@@ -11269,7 +11269,7 @@
       "thirdmove": 50,
       "evolution_item": "",
       "legendary": "",
-      "gender_requirement": "Female",
+      "gender_requirement": "female",
       "buddy_distance_evolve": ""
     },
     "417": {
@@ -12809,7 +12809,7 @@
       "thirdmove": 75,
       "evolution_item": "",
       "legendary": "",
-      "gender_requirement": "Male",
+      "gender_requirement": "male",
       "buddy_distance_evolve": ""
     },
     "476": {
@@ -12887,7 +12887,7 @@
       "thirdmove": 50,
       "evolution_item": "",
       "legendary": "",
-      "gender_requirement": "Female",
+      "gender_requirement": "female",
       "buddy_distance_evolve": ""
     },
     "479": {
@@ -20043,7 +20043,7 @@
       "thirdmove": "",
       "evolution_item": "",
       "legendary": "",
-      "gender_requirement": "Female",
+      "gender_requirement": "female",
       "buddy_distance_evolve": ""
     },
     "759": {
