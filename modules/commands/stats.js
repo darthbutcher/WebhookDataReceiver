@@ -37,7 +37,7 @@ async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
           pokemon_count += 1;
         });
         if (pokemon == 'ALL'){ pokemon_name = 'ALL'; }
-        else { pokemon_name = MAIN.pokemon[pokemon].name; }
+        else { pokemon_name = MAIN.masterfile['pokemon'][pokemon].name; }
         stat_message = 'There have been '+pokemon_count+' '+pokemon_name+' seen in the last hour.';
 
         if(discord.spam_channels.indexOf(message.channel.id) >= 0){
@@ -65,8 +65,8 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
    }
    if (pokemon == 'All'){ collector.stop('ALL'); }
 
-   for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === pokemon) {
+   for (key in MAIN.masterfile['pokemon']) {
+      if (MAIN.masterfile['pokemon'][key].name === pokemon) {
         pokemon = key;
         collector.stop(pokemon);
         break;

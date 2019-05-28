@@ -8,9 +8,9 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
   let pokemon = {type: '', color: '', form: '', gender: '', weather_boost: ''};
 
   // DETERMINE POKEMON NAME AND FORM
-  pokemon.name = MAIN.pokemon[sighting.pokemon_id].name;
+  pokemon.name = MAIN.masterfile['pokemon'][sighting.pokemon_id].name;
   if (sighting.form > 0){
-    form_name = '['+MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].name+'] ';
+    form_name = '['+MAIN.masterfile['pokemon'][sighting.pokemon_id].forms[sighting.form].name+'] ';
   }
 
   pokemon.area = embed_area;
@@ -31,15 +31,15 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
   pokemon.secs = Math.floor((sighting.disappear_time-(time_now/1000)) - (pokemon.mins*60));
 
   // DETERMINE POKEMON NAME, FORM AND TYPE EMOTES
-  pokemon.name = MAIN.pokemon[sighting.pokemon_id].name;
-  if (sighting.form > 0 && !MAIN.pokemon[sighting.pokemon_id].types){
-    pokemon.form = '['+MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].name+'] ';
-    MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].types.forEach((type) => {
+  pokemon.name = MAIN.masterfile['pokemon'][sighting.pokemon_id].name;
+  if (sighting.form > 0 && !MAIN.masterfile['pokemon'][sighting.pokemon_id].types){
+    pokemon.form = '['+MAIN.masterfile['pokemon'][sighting.pokemon_id].forms[sighting.form].name+'] ';
+    MAIN.masterfile['pokemon'][sighting.pokemon_id].forms[sighting.form].types.forEach((type) => {
       pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
       pokemon.color = MAIN.Get_Color(type, pokemon.color);
     }); pokemon.type = pokemon.type.slice(0,-3);
   } else {
-    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => {
+    MAIN.masterfile['pokemon'][sighting.pokemon_id].types.forEach((type) => {
       pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
       pokemon.color = MAIN.Get_Color(type, pokemon.color);
     }); pokemon.type = pokemon.type.slice(0,-3);
@@ -72,10 +72,10 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
 
     if(sighting.cp == null){ return; }
     // DETERMINE MOVE NAMES AND TYPES
-    pokemon.move_name_1 = MAIN.pokemon['moves'][sighting.move_1].name;
-    pokemon.move_type_1 = MAIN.emotes[MAIN.pokemon['moves'][sighting.move_1].type.toLowerCase()];
-    pokemon.move_name_2 = MAIN.pokemon['moves'][sighting.move_2].name;
-    pokemon.move_type_2 = MAIN.emotes[MAIN.pokemon['moves'][sighting.move_2].type.toLowerCase()];
+    pokemon.move_name_1 = MAIN.masterfile['moves'][sighting.move_1].name;
+    pokemon.move_type_1 = MAIN.emotes[MAIN.masterfile['moves'][sighting.move_1].type.toLowerCase()];
+    pokemon.move_name_2 = MAIN.masterfile['moves'][sighting.move_2].name;
+    pokemon.move_type_2 = MAIN.emotes[MAIN.masterfile['moves'][sighting.move_2].type.toLowerCase()];
 
     // DETERMINE HEIGHT, WEIGHT AND SIZE
     pokemon.height = Math.floor(sighting.height*100)/100;

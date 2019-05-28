@@ -49,13 +49,13 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
-   for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === split[0]) {
+   for (key in MAIN.masterfile['pokemon']) {
+      if (MAIN.masterfile['pokemon'][key].name === split[0]) {
         if (split[1]){
           form = capitalize(split[1]);
           if (split[2]){ form += ' '+capitalize(split[2]); }
-          Object.keys(MAIN.pokemon[key].forms).forEach(function(name){
-            if(MAIN.pokemon[key].forms[name].name == form){
+          Object.keys(MAIN.masterfile['pokemon'][key].forms).forEach(function(name){
+            if(MAIN.masterfile['pokemon'][key].forms[name].name == form){
               form = name;
             }
           });

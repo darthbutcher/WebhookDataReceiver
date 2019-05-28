@@ -36,7 +36,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             if(sub.areas == 'No' || user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
 
               // CHECK POKEMON NAME
-              if(sub.name == MAIN.pokemon[sighting.pokemon_id].name || sub.name.toLowerCase().startsWith('all')){
+              if(sub.name == MAIN.masterfile['pokemon'][sighting.pokemon_id].name || sub.name.toLowerCase().startsWith('all')){
 
                 // DETERMINE GENDER
                 sub.gender = sub.gender.toLowerCase();
@@ -89,10 +89,10 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                     }
                 }
               } else{
-                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Name Filters.'); }
+                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.masterfile['pokemon'][sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Name Filters.'); }
               }
             } else{
-              if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.pokemon[sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
+              if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [pokemon.js] '+MAIN.masterfile['pokemon'][sighting.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
             }
           });
         }

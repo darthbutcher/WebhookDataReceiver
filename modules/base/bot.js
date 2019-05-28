@@ -109,7 +109,7 @@ function load_data(){
   delete require.cache[require.resolve('../../static/types.json')];
   MAIN.types = require('../../static/types.json');
   delete require.cache[require.resolve('../../static/masterfile.json')];
-  MAIN.pokemon = require('../../static/masterfile.json');
+  MAIN.masterfile = require('../../static/masterfile.json');
   delete require.cache[require.resolve('../../static/cp_multiplier.json')];
   MAIN.cp_multiplier = require('../../static/cp_multiplier.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
@@ -351,7 +351,7 @@ MAIN.Get_Sprite = (form, id) => {
   // ASSET ICONS
   if (MAIN.config.SPRITE_TYPE == 'ASSETS') {
     if (form > 0 ){
-      switch (MAIN.pokemon[id].forms[form].name) {
+      switch (MAIN.masterfile['pokemon'][id].forms[form].name) {
         case 'Alolan': extension = '_61'+extension; break;
         case 'Origin': extension = '_12'+extension; break;
         case 'Sunny': extension = '_12'+extension; break;
@@ -365,7 +365,7 @@ MAIN.Get_Sprite = (form, id) => {
   }
   // SEREBII ICONS
   if ((form != 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
-    switch (MAIN.pokemon[id].forms[form].name) {
+    switch (MAIN.masterfile['pokemon'][id].forms[form].name) {
       case 'Alolan': extension = '-a'+extension; break;
       case 'Origin': extension = '-o'+extension; break;
       default: extension = extension;
@@ -414,14 +414,14 @@ MAIN.CalculateCP = (pokemon_id, form_id, iv_atk, iv_def, iv_sta, level) => {
 	let cpIndex = ((level * 2) - 2) + (remainder * 2);
 	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
 
-  if (form_id > 0 && !MAIN.pokemon[pokemon_id].attack){
-    base_atk = MAIN.pokemon[pokemon_id].forms[form_id].attack;
-  	base_def = MAIN.pokemon[pokemon_id].forms[form_id].defense;
-  	base_sta = MAIN.pokemon[pokemon_id].forms[form_id].stamina;
+  if (form_id > 0 && !MAIN.masterfile['pokemon'][pokemon_id].attack){
+    base_atk = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].attack;
+  	base_def = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].defense;
+  	base_sta = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].stamina;
   } else {
-    base_atk = MAIN.pokemon[pokemon_id].attack;
-  	base_def = MAIN.pokemon[pokemon_id].defense;
-  	base_sta = MAIN.pokemon[pokemon_id].stamina;
+    base_atk = MAIN.masterfile['pokemon'][pokemon_id].attack;
+  	base_def = MAIN.masterfile['pokemon'][pokemon_id].defense;
+  	base_sta = MAIN.masterfile['pokemon'][pokemon_id].stamina;
   }
 
 	let attackMultiplier = base_atk + parseInt(iv_atk);
@@ -487,12 +487,12 @@ MAIN.Get_Icon = (object, quest_reward) => {
 // Get Size of Pokemon BIG Karp/Tiny Rat
 MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight, form_id) => {
         let weightRatio = 0, heightRatio = 0;
-        if (form_id > 0 && !MAIN.pokemon[pokemon_id].weight){
-          weightRatio = pokemon_weight / MAIN.pokemon[pokemon_id].forms[form_id].weight;
-          heightRatio = pokemon_height / MAIN.pokemon[pokemon_id].forms[form_id].height;
+        if (form_id > 0 && !MAIN.masterfile['pokemon'][pokemon_id].weight){
+          weightRatio = pokemon_weight / MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].weight;
+          heightRatio = pokemon_height / MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].height;
         } else {
-          weightRatio = pokemon_weight / MAIN.pokemon[pokemon_id].weight;
-          heightRatio = pokemon_height / MAIN.pokemon[pokemon_id].height;
+          weightRatio = pokemon_weight / MAIN.masterfile['pokemon'][pokemon_id].weight;
+          heightRatio = pokemon_height / MAIN.masterfile['pokemon'][pokemon_id].height;
         }
 
         let size = heightRatio + weightRatio;
@@ -550,7 +550,7 @@ MAIN.sqlFunction = (sql,data,logSuccess,logError) => {
 setTimeout(function() { load_arrays(); }, 21600000);
 MAIN.gym_array = []; MAIN.pokemon_array = []; MAIN.park_array = [];
 function load_arrays(){
-  MAIN.pokemon_array = Object.keys(MAIN.pokemon).map(i => MAIN.pokemon[i].name);
+  MAIN.pokemon_array = Object.keys(MAIN.masterfile['pokemon']).map(i => MAIN.masterfile['pokemon'][i].name);
   // Gym Names Array
   MAIN.rdmdb.query(`SELECT * FROM gym WHERE name is not NULL`, function (error, gyms, fields){
     if(gyms){

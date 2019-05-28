@@ -101,8 +101,8 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
         break;
       }
     }
-   for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === pokemon) {
+   for (key in MAIN.masterfile['pokemon']) {
+      if (MAIN.masterfile['pokemon'][key].name === pokemon) {
         pokemon = key;
         console.log(non_nesting.indexOf(parseInt(pokemon)));
         if (non_nesting.indexOf(parseInt(pokemon)) >= 0) {

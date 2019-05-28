@@ -29,10 +29,10 @@ async function pokemon_view(MAIN, message, nickname, pokemon_w_form, prefix, dis
   let pokemon_id = pokemon_w_form[0], form_id = pokemon_w_form[1];
 
   if(!form_id || form_id == 'NaN'){
-    if(!MAIN.pokemon[pokemon_id].default_form){
+    if(!MAIN.masterfile['pokemon'][pokemon_id].default_form){
       form_id = 0;
     } else{
-      form_id = MAIN.pokemon[pokemon_id].default_form;
+      form_id = MAIN.masterfile['pokemon'][pokemon_id].default_form;
     }
   }
 
@@ -76,13 +76,13 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
-   for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === split[0]) {
+   for (key in MAIN.masterfile['pokemon']) {
+      if (MAIN.masterfile['pokemon'][key].name === split[0]) {
         if (split[1]){
           form = capitalize(split[1]);
           if (split[2]){ form += ' '+capitalize(split[2]); }
-          Object.keys(MAIN.pokemon[key].forms).forEach(function(name){
-            if(MAIN.pokemon[key].forms[name].name == form){
+          Object.keys(MAIN.masterfile['pokemon'][key].forms).forEach(function(name){
+            if(MAIN.masterfile['pokemon'][key].forms[name].name == form){
               form = name;
             }
           });

@@ -7,26 +7,24 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
       let role_id = '';
 
       // DETERMINE POKEMON NAME
-      let pokemon_name = MAIN.pokemon[pokemon_id].name;
+      let pokemon_name = MAIN.masterfile['pokemon'][pokemon_id].name;
       let pokemon_type = '', weaknesses = '', pokemon_color = '', evolutions = pokemon_name;
       let attack = '', defense = '', stamina = '', form_name = '';
 
       if(!form_id || form_id == 'NaN'){
-        if(!MAIN.pokemon[pokemon_id].default_form){
-          form_id = 0;
-        } else{
-          form_id = MAIN.pokemon[pokemon_id].default_form;
-        }
+        if(MAIN.masterfile['pokemon'][pokemon_id].default_form){
+          form_id = MAIN.masterfile['pokemon'][pokemon_id].default_form;
+        } else { form_id = 0; }
       }
 
       // DETERMINE FORM TYPE(S), EMOTE AND COLOR
-      if (!MAIN.pokemon[pokemon_id].attack) {
-        form_name = MAIN.pokemon[pokemon_id].forms[form_id].name;
-        attack = MAIN.pokemon[pokemon_id].forms[form_id].attack;
-        defense = MAIN.pokemon[pokemon_id].forms[form_id].defense;
-        stamina = MAIN.pokemon[pokemon_id].forms[form_id].stamina;
+      if (!MAIN.masterfile['pokemon'][pokemon_id].attack) {
+        form_name = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].name;
+        attack = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].attack;
+        defense = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].defense;
+        stamina = MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].stamina;
 
-        MAIN.pokemon[pokemon_id].forms[form_id].types.forEach((type) => {
+        MAIN.masterfile['pokemon'][pokemon_id].forms[form_id].types.forEach((type) => {
           pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
           MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
             if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
@@ -38,11 +36,11 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
         pokemon_type = pokemon_type.slice(0,-3);
         weaknesses = weaknesses.slice(0,-1);
       } else {
-        attack = MAIN.pokemon[pokemon_id].attack;
-        defense = MAIN.pokemon[pokemon_id].defense;
-        stamina = MAIN.pokemon[pokemon_id].stamina;
+        attack = MAIN.masterfile['pokemon'][pokemon_id].attack;
+        defense = MAIN.masterfile['pokemon'][pokemon_id].defense;
+        stamina = MAIN.masterfile['pokemon'][pokemon_id].stamina;
 
-        MAIN.pokemon[pokemon_id].types.forEach((type) => {
+        MAIN.masterfile['pokemon'][pokemon_id].types.forEach((type) => {
           pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
           MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
             if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
@@ -56,15 +54,15 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
       }
 
       //EVOLUTION FAMILY
-      for (key in MAIN.pokemon) { //Find Previous Evolutions
-        for(var i = 0; i < MAIN.pokemon[key].evolutions.length; i++) {
-          if (MAIN.pokemon[key].evolutions[i] == pokemon_id) {
-            evolutions = MAIN.pokemon[key].name+' -> '+evolutions;
+      for (key in MAIN.masterfile['pokemon']) { //Find Previous Evolutions
+        for(var i = 0; i < MAIN.masterfile['pokemon'][key].evolutions.length; i++) {
+          if (MAIN.masterfile['pokemon'][key].evolutions[i] == pokemon_id) {
+            evolutions = MAIN.masterfile['pokemon'][key].name+' -> '+evolutions;
             evolve = key;
-            for (key in MAIN.pokemon) {
-              for(var x = 0; x < MAIN.pokemon[evolve].evolutions.length; x++) {
-               if (MAIN.pokemon[key].evolutions[x] == evolve) {
-                 evolutions = MAIN.pokemon[key].name+' -> '+evolutions;
+            for (key in MAIN.masterfile['pokemon']) {
+              for(var x = 0; x < MAIN.masterfile['pokemon'][evolve].evolutions.length; x++) {
+               if (MAIN.masterfile['pokemon'][key].evolutions[x] == evolve) {
+                 evolutions = MAIN.masterfile['pokemon'][key].name+' -> '+evolutions;
                  break;
                }
              }
@@ -73,16 +71,16 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
           }
         }
        }
-       if (MAIN.pokemon[pokemon_id].evolutions != ''){ //Find Next Evolution
+       if (MAIN.masterfile['pokemon'][pokemon_id].evolutions != ''){ //Find Next Evolution
          evolutions += ' -> ';
-         for(var i = 0; i < MAIN.pokemon[pokemon_id].evolutions.length; i++) {
-           evolutions += MAIN.pokemon[MAIN.pokemon[pokemon_id].evolutions[i]].name+', ';
-           evolve = parseInt(MAIN.pokemon[MAIN.pokemon[pokemon_id].evolutions[i]]);
-           if (evolve != 'NaN' && MAIN.pokemon[evolve]) {
+         for(var i = 0; i < MAIN.masterfile['pokemon'][pokemon_id].evolutions.length; i++) {
+           evolutions += MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][pokemon_id].evolutions[i]].name+', ';
+           evolve = parseInt(MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][pokemon_id].evolutions[i]]);
+           if (evolve != 'NaN' && MAIN.masterfile['pokemon'][evolve]) {
              evolutions = evolutions.slice(0,-2);
              evolutions += ' -> ';
-             for(var x = 0; x < MAIN.pokemon[MAIN.pokemon[pokemon_id].evolutions[i]].evolutions.length; x++) {
-               evolutions += MAIN.pokemon[MAIN.pokemon[MAIN.pokemon[pokemon_id].evolutions[i]].evolutions[x]].name+', ';
+             for(var x = 0; x < MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][pokemon_id].evolutions[i]].evolutions.length; x++) {
+               evolutions += MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][pokemon_id].evolutions[i]].evolutions[x]].name+', ';
              }
            }
          }
@@ -96,7 +94,7 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
       .setColor(pokemon_color)
       .setThumbnail(sprite)
       .setTitle('**'+pokemon_name+'** ['+form_name+'] ('+pokemon_id+') '+pokemon_type)
-      .setDescription(MAIN.pokemon[pokemon_id].dex)
+      .setDescription(MAIN.masterfile['pokemon'][pokemon_id].dex)
       .addField('__Evolution Family__', evolutions)
       .addField('__Weaknesses__',weaknesses,true)
       .addField('__Base Stats__',

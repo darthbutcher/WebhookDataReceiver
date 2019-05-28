@@ -466,7 +466,7 @@ function sub_collector(MAIN, type, nickname, message, object, requirements, sub,
               default:
                 for(let p = 1; p < 723; p++){
                   if(p == 722){ message.reply('`'+message.content+'` doesn\'t appear to be a valid Raid Boss name. Please check the spelling and try again.').then(m => m.delete(5000)).catch(console.error); }
-                  else if(message.content.toLowerCase() == MAIN.pokemon[p].name.toLowerCase()){ return collector.stop(MAIN.pokemon[p].name); }
+                  else if(message.content.toLowerCase() == MAIN.masterfile['pokemon'][p].name.toLowerCase()){ return collector.stop(MAIN.masterfile['pokemon'][p].name); }
                 }
             } break;
 
