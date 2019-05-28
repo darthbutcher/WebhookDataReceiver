@@ -1,4 +1,9 @@
+<!-- define variables -->
+[1.1]: http://i.imgur.com/M4fJ65n.png (ATTENTION)
+
 # Webhook Data Receiver
+
+![alt text][1.1] <strong><em>`The contents of this repo are a proof of concept and are for educational use only, all copyrights belong to their respective owners.`</em></strong>![alt text][1.1]<br/>
 
 ## This bot requires intermediate knowledge of discord and bots. This is **not** for a beginner user. You will not receive beginner level support for this.
 
@@ -16,11 +21,9 @@
 
 ## 5: Edit the Config files and save them without the `.example` on them.
   - Emotes.ini
-    You have the option of setting your own custom emotes. If "Custom_Emotes" is set to false in your config, you will need to join then add your bots to these servers:
+    You will need to join emoji servers, or add the emoji to your own server:
       https://discord.gg/zqVCfPy - WEATHER, TEAMS, GYMS, TYPES
       https://discord.gg/AnECN8U - Legendary boss emojis
-    If you choose `true` for custom emotes, you will need to edit the emotes.json.example like below:
-      - This will be the emotes the bot uses for the embed posts (team emblems and Ex Icon. Images you can upload to your discord server are in the files folder under emotes. To get the emote IDs in you server, type \:youremotename: in discord. This will output something like `<:instinct:499334776189091871>`. Paste those into the emotes.json.example and save as emotes.json.
   - Discords.json
       - You need to add each Discord you plan on serving. WebhookDataReceiver is multi-discord capable. The geofence should encompass the whole area that the discord covers. Must be in geojson format.
   - Geojson.json
@@ -34,6 +37,7 @@
       - channels_pokemon.ini
       - channels_raids.ini
       - channels_quests.ini
+      - channels_lures.ini
 
 ## 7: Filters
   In /filters you will find examples of spawns, quest, and raid feeds. These files can be named whatever you want, there is no more name requirement. These are spawn filters based on PA type, also with a min_iv and max_iv override. If you do not include a Channel_ID, the bot will ignore the filter.
