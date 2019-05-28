@@ -26,31 +26,64 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
   let guild = MAIN.guilds.get(message.guild.id);
+  let pokemon_id = pokemon[0], form_id = pokemon[1];
+
+  if(!form_id || form_id == 'NaN'){
+    if(!MAIN.pokemon[pokemon_id].default_form){
+      form_id = 0;
+    } else{
+      form_id = MAIN.pokemon[pokemon_id].default_form;
+    }
+  }
 
   let result_string = '```', role_id = '';
-  let pokemon_name = MAIN.pokemon[pokemon].name;
-  let pokemon_color = '', form = '', level = 15;
+  let pokemon_name = MAIN.pokemon[pokemon_id].name;
+  let pokemon_color = '', level = 15;
   let pokemon_type = '', weaknesses = '';
   for(var atk = 15; atk >= 13; atk--) {
     for(var def = 15; def >= 13; def--) {
       for(var sta = 15; sta >= 13; sta--) {
         iv_percent = Math.round((atk + def + sta) / 45 * 100);
-        result_string += atk+','+def+','+sta+'  '+MAIN.CalculateCP(pokemon,form,atk,def,sta,level)+' CP  '+iv_percent+'%\n';
+        result_string += atk+','+def+','+sta+' '+MAIN.CalculateCP(pokemon_id,form_id,atk,def,sta,level)+' CP '+iv_percent+'%\n';
       }
     }
   }
   result_string += '```';
-  MAIN.pokemon[pokemon].types.forEach((type) => {
-    pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
-    MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
-      if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
-        weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
-      }
+  // DETERMINE FORM TYPE(S), EMOTE AND COLOR
+  if (!MAIN.pokemon[pokemon_id].attack) {
+    form_name = MAIN.pokemon[pokemon_id].forms[form_id].name;
+    attack = MAIN.pokemon[pokemon_id].forms[form_id].attack;
+    defense = MAIN.pokemon[pokemon_id].forms[form_id].defense;
+    stamina = MAIN.pokemon[pokemon_id].forms[form_id].stamina;
+
+    MAIN.pokemon[pokemon_id].forms[form_id].types.forEach((type) => {
+      pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
+        if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+          weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+        }
+      });
+      pokemon_color = MAIN.Get_Color(type, pokemon_color);
     });
-    pokemon_color = MAIN.Get_Color(type, pokemon_color);
-  });
-  pokemon_type = pokemon_type.slice(0,-3);
-  weaknesses = weaknesses.slice(0,-1);
+    pokemon_type = pokemon_type.slice(0,-3);
+    weaknesses = weaknesses.slice(0,-1);
+  } else {
+    attack = MAIN.pokemon[pokemon_id].attack;
+    defense = MAIN.pokemon[pokemon_id].defense;
+    stamina = MAIN.pokemon[pokemon_id].stamina;
+
+    MAIN.pokemon[pokemon_id].types.forEach((type) => {
+      pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
+        if(weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+          weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+        }
+      });
+      pokemon_color = MAIN.Get_Color(type, pokemon_color);
+    });
+    pokemon_type = pokemon_type.slice(0,-3);
+    weaknesses = weaknesses.slice(0,-1);
+  }
 
   let sprite = await MAIN.Get_Sprite(form, pokemon);
   let chart_embed = new Discord.RichEmbed()
@@ -77,14 +110,27 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
   // FILTER COLLECT EVENT
   await collector.on('collect', message => {
    if(MAIN.config.Tidy_Channel == 'ENABLED' && discord.command_channels.indexOf(message.channel.id) < 0 && discord.spam_channels.indexOf(message.channel.id) < 0){ message.delete(); }
+   let pokemon_w_form = [], form = '';
    pokemon = capitalize(message.content);
+   split = pokemon.split(' ');
+
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
    for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === pokemon) {
-        pokemon = key;
-        collector.stop(pokemon);
+      if (MAIN.pokemon[key].name === split[0]) {
+        if (split[1]){
+          form = capitalize(split[1]);
+          if (split[2]){ form += ' '+capitalize(split[2]); }
+          Object.keys(MAIN.pokemon[key].forms).forEach(function(name){
+            if(MAIN.pokemon[key].forms[name].name == form){
+              form = name;
+            }
+          });
+        }
+        pokemon_w_form[0] = key;
+        pokemon_w_form[1] = form;
+        collector.stop(pokemon_w_form);
         break;
       }
     }

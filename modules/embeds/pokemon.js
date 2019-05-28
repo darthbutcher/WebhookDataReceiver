@@ -114,13 +114,13 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   }
 
   function send_embed(minutes){
-  if(member){
-    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon.name+' to '+member.user.tag+' ('+member.id+').'); }
-    return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
-  } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
-    if (minutes < MAIN.config.TIME_REMAIN) { return console.error('Timer ('+minutes+') for is less than '+MAIN.config.TIME_REMAIN+' '+pokemon.name+' ->'+sighting.encounter_id); }
-    if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon.name+' to '+target.guild.name+' ('+target.id+').'); }
-    return MAIN.Send_Embed('pokemon', 0, server, role_id, pokemon_embed, target.id);
-  } else{ return; }}
+    if(member){
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon.name+' to '+member.user.tag+' ('+member.id+').'); }
+      return MAIN.Send_DM(server.id, member.id, pokemon_embed, target.bot);
+    } else if(MAIN.config.POKEMON.Discord_Feeds == 'ENABLED'){
+      if (minutes < MAIN.config.TIME_REMAIN) { return console.error('Timer ('+minutes+') for is less than '+MAIN.config.TIME_REMAIN+' '+pokemon.name+' ->'+sighting.encounter_id); }
+      if(MAIN.config.DEBUG.Pokemon == 'ENABLED'){ console.info('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] [Embed] [pokemon.js] Sent a '+pokemon.name+' to '+target.guild.name+' ('+target.id+').'); }
+      return MAIN.Send_Embed('pokemon', 0, server, role_id, pokemon_embed, target.id);
+    } else{ return; }}
 
 }

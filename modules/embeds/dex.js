@@ -15,18 +15,17 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
         if(!MAIN.pokemon[pokemon_id].default_form){
           form_id = 0;
         } else{
-          form_id = MAIN.pokemon[pokemon_id].default_form
+          form_id = MAIN.pokemon[pokemon_id].default_form;
         }
       }
 
-      // DETERMINE FORM
+      // DETERMINE FORM TYPE(S), EMOTE AND COLOR
       if (!MAIN.pokemon[pokemon_id].attack) {
         form_name = MAIN.pokemon[pokemon_id].forms[form_id].name;
         attack = MAIN.pokemon[pokemon_id].forms[form_id].attack;
         defense = MAIN.pokemon[pokemon_id].forms[form_id].defense;
         stamina = MAIN.pokemon[pokemon_id].forms[form_id].stamina;
 
-        // GET POKEMON TYPE(S), EMOTE AND COLOR
         MAIN.pokemon[pokemon_id].forms[form_id].types.forEach((type) => {
           pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
           MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
@@ -43,7 +42,6 @@ module.exports.run = async (MAIN, message, pokemon_id, form_id, server) => {
         defense = MAIN.pokemon[pokemon_id].defense;
         stamina = MAIN.pokemon[pokemon_id].stamina;
 
-        // GET POKEMON TYPE(S), EMOTE AND COLOR
         MAIN.pokemon[pokemon_id].types.forEach((type) => {
           pokemon_type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
           MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {

@@ -353,7 +353,7 @@ MAIN.Get_Sprite = (form, id) => {
   // ASSET ICONS
   if (MAIN.config.SPRITE_TYPE == 'ASSETS') {
     if (form > 0 ){
-      switch (MAIN.forms[id][form]) {
+      switch (MAIN.pokemon[id].forms[form].name) {
         case 'Alolan': extension = '_61'+extension; break;
         case 'Origin': extension = '_12'+extension; break;
         case 'Sunny': extension = '_12'+extension; break;
@@ -367,7 +367,7 @@ MAIN.Get_Sprite = (form, id) => {
   }
   // SEREBII ICONS
   if ((form != 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
-    switch (MAIN.forms[id][form]) {
+    switch (MAIN.pokemon[id].forms[form].name) {
       case 'Alolan': extension = '-a'+extension; break;
       case 'Origin': extension = '-o'+extension; break;
       default: extension = extension;

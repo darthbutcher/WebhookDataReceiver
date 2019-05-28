@@ -83,7 +83,7 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
     // DELETE ORIGINAL MESSAGE
     msg.delete();
     switch(reason){
-      case 'cancel': resolve('cancel'); break;
+      case 'cancel': break;
       case 'time': if(source == 'start'){
         message.reply('Your subscription has timed out.').then(m => m.delete(5000)).catch(console.error);
       }

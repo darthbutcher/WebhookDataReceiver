@@ -23,12 +23,11 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 }
 
-function pokemon_view(MAIN, message, nickname, pokemon_w_form, prefix, discord){
+function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
   new Promise(async function(resolve, reject) {
-    pokemon = pokemon_w_form[0];
-    form = pokemon_w_form[1];
-    console.log(pokemon+' '+form);
-    Send_Dex.run(MAIN, message, pokemon, form, discord);
+    pokemon_id = pokemon[0];
+    form_id = pokemon[1];
+    Send_Dex.run(MAIN, message, pokemon_id, form_id, discord);
     return message.reply('Entry sent, check your inbox if not in the channel.')
     .then(m => m.delete(5000)).catch(console.error);
   });
