@@ -1,5 +1,5 @@
 const Discord = require('discord.js');
-const base_stats = require('../static/base_stats.json');
+const pokemon = require('../static/masterfile.json');
 
 module.exports = function(p) {
 
@@ -7,7 +7,7 @@ module.exports = function(p) {
 
   for(var pokemon in p.possible_cps)
   {
-    pvpString += base_stats[pokemon].name+" Level "+p.possible_cps[pokemon].level+" CP "+p.possible_cps[pokemon].cp
+    pvpString += pokemon[pokemon].name+" Level "+p.possible_cps[pokemon].level+" CP "+p.possible_cps[pokemon].cp
                 +" \n Rank: "+p.possible_cps[pokemon].rank+"("+p.possible_cps[pokemon].percent+"%)\n";
   }
 

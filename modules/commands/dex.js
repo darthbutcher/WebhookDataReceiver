@@ -4,7 +4,7 @@ const Send_Dex = require('../embeds/dex.js');
 
 module.exports.run = async (MAIN, message, prefix, discord) => {
   // DECLARE VARIABLES
-  let nickname = '', park = '';
+  let nickname = '';
 
   // GET USER NICKNAME
   if(message.member.nickname){ nickname = message.member.nickname; } else{ nickname = message.member.user.username; }
@@ -12,7 +12,7 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
   let requestAction = new Discord.RichEmbed()
     .setAuthor(nickname, message.member.user.displayAvatarURL)
     .setTitle('What Pokémon do you want to find out more about?')
-    .setFooter('Type the name of desired Poké or Park, no command prefix required.');
+    .setFooter('Type the name of desired Pokémon, no command prefix required.');
 
   message.channel.send(requestAction).catch(console.error).then( msg => {
       initiate_collector(MAIN, 'start', message, msg, nickname, prefix, discord);
@@ -23,9 +23,12 @@ module.exports.run = async (MAIN, message, prefix, discord) => {
 
 }
 
-function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
+function pokemon_view(MAIN, message, nickname, pokemon_w_form, prefix, discord){
   new Promise(async function(resolve, reject) {
-    Send_Dex.run(MAIN, message, pokemon, discord);
+    pokemon = pokemon_w_form[0];
+    form = pokemon_w_form[1];
+    console.log(pokemon+' '+form);
+    Send_Dex.run(MAIN, message, pokemon, form, discord);
     return message.reply('Entry sent, check your inbox if not in the channel.')
     .then(m => m.delete(5000)).catch(console.error);
   });
@@ -40,14 +43,27 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
   // FILTER COLLECT EVENT
   await collector.on('collect', message => {
    if(MAIN.config.Tidy_Channel == 'ENABLED' && discord.command_channels.indexOf(message.channel.id) < 0 && discord.spam_channels.indexOf(message.channel.id) < 0){ message.delete(); }
+   let pokemon_w_form = [], form = '';
    pokemon = capitalize(message.content);
+   split = pokemon.split(' ');
+
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
    for (key in MAIN.pokemon) {
-      if (MAIN.pokemon[key].name === pokemon) {
-        pokemon = key;
-        collector.stop(pokemon);
+      if (MAIN.pokemon[key].name === split[0]) {
+        if (split[1]){
+          form = capitalize(split[1]);
+          if (split[2]){ form += ' '+capitalize(split[2]); }
+          Object.keys(MAIN.pokemon[key].forms).forEach(function(name){
+            if(MAIN.pokemon[key].forms[name].name == form){
+              form = name;
+            }
+          });
+        }
+        pokemon_w_form[0] = key;
+        pokemon_w_form[1] = form;
+        collector.stop(pokemon_w_form);
         break;
       }
     }
@@ -82,10 +98,4 @@ const capitalize = (s) => {
  if (typeof s !== 'string') {return '';}
  s = s.toLowerCase();
  return s.charAt(0).toUpperCase() + s.slice(1)
-}
-
-async function asyncForEach(array, callback) {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
 }

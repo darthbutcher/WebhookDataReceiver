@@ -31,7 +31,7 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     case 7:
       form = quest.rewards[0].info.form_id;
       if (form > 0){
-        form_name = ' ['+MAIN.forms[quest.rewards[0].info.pokemon_id][form]+']';
+        form_name = ' ['+MAIN.pokemon[quest.rewards[0].info.pokemon_id].forms[form].name+']';
       }
       simple_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name;
       quest_reward = MAIN.pokemon[quest.rewards[0].info.pokemon_id].name+form_name+' Encounter';
@@ -245,7 +245,6 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
   } else{ pokestop.sprite = await MAIN.Get_Icon(quest, quest_reward); }
 
   // DETERMINE THE QUEST TASK
-  pokestop.task = '';
   switch(true){
     // CATCHING SPECIFIC POKEMON
     case quest.template.indexOf('catch')>=0:

@@ -10,7 +10,7 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
   // DETERMINE POKEMON NAME AND FORM
   pokemon.name = MAIN.pokemon[sighting.pokemon_id].name;
   if (sighting.form > 0){
-    form_name = '['+MAIN.forms[sighting.pokemon_id][sighting.form]+'] ';
+    form_name = '['+MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].name+'] ';
   }
 
   pokemon.area = embed_area;
@@ -30,11 +30,20 @@ module.exports.run = async (MAIN, target, sighting, internal_value, time_now, ma
   pokemon.mins = Math.floor((sighting.disappear_time-(time_now/1000))/60);
   pokemon.secs = Math.floor((sighting.disappear_time-(time_now/1000)) - (pokemon.mins*60));
 
-  // GET POKEMON TYPE(S) AND EMOTE
-  MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => {
-    pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
-    pokemon.color = MAIN.Get_Color(type, pokemon.color);
-  }); pokemon.type = pokemon.type.slice(0,-3);
+  // DETERMINE POKEMON NAME, FORM AND TYPE EMOTES
+  pokemon.name = MAIN.pokemon[sighting.pokemon_id].name;
+  if (sighting.form > 0 && !MAIN.pokemon[sighting.pokemon_id].types){
+    pokemon.form = '['+MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].name+'] ';
+    MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].types.forEach((type) => {
+      pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      pokemon.color = MAIN.Get_Color(type, pokemon.color);
+    }); pokemon.type = pokemon.type.slice(0,-3);
+  } else {
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => {
+      pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      pokemon.color = MAIN.Get_Color(type, pokemon.color);
+    }); pokemon.type = pokemon.type.slice(0,-3);
+  }
 
   // GET SPRITE IMAGE
   pokemon.sprite = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);

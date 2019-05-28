@@ -110,14 +110,8 @@ function load_data(){
   MAIN.db = require('../../static/database.json');
   delete require.cache[require.resolve('../../static/types.json')];
   MAIN.types = require('../../static/types.json');
-  delete require.cache[require.resolve('../../static/pokemon.json')];
-  MAIN.pokemon = require('../../static/pokemon.json');
-  delete require.cache[require.resolve('../../static/forms.json')];
-  MAIN.forms = require('../../static/forms.json');
-  delete require.cache[require.resolve('../../static/base_stats.json')];
-  MAIN.base_stats = require('../../static/base_stats.json');
-  delete require.cache[require.resolve('../../static/evolutions.json')];
-  MAIN.evolutions = require('../../static/evolutions.json');
+  delete require.cache[require.resolve('../../static/masterfile.json')];
+  MAIN.pokemon = require('../../static/masterfile.json');
   delete require.cache[require.resolve('../../static/cp_multiplier.json')];
   MAIN.cp_multiplier = require('../../static/cp_multiplier.json');
   delete require.cache[require.resolve('../../static/gyms.json')];
@@ -411,9 +405,9 @@ MAIN.Get_Color = (type, color) => {
 }
 
 // POKEMON CPs
-MAIN.CalculateCP = (pokemon, form, iv_atk, iv_def, iv_sta, level) => {
-  if (form > 28) { pokemon = pokemon+form }
+MAIN.CalculateCP = (pokemon_id, form_id, iv_atk, iv_def, iv_sta, level) => {
 	let cp = 0;
+  let base_atk = 0, base_def = 0, base_sta = 0;
 
 	let remainder = level % 1;
 	level = Math.floor(level);
@@ -422,9 +416,15 @@ MAIN.CalculateCP = (pokemon, form, iv_atk, iv_def, iv_sta, level) => {
 	let cpIndex = ((level * 2) - 2) + (remainder * 2);
 	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
 
-	let base_atk = MAIN.base_stats[pokemon].attack;
-	let base_def = MAIN.base_stats[pokemon].defense;
-	let base_sta = MAIN.base_stats[pokemon].stamina;
+  if (form_id > 0 && !MAIN.pokemon[pokemon_id].attack){
+    base_atk = MAIN.pokemon[pokemon_id].forms[form_id].attack;
+  	base_def = MAIN.pokemon[pokemon_id].forms[form_id].defense;
+  	base_sta = MAIN.pokemon[pokemon_id].forms[form_id].stamina;
+  } else {
+    base_atk = MAIN.pokemon[pokemon_id].attack;
+  	base_def = MAIN.pokemon[pokemon_id].defense;
+  	base_sta = MAIN.pokemon[pokemon_id].stamina;
+  }
 
 	let attackMultiplier = base_atk + parseInt(iv_atk);
 	let defenseMultiplier = Math.pow(base_def + parseInt(iv_def),.5);
@@ -487,9 +487,15 @@ MAIN.Get_Icon = (object, quest_reward) => {
 }
 
 // Get Size of Pokemon BIG Karp/Tiny Rat
-MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight) => {
-        let weightRatio = pokemon_weight / MAIN.base_stats[pokemon_id].weight;
-        let heightRatio = pokemon_height / MAIN.base_stats[pokemon_id].height;
+MAIN.Get_Size = (pokemon_id, pokemon_height, pokemon_weight, form_id) => {
+        let weightRatio = 0, heightRatio = 0;
+        if (form_id > 0 && !MAIN.pokemon[pokemon_id].weight){
+          weightRatio = pokemon_weight / MAIN.pokemon[pokemon_id].forms[form_id].weight;
+          heightRatio = pokemon_height / MAIN.pokemon[pokemon_id].forms[form_id].height;
+        } else {
+          weightRatio = pokemon_weight / MAIN.pokemon[pokemon_id].weight;
+          heightRatio = pokemon_height / MAIN.pokemon[pokemon_id].height;
+        }
 
         let size = heightRatio + weightRatio;
 

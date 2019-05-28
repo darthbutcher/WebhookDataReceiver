@@ -99,22 +99,26 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
 
     // RAID IS A BOSS
     case 'Boss':
-      // DETERMINE POKEMON NAME AND FORM
+      // DETERMINE POKEMON NAME, FORM, TYPE, AND WEAKNESSES
       gym.boss = MAIN.pokemon[raid.pokemon_id].name;
       if (raid.form > 0){
-        gym.form = '['+MAIN.forms[raid.pokemon_id][raid.form]+']';
+        gym.form = '['+MAIN.pokemon[raid.pokemon_id].forms[raid.form].name+']';
+        await MAIN.pokemon[raid.pokemon_id].forms[raid.form].types.forEach((type) => {
+         gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
+         MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
+           if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+             gym.weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+           }
+         }); });
+      } else{
+        await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {
+         gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
+         MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
+           if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
+             gym.weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
+           }
+         }); });
       }
-
-
-      // DETERMINE POKEMON TYPE
-      await MAIN.pokemon[raid.pokemon_id].types.forEach((type) => {
-        gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
-        MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
-          if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
-            gym.weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
-          }
-        });
-      });
       gym.type = gym.type.slice(0,-3);
       gym.weaknesses = gym.weaknesses.slice(0,-1);
 

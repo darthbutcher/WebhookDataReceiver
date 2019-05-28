@@ -6,6 +6,8 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
 
   // CHECK IF THE TARGET IS A USER
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
+
+  // ASSIGN VARIABLES
   let pokemon = {type: '', color: '', form: '', weather_boost: ''};
   pokemon.area = embed_area;
   pokemon.lat = sighting.latitude;
@@ -16,10 +18,19 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
     pokemon.map_img = await MAIN.Static_Map_Tile(sighting.latitude, sighting.longitude, 'pokemon');
   }
 
-  // DETERMINE POKEMON NAME AND FORM
+  // DETERMINE POKEMON NAME, FORM AND TYPE EMOTES
   pokemon.name = MAIN.pokemon[sighting.pokemon_id].name;
-  if (sighting.form > 0){
-    pokemon.form = '['+MAIN.forms[sighting.pokemon_id][sighting.form]+'] ';
+  if (sighting.form > 0 && !MAIN.pokemon[sighting.pokemon_id].types){
+    pokemon.form = '['+MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].name+'] ';
+    MAIN.pokemon[sighting.pokemon_id].forms[sighting.form].types.forEach((type) => {
+      pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      pokemon.color = MAIN.Get_Color(type, pokemon.color);
+    }); pokemon.type = pokemon.type.slice(0,-3);
+  } else {
+    MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => {
+      pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
+      pokemon.color = MAIN.Get_Color(type, pokemon.color);
+    }); pokemon.type = pokemon.type.slice(0,-3);
   }
 
   // DESPAWN VERIFICATION
@@ -29,12 +40,6 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
   pokemon.time = await MAIN.Bot_Time(sighting.disappear_time, '1', timezone);
   pokemon.mins = Math.floor((sighting.disappear_time-(time_now/1000))/60);
   pokemon.secs = Math.floor((sighting.disappear_time-(time_now/1000)) - (pokemon.mins*60));
-
-  // GET POKEMON TYPE(S) AND EMOTE
-  MAIN.pokemon[sighting.pokemon_id].types.forEach((type) => {
-    pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
-    pokemon.color = MAIN.Get_Color(type, pokemon.color);
-  }); pokemon.type = pokemon.type.slice(0,-3);
 
   // GET SPRITE IMAGE
   pokemon.sprite = await MAIN.Get_Sprite(sighting.form, sighting.pokemon_id);
