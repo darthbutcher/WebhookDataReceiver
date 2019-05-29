@@ -7,7 +7,7 @@ module.exports = function(p) {
 
   for(var pokemon in p.possible_cps)
   {
-    pvpString += master_file['pokemon'].name+" Level "+p.possible_cps[pokemon].level+" CP "+p.possible_cps[pokemon].cp
+    pvpString += master_file[pokemon].name+" Level "+p.possible_cps[pokemon].level+" CP "+p.possible_cps[pokemon].cp
                 +" \n Rank: "+p.possible_cps[pokemon].rank+"("+p.possible_cps[pokemon].percent+"%)\n";
   }
 
