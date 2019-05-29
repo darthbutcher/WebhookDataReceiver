@@ -41,9 +41,6 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
       } break;
   }
 
-  // GET THE QUEST TASK
-  let quest_task = await get_quest_task(MAIN, quest);
-
   if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [quests.js] [QUEST] Received '+quest_reward+' Quest for '+server.name+'.'); }
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
@@ -244,66 +241,8 @@ async function send_quest(MAIN, quest, quest_reward, simple_reward, main_area, s
     pokestop.sprite = await MAIN.Get_Sprite(quest.rewards[0].info.form_id, quest.rewards[0].info.pokemon_id);
   } else{ pokestop.sprite = await MAIN.Get_Icon(quest, quest_reward); }
 
-  // DETERMINE THE QUEST TASK
-  switch(true){
-    // CATCHING SPECIFIC POKEMON
-    case quest.template.indexOf('catch')>=0:
-      if(quest.conditions && quest.conditions[0]){
-        if(quest.conditions[0].info && quest.conditions[0].info.pokemon_type_ids){
-          pokestop.task = 'Catch '+quest.target+' '+MAIN.proto.values['poke_type_'+quest.conditions[0].info.pokemon_type_ids[0]]+' Type Pokémon.';
-        } else{ pokestop.task = 'Catch '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[0].type]+' Pokémon.'; }
-      } else{ pokestop.task = 'Catch '+quest.target+' Pokémon.'; } break;
-    // LANDING SPECIFIC THROWS
-    case quest.template.indexOf('great') >= 0:
-    case quest.template.indexOf('curveball') >= 0:
-    case quest.template.indexOf('excellent') >= 0:
-    case quest.template.indexOf('land') >= 0:
-      if(quest.conditions[1]){ pokestop.task = 'Throw '+quest.target+' '+MAIN.proto.values['quest_condition_'+quest.conditions[1].type]+'(s).'; }
-      else if(quest.target > 1){ pokestop.task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throws in a Row.'; }
-      else{ pokestop.task = 'Perform '+quest.target+' '+MAIN.proto.values['throw_type_'+quest.conditions[0].info.throw_type_id]+' Throw.'; } break;
-    // COMPLETE RAIDS
-    case quest.template.indexOf('raid') >= 0:
-      if(!quest.conditions[0]){ pokestop.task = 'Battle in '+quest.target+' Raid.'; }
-      else if(quest.conditions[0].type == 6){ pokestop.task = 'Battle in '+quest.target+' Raid(s).'; }
-      else{ pokestop.task = 'Win '+quest.target+' Level '+quest.conditions[0].info.raid_levels+' Raid(s).'; } break;
-    // SEND GIFTS TO FRIENDS
-    case quest.template.indexOf('gifts') >= 0:
-      pokestop.task = 'Send '+quest.target+' Gift(s).'; break;
-    // GYM BATTLING
-    case quest.template.indexOf('gym') >= 0:
-      if(quest.target > 1){ pokestop.task = 'Battle '+quest.target+' Times in a Gym.'; }
-      else{ pokestop.task = 'Battle '+quest.target+' Time in a Gym.'; } break;
-    // BERRY GYM POKEMON
-    case quest.template.indexOf('berry') >= 0:
-      pokestop.task = 'Berry Pokémon '+quest.target+' Time(s) in a Gym.'; break;
-    // HATCH EGGS
-    case quest.template.indexOf('hatch') >= 0:
-      if(quest.target > 1){ quest_task='Hatch '+quest.target+' Eggs.'; }
-      else{ pokestop.task = 'Hatch '+quest.target+' Egg.'; } break;
-    // SPIN POKESTOPS
-    case quest.template.indexOf('spin') >= 0:
-      pokestop.task = 'Spin '+quest.target+' Pokéstops.'; break;
-    // EVOLVE POKEMON
-    case quest.template.indexOf('evolve') >= 0:
-      pokestop.task = 'Evolve '+quest.target+' Pokémon.'; break;
-    // BUDDY TASKS
-    case quest.template.indexOf('buddy') >= 0:
-      pokestop.task = 'Get '+quest.target+' Buddy Walking Candy.'; break;
-    // POWER UP POKEMON
-    case quest.template.indexOf('powerup') >= 0:
-      pokestop.task = 'Power Up '+quest.target+' Pokémon.'; break;
-    // TRADE POKEMON
-    case quest.template.indexOf('trade') >= 0:
-      pokestop.task = 'Perform '+quest.target+' Trade(s) with a Friend.'; break;
-    // TRANSFER POKEMON
-    case quest.template.indexOf('transfer') >= 0:
-      pokestop.task = 'Transfer '+quest.target+' Pokémon.'; break;
-    // USE SPECIFIC CHARGE MOVES
-    case quest.template.indexOf('charge') >= 0:
-      if(quest.target > 1){ quest_task='Use a Super Effective Charge Move '+quest.target+' Times.'; }
-      else{ pokestop.task = 'Use a Super Effective Charge Move '+quest.target+' Time.'; } break;
-    default: return console.error('NO CASE FOR THIS QUEST ('+quest.pokestop_id+')', quest);
-  }
+  // GET THE QUEST TASK
+  pokestop.task = await get_quest_task(MAIN, quest);
 
   // GET EMBED COLOR BASED ON QUEST DIFFICULTY
   pokestop.color = '';
