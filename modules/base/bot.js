@@ -364,10 +364,13 @@ MAIN.Get_Sprite = (form, id) => {
     sprite_url = sprite_url+'pokemon_icon_';
   }
   // SEREBII ICONS
-  if ((form != 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
+  if ((form > 0 ) && (MAIN.config.SPRITE_TYPE == 'DEFAULT')){
+    if(!MAIN.masterfile.pokemon[id].forms[form]){console.log('Error finding pokemon with form '+id+' '+form);}
     switch (MAIN.masterfile.pokemon[id].forms[form].name) {
       case 'Alolan': extension = '-a'+extension; break;
       case 'Origin': extension = '-o'+extension; break;
+      case 'Sandy': extension = '-c'+extension; break;
+      case 'Trash': extension = '-s'+extension; break;
       default: extension = extension;
     }
   }
