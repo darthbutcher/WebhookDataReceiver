@@ -8,7 +8,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
 
   // FILTER FEED TYPE FOR EGG, BOSS, OR BOTH
   let type = '', gym_id = raid.gym_id;
-  if(raid.cp > 0 || raid.is_exclusive == true){ type = 'Boss'; boss_name = MAIN.masterfile['pokemon'][raid.pokemon_id].name; }
+  if(raid.cp > 0 || raid.is_exclusive == true){ type = 'Boss'; boss_name = MAIN.masterfile.pokemon[raid.pokemon_id].name; }
   else{ type = 'Egg'; boss_name = 'Lvl'+raid.level; }
 
   await raid_lobbies();

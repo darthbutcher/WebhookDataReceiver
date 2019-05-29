@@ -56,7 +56,7 @@ function get_quest_task(MAIN, quest){
     // CATCHING SPECIFIC POKEMON
     case quest.template.indexOf('catch_specific')>=0:
       if(quest.conditions[0].info && quest.conditions[0].info.pokemon_ids){
-        quest_task = 'Catch '+quest.target+' '+MAIN.masterfile['pokemon'][quest.conditions[0].info.pokemon_ids[0]]+'.';
+        quest_task = 'Catch '+quest.target+' '+MAIN.masterfile.pokemon[quest.conditions[0].info.pokemon_ids[0]]+'.';
       } break;
 
     // CATCH POKEMON TYPES
@@ -144,7 +144,7 @@ function get_quest_task(MAIN, quest){
     case quest.template.indexOf('evolve_specific_plural') >= 0:
       let quest_pokemon = '';
       for(let p = 0; p < quest.conditions[0].info.pokemon_ids.length; p++){
-        quest_pokemon = MAIN.masterfile['pokemon'][quest.conditions[0].info.pokemon_ids[p]].name+', ';
+        quest_pokemon = MAIN.masterfile.pokemon[quest.conditions[0].info.pokemon_ids[p]].name+', ';
       }
       quest_pokemon = quest_pokemon.slice(0,-2);
       quest_task = 'Evolve a '+quest_pokemon; break;

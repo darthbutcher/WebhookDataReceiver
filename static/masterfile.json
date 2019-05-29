@@ -5532,6 +5532,7 @@
         "28": {"name": "Question"}
       },
       "evolutions": [],
+      "default_form": 19,
       "types": ["Psychic"],
       "dex": "This Pokémon is shaped like ancient writing. It is a mystery as to which came first, the ancient writings or the various Unown. Research into this topic is ongoing but nothing is known.",
       "attack": 136,
@@ -11110,38 +11111,14 @@
       "forms": {
         "118": {
           "name": "Plant",
-          "types": ["bug"],
-          "attack": 53,
-          "defense": 83,
-          "stamina": 120,
-          "height": 0.200000002980232,
-          "weight": 3.40000009536743,
-          "quickmove": ["Bug Bite", "Tackle"],
-          "chargedmove": ["Struggle"],
           "evolved_form": 87
         },
         "119": {
           "name": "Sandy",
-          "types": ["bug"],
-          "attack": 53,
-          "defense": 83,
-          "stamina": 120,
-          "height": 0.200000002980232,
-          "weight": 3.40000009536743,
-          "quickmove": ["Bug Bite", "Tackle"],
-          "chargedmove": ["Struggle"],
           "evolved_form": 88
         },
         "120": {
           "name": "Trash",
-          "types": ["bug"],
-          "attack": 53,
-          "defense": 83,
-          "stamina": 120,
-          "height": 0.200000002980232,
-          "weight": 3.40000009536743,
-          "quickmove": ["Bug Bite", "Tackle"],
-          "chargedmove": ["Struggle"],
           "evolved_form": 89
         }
       },
@@ -11177,7 +11154,7 @@
           "defense": 180,
           "stamina": 155,
           "height": 0.5,
-          "weight": 6.5,          
+          "weight": 6.5,
           "quickmove": ["Confusion","Bug Bite"],
           "chargedmove": ["Psybeam","Energy Ball","Bug Buzz"]
         },
@@ -11406,6 +11383,7 @@
         "94": { "name": "Overcast" },
         "95": { "name": "Sunny" }
       },
+      "default_form": 95,
       "evolutions": [],
       "types": ["Grass"],
       "dex": "If it senses strong sunlight, it opens its folded petals to absorb the sun's rays with its whole body.",
@@ -11434,6 +11412,7 @@
         "96": { "name": "West Sea" },
         "97": { "name": "East Sea" }
       },
+      "default_form": 97,
       "evolutions": [423],
       "types": ["Water"],
       "dex": "Its shape and coloration vary, depending on its habitat.",
@@ -11462,6 +11441,7 @@
         "98": { "name": "West Sea" },
         "99": { "name": "East Sea" }
       },
+      "default_form": 99,
       "evolutions": [],
       "types": ["Water","Ground"],
       "dex": "It apparently had a huge shell for protection in ancient times. It lives in shallow tidal pools.",
@@ -12919,7 +12899,7 @@
       "forms": {
         "81": {
           "name": "Normal",
-          "types": [],
+          "types": ["Electric","Ghost"],
           "attack": 185,
           "defense": 159,
           "stamina": 137,
@@ -12930,7 +12910,7 @@
         },
         "82": {
           "name": "Frost",
-          "types": [],
+          "types": ["Electric","Ice"],
           "attack": 204,
           "defense": 219,
           "stamina": 137,
@@ -12940,8 +12920,8 @@
           "chargedmove": ["Blizzard","Thunderbolt","Thunder"]
         },
         "83": {
-          "forms": "Fan",
-          "types": ["Electric","Ghost"],
+          "name": "Fan",
+          "types": ["Electric","Flying"],
           "attack": 204,
           "defense": 219,
           "stamina": 137,
@@ -12951,33 +12931,19 @@
           "chargedmove": ["Ominous Wind","Thunderbolt","Thunder"]
         },
         "84": {
-          "name": "Rotom",
-          "forms": "Mow",
-          "evolutions": [],
-          "types": [],
-          "dex": "",
+          "name": "Mow",
+          "types": ["Electric","Grass"],
           "attack": 204,
           "defense": 219,
           "stamina": 137,
           "height": 0.300000011920929,
           "weight": 0.300000011920929,
-          "male_percent": "",
-          "female_percent": "",
-          "catch_rate": 0.300000011920929,
-          "flee_rate": 0.100000001490116,
           "quickmove": ["Astonish","Thunder Shock"],
-          "chargedmove": ["Ominous Wind","Thunderbolt","Thunder"],
-          "candy": 25,
-          "buddy_distance": 5,
-          "thirdmove": 75,
-          "evolution_item": "",
-          "legendary": "",
-          "gender_requirement": "",
-          "buddy_distance_evolve": ""
+          "chargedmove": ["Ominous Wind","Thunderbolt","Thunder"]
         },
         "85": {
-          "forms": "Wash",
-          "types": [],
+          "name": "Wash",
+          "types": ["Electric","Water"],
           "attack": 204,
           "defense": 219,
           "stamina": 137,
@@ -12988,7 +12954,7 @@
         },
         "86": {
           "name": "Heat",
-          "types": [],
+          "types": ["Electric","Fire"],
           "attack": 204,
           "defense": 219,
           "stamina": 137,
@@ -12998,6 +12964,7 @@
           "chargedmove": ["Overheat","Thunderbolt","Thunder"]
         }
       },
+      "default_form": 81,
       "evolutions": [],
       "dex": "Its body is composed of plasma. It is known to infiltrate electronic devices and wreak havoc.",
       "male_percent": "",
@@ -13198,7 +13165,7 @@
       "name": "Giratina",
       "forms": {
         "90": {
-          "name": "Alttered",
+          "name": "Altered",
           "types": ["Ghost","Dragon"],
           "attack": 187,
           "defense": 225,

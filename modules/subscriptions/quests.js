@@ -31,10 +31,10 @@ module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server
     case 7:
       form = quest.rewards[0].info.form_id;
       if (form > 0){
-        form_name = ' ['+MAIN.masterfile['pokemon'][quest.rewards[0].info.pokemon_id].forms[form].name+']';
+        form_name = ' ['+MAIN.masterfile.pokemon[quest.rewards[0].info.pokemon_id].forms[form].name+']';
       }
-      simple_reward = MAIN.masterfile['pokemon'][quest.rewards[0].info.pokemon_id].name+form_name;
-      quest_reward = MAIN.masterfile['pokemon'][quest.rewards[0].info.pokemon_id].name+form_name+' Encounter';
+      simple_reward = MAIN.masterfile.pokemon[quest.rewards[0].info.pokemon_id].name+form_name;
+      quest_reward = MAIN.masterfile.pokemon[quest.rewards[0].info.pokemon_id].name+form_name+' Encounter';
       if(quest.rewards[0].info.shiny == true){
         simple_reward = 'Shiny '+simple_reward;
         quest_reward = 'Shiny '+quest_reward;
@@ -97,7 +97,7 @@ function get_quest_task(MAIN, quest){
     // CATCHING SPECIFIC POKEMON
     case quest.template.indexOf('catch_specific')>=0:
       if(quest.conditions[0].info && quest.conditions[0].info.pokemon_ids){
-        quest_task = 'Catch '+quest.target+' '+MAIN.masterfile['pokemon'][quest.conditions[0].info.pokemon_ids[0]]+'.';
+        quest_task = 'Catch '+quest.target+' '+MAIN.masterfile.pokemon[quest.conditions[0].info.pokemon_ids[0]]+'.';
       } break;
 
     // CATCH POKEMON TYPES
@@ -185,7 +185,7 @@ function get_quest_task(MAIN, quest){
     case quest.template.indexOf('evolve_specific_plural') >= 0:
       let quest_pokemon = '';
       for(let p = 0; p < quest.conditions[0].info.pokemon_ids.length; p++){
-        quest_pokemon = MAIN.masterfile['pokemon'][quest.conditions[0].info.pokemon_ids[p]].name+', ';
+        quest_pokemon = MAIN.masterfile.pokemon[quest.conditions[0].info.pokemon_ids[p]].name+', ';
       }
       quest_pokemon = quest_pokemon.slice(0,-2);
       quest_task = 'Evolve a '+quest_pokemon; break;

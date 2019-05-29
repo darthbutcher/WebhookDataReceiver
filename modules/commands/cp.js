@@ -28,12 +28,11 @@ async function pokemon_view(MAIN, message, nickname, pokemon_w_form, prefix, dis
   let guild = MAIN.guilds.get(message.guild.id);
   let pokemon_id = pokemon_w_form[0], form_id = pokemon_w_form[1];
 
-  if(!form_id || form_id == 'NaN'){
-    if(!MAIN.masterfile['pokemon'][pokemon_id].default_form){
-      form_id = 0;
-    } else{
-      form_id = MAIN.masterfile['pokemon'][pokemon_id].default_form;
-    }
+  // CHECK FOR DEFAULT FORM IF NOT 0
+  if(!form_id){
+    if(MAIN.masterfile.pokemon[pokemon_id].default_form){
+      form_id = MAIN.masterfile.pokemon[pokemon_id].default_form;
+    } else { form_id = 0; }
   }
 
   let search_string = pokemon_id+'&', role_id = '';
@@ -69,26 +68,27 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
   // FILTER COLLECT EVENT
   await collector.on('collect', message => {
    if(MAIN.config.Tidy_Channel == 'ENABLED' && discord.command_channels.indexOf(message.channel.id) < 0 && discord.spam_channels.indexOf(message.channel.id) < 0){ message.delete(); }
-   let pokemon_w_form = [], form = '';
+   let pokemon_w_form = [], form = '', form_id = '', name = '';
    pokemon = capitalize(message.content);
    split = pokemon.split(' ');
 
    if (pokemon != 'NaN' && pokemon < 809) {
      collector.stop(pokemon);
    }
-   for (key in MAIN.masterfile['pokemon']) {
-      if (MAIN.masterfile['pokemon'][key].name === split[0]) {
+   for (key in MAIN.masterfile.pokemon) {
+      if (MAIN.masterfile.pokemon[key].name === split[0]) {
+        name = key;
         if (split[1]){
           form = capitalize(split[1]);
           if (split[2]){ form += ' '+capitalize(split[2]); }
-          Object.keys(MAIN.masterfile['pokemon'][key].forms).forEach(function(name){
-            if(MAIN.masterfile['pokemon'][key].forms[name].name == form){
-              form = name;
+          Object.keys(MAIN.masterfile.pokemon[name].forms).forEach(function(id){
+            if(MAIN.masterfile.pokemon[name].forms[id].name == form){
+              form_id = id;
             }
           });
         }
-        pokemon_w_form[0] = key;
-        pokemon_w_form[1] = form;
+        pokemon_w_form[0] = name;
+        pokemon_w_form[1] = form_id;
         collector.stop(pokemon_w_form);
         break;
       }

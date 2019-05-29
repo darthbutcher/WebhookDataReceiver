@@ -6,7 +6,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
 
   if(!raid.pokemon_id){ return; }
 
-  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] Received '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Raid for '+server.name+'.'); }
+  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] Received '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Raid for '+server.name+'.'); }
 
   // FETCH ALL USERS FROM THE USERS TABLE AND CHECK SUBSCRIPTIONS
   MAIN.pdb.query(`SELECT * FROM users WHERE discord_id = ? AND status = ?`, [server.id, 'ACTIVE'], function (error, users, fields){
@@ -37,7 +37,7 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
             if(sub.id == raid.gym_id || sub.gym == 'All'){
 
               // CHECK IF THE RAID BOSS NAME MATCHES THE USER'S SUB
-              if(sub.boss == MAIN.masterfile['pokemon'][raid.pokemon_id].name || sub.boss == 'All'){
+              if(sub.boss == MAIN.masterfile.pokemon[raid.pokemon_id].name || sub.boss == 'All'){
 
                 // CHECK THE SUBS MIN LEVEL
                 if(sub.min_lvl == 'Boss Specified' || raid.level >= sub.min_lvl || sub.min_lvl.toLowerCase() == 'all'){
@@ -51,19 +51,19 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
                     } else if(user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
                       Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
                     } else{
-                      if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
+                      if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
                     }
                   } else{
-                    if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Level Filter.'); }
+                    if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Level Filter.'); }
                   }
                 } else{
-                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Level Filter.'); }
+                  if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Level Filter.'); }
                 }
               } else{
-                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Boss Name Filter.'); }
+                if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Raid Boss Name Filter.'); }
               }
             } else{
-              if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile['pokemon'][raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gym Name Filter.'); }
+              if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Gym Name Filter.'); }
             }
           });
         }

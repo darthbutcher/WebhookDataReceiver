@@ -55,7 +55,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         // no need to calculate possible CP if current CP wasn't provided
         if(!sighting.cp) return;
         if(sighting.cp > filter.max_cp_range) { return sightingFailed(MAIN, filter, "CP Range"); }
-        if(filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name] != 'True') { return sightingFailed(MAIN, filter, "Pokemon: "+sighting.pokemon_id+" set to False"); }
+        if(filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name] != 'True') { return sightingFailed(MAIN, filter, "Pokemon: "+sighting.pokemon_id+" set to False"); }
         let form_name = '', formID = sighting.form;
         let possible_cps = CalculatePossibleCPs(MAIN, sighting.pokemon_id, sighting.form, sighting.individual_attack, sighting.individual_defense, sighting.individual_stamina, sighting.pokemon_level, gender, filter.min_cp_range, filter.max_cp_range);
         let unique_cps = {};
@@ -91,7 +91,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         case filter.Post_Without_IV:
           switch(true){
             case sighting.cp > 0: break;
-            case filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name] == 'False': break;
+            case filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name] == 'False': break;
             default:
               Send_Pokemon.run(MAIN, false, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id); break;
           }
@@ -99,10 +99,10 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
         case !sighting.cp > 0: break;
 
         // CHECK IF FILTER HAS INDIVIDUAL POKEMON IV REQUIREMENT
-        case filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name] != 'True':
+        case filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name] != 'True':
           switch(true){
-            case filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name] == 'False': break;
-            case filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name].min_iv > internal_value: sightingFailed(MAIN, filter, 'IV'); break;
+            case filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name] == 'False': break;
+            case filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name].min_iv > internal_value: sightingFailed(MAIN, filter, 'IV'); break;
             case filter.max_iv < internal_value: sightingFailed(MAIN, filter, 'IV'); break;
             case filter.min_cp > sighting.cp: sightingFailed(MAIN, filter, 'CP'); break;
             case filter.max_cp < sighting.cp: sightingFailed(MAIN, filter, 'CP'); break;
@@ -119,7 +119,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
           // SEND SIGHTING THROUGH ALL FILTERS
           switch(true){
-            case !filter[MAIN.masterfile['pokemon'][sighting.pokemon_id].name]: sightingFailed(MAIN, filter, 'IV'); break;
+            case !filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name]: sightingFailed(MAIN, filter, 'IV'); break;
             case min_iv[0] > sighting.individual_attack: sightingFailed(MAIN, filter, 'IV'); break;
             case min_iv[1] > sighting.individual_defense: sightingFailed(MAIN, filter, 'IV'); break;
             case min_iv[2] > sighting.individual_stamina: sightingFailed(MAIN, filter, 'IV'); break;
@@ -164,13 +164,13 @@ function sightingFailed(MAIN, filter, reason){
 function CalculatePossibleCPs(MAIN, pokemonID, formID, attack, defense, stamina, level, gender, minCP, maxCP)
 {
 
-  let possibleCPs = []; 
+  let possibleCPs = [];
 
   // Check for required gender on evolution
-  if(MAIN.masterfile.pokemon[pokemonID].gender_requirement  && MAIN.masterfile.pokemon[pokemonID].gender_requirement != gender) 
-  {     
-    return possibleCPs; 
-  }  
+  if(MAIN.masterfile.pokemon[pokemonID].gender_requirement  && MAIN.masterfile.pokemon[pokemonID].gender_requirement != gender)
+  {
+    return possibleCPs;
+  }
 
   for(var i = level; i <= 40; i += .5)
   {
@@ -184,21 +184,21 @@ function CalculatePossibleCPs(MAIN, pokemonID, formID, attack, defense, stamina,
   }
 
   // IF no data about possible evolutions just return now rather than moving on
-  if(!MAIN.masterfile['pokemon'][pokemonID].evolutions){ return possibleCPs; }
+  if(!MAIN.masterfile.pokemon[pokemonID].evolutions){ return possibleCPs; }
 
-  for(var i = 0; i < MAIN.masterfile['pokemon'][pokemonID].evolutions.length; i++) {
+  for(var i = 0; i < MAIN.masterfile.pokemon[pokemonID].evolutions.length; i++) {
     //Check for Evolution Form
     if (formID > 0){
-      if(!MAIN.masterfile['pokemon'][pokemonID].forms[formID]){
-          evolvedForm = MAIN.masterfile['pokemon'][MAIN.masterfile['pokemon'][pokemonID].evolutions[i]].default_form;
+      if(!MAIN.masterfile.pokemon[pokemonID].forms[formID]){
+          evolvedForm = MAIN.masterfile.pokemon[MAIN.masterfile.pokemon[pokemonID].evolutions[i]].default_form;
         } else{
-          evolvedForm = MAIN.masterfile['pokemon'][pokemonID].forms[formID].evolved_form;
+          evolvedForm = MAIN.masterfile.pokemon[pokemonID].forms[formID].evolved_form;
         }
-    } else if (MAIN.masterfile['pokemon'][pokemonID].evolved_form){
-      evolvedForm = MAIN.masterfile['pokemon'][pokemonID].evolved_form;
+    } else if (MAIN.masterfile.pokemon[pokemonID].evolved_form){
+      evolvedForm = MAIN.masterfile.pokemon[pokemonID].evolved_form;
     } else { evolvedForm = formID; }
 
-    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.masterfile['pokemon'][pokemonID].evolutions[i], evolvedForm, attack, defense, stamina, level, gender, minCP, maxCP));
+    possibleCPs = possibleCPs.concat(CalculatePossibleCPs(MAIN,MAIN.masterfile.pokemon[pokemonID].evolutions[i], evolvedForm, attack, defense, stamina, level, gender, minCP, maxCP));
   }
 
   return possibleCPs;
@@ -215,18 +215,18 @@ function CalculateCP(MAIN, pokemonID, formID, attack , defense, stamina, level)
 	let cpIndex = ((level * 2) - 2) + (remainder * 2);
 	let CPMultiplier = MAIN.cp_multiplier.CPMultiplier[cpIndex];
 
-  if(!MAIN.masterfile['pokemon'][pokemonID].attack)
+  if(!MAIN.masterfile.pokemon[pokemonID].attack)
   {
-    if(!MAIN.masterfile['pokemon'][pokemonID].forms[formID] || !MAIN.masterfile['pokemon'][pokemonID].forms[formID].attack){
+    if(!MAIN.masterfile.pokemon[pokemonID].forms[formID] || !MAIN.masterfile.pokemon[pokemonID].forms[formID].attack){
       console.log("Can't find attack of Pokemon ID: "+pokemonID+' Form:'+formID);
     }
-    pokemonAttack = MAIN.masterfile['pokemon'][pokemonID].forms[formID].attack;
-  	pokemonDefense = MAIN.masterfile['pokemon'][pokemonID].forms[formID].defense;
-  	pokemonStamina = MAIN.masterfile['pokemon'][pokemonID].forms[formID].stamina;
+    pokemonAttack = MAIN.masterfile.pokemon[pokemonID].forms[formID].attack;
+  	pokemonDefense = MAIN.masterfile.pokemon[pokemonID].forms[formID].defense;
+  	pokemonStamina = MAIN.masterfile.pokemon[pokemonID].forms[formID].stamina;
   } else {
-    pokemonAttack = MAIN.masterfile['pokemon'][pokemonID].attack;
-  	pokemonDefense = MAIN.masterfile['pokemon'][pokemonID].defense;
-  	pokemonStamina = MAIN.masterfile['pokemon'][pokemonID].stamina;
+    pokemonAttack = MAIN.masterfile.pokemon[pokemonID].attack;
+  	pokemonDefense = MAIN.masterfile.pokemon[pokemonID].defense;
+  	pokemonStamina = MAIN.masterfile.pokemon[pokemonID].stamina;
   }
 
 
@@ -322,15 +322,15 @@ function CalculatePvPStat(MAIN, pokemonID, formID, level, attack, defense, stami
     let cpIndex = ((level * 2) - 2) + (remainder * 2);
     level = Math.floor(level);
 
-    if(!MAIN.masterfile['pokemon'][pokemonID].attack){
-      attack = (attack + MAIN.masterfile['pokemon'][pokemonID].forms[formID].attack) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
-      defense = (defense + MAIN.masterfile['pokemon'][pokemonID].forms[formID].defense) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
-      stamina = (stamina + MAIN.masterfile['pokemon'][pokemonID].forms[formID].stamina) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+    if(!MAIN.masterfile.pokemon[pokemonID].attack){
+      attack = (attack + MAIN.masterfile.pokemon[pokemonID].forms[formID].attack) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+      defense = (defense + MAIN.masterfile.pokemon[pokemonID].forms[formID].defense) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+      stamina = (stamina + MAIN.masterfile.pokemon[pokemonID].forms[formID].stamina) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
 
     } else {
-      attack = (attack + MAIN.masterfile['pokemon'][pokemonID].attack) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
-      defense = (defense + MAIN.masterfile['pokemon'][pokemonID].defense) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
-      stamina = (stamina + MAIN.masterfile['pokemon'][pokemonID].stamina) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+      attack = (attack + MAIN.masterfile.pokemon[pokemonID].attack) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+      defense = (defense + MAIN.masterfile.pokemon[pokemonID].defense) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
+      stamina = (stamina + MAIN.masterfile.pokemon[pokemonID].stamina) * MAIN.cp_multiplier.CPMultiplier[cpIndex];
     }
 
     product = attack * defense * Math.floor(stamina);

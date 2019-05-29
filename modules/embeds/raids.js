@@ -100,18 +100,19 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
     // RAID IS A BOSS
     case 'Boss':
       // DETERMINE POKEMON NAME, FORM, TYPE, AND WEAKNESSES
-      gym.boss = MAIN.masterfile['pokemon'][raid.pokemon_id].name;
-      if (raid.form > 0){
-        gym.form = '['+MAIN.masterfile['pokemon'][raid.pokemon_id].forms[raid.form].name+']';
-        await MAIN.masterfile['pokemon'][raid.pokemon_id].forms[raid.form].types.forEach((type) => {
+      gym.boss = MAIN.masterfile.pokemon[raid.pokemon_id].name;
+      if (raid.form > 0 && !MAIN.masterfile.pokemon[raid.pokemon_id].types){
+        gym.form = '['+MAIN.masterfile.pokemon[raid.pokemon_id].forms[raid.form].name+']';
+        await MAIN.masterfile.pokemon[raid.pokemon_id].forms[raid.form].types.forEach((type) => {
          gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
          MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
            if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
              gym.weaknesses += MAIN.emotes[weakness.toLowerCase()]+' ';
            }
          }); });
-      } else{
-        await MAIN.masterfile['pokemon'][raid.pokemon_id].types.forEach((type) => {
+      } else {
+        if (sighting.form > 0){ raid.form = '['+MAIN.masterfile.pokemon[raid.pokemon_id].forms[raid.form].name+'] '; }
+        await MAIN.masterfile.pokemon[raid.pokemon_id].types.forEach((type) => {
          gym.type += type+' '+MAIN.emotes[type.toLowerCase()]+' / ';
          MAIN.types[type.toLowerCase()].weaknesses.forEach((weakness,index) => {
            if(gym.weaknesses.indexOf(MAIN.emotes[weakness.toLowerCase()]) < 0){
@@ -122,14 +123,14 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       gym.type = gym.type.slice(0,-3);
       gym.weaknesses = gym.weaknesses.slice(0,-1);
 
-      if(!MAIN.masterfile['moves'][raid.move_1]){ console.error('Move ID #'+raid.move_1+' not found in pokemon.json. Please report to the Discord.'); }
-      if(!MAIN.masterfile['moves'][raid.move_2]){ console.error('Move ID #'+raid.move_2+' not found in pokemon.json. Please report to the Discord.'); }
+      if(!MAIN.masterfile.moves[raid.move_1]){ console.error('Move ID #'+raid.move_1+' not found in pokemon.json. Please report to the Discord.'); }
+      if(!MAIN.masterfile.moves[raid.move_2]){ console.error('Move ID #'+raid.move_2+' not found in pokemon.json. Please report to the Discord.'); }
 
       // DETERMINE MOVE NAMES AND TYPES
-      gym.move_name_1 = MAIN.masterfile['moves'][raid.move_1].name;
-      gym.move_type_1 = MAIN.emotes[MAIN.masterfile['moves'][raid.move_1].type.toLowerCase()];
-      gym.move_name_2 = MAIN.masterfile['moves'][raid.move_2].name;
-      gym.move_type_2 = MAIN.emotes[MAIN.masterfile['moves'][raid.move_2].type.toLowerCase()];
+      gym.move_name_1 = MAIN.masterfile.moves[raid.move_1].name;
+      gym.move_type_1 = MAIN.emotes[MAIN.masterfile.moves[raid.move_1].type.toLowerCase()];
+      gym.move_name_2 = MAIN.masterfile.moves[raid.move_2].name;
+      gym.move_type_2 = MAIN.emotes[MAIN.masterfile.moves[raid.move_2].type.toLowerCase()];
 
       // GET THE RAID BOSS SPRITE
       gym.sprite = await MAIN.Get_Sprite(raid.form, raid.pokemon_id);

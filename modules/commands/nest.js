@@ -32,7 +32,7 @@ function pokemon_view(MAIN, message, nickname, name, search_area, prefix, discor
             if (area){
               if (search_area == area.embed_area || search_area == 'ALL') {
                 Send_Nest.run(MAIN, message, nest, discord, area.embed_area, timezone);
-                message.reply('Nest sent as a message, check your inbox.')
+                message.channel.send('Nest sent, check your inbox if not in the channel.')
                 .then(m => m.delete(5000)).catch(console.error);
                 nest_found = true;
               }
@@ -101,8 +101,8 @@ async function initiate_collector(MAIN, source, message, msg, nickname, prefix, 
         break;
       }
     }
-   for (key in MAIN.masterfile['pokemon']) {
-      if (MAIN.masterfile['pokemon'][key].name === pokemon) {
+   for (key in MAIN.masterfile.pokemon) {
+      if (MAIN.masterfile.pokemon[key].name === pokemon) {
         pokemon = key;
         console.log(non_nesting.indexOf(parseInt(pokemon)));
         if (non_nesting.indexOf(parseInt(pokemon)) >= 0) {

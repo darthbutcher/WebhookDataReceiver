@@ -8,7 +8,7 @@ module.exports.run = async (MAIN, message, nest, server, embed_area, timezone) =
       let pokemon = {type: '', color: '', form: '', area: embed_area}, role_id ='';
 
       // DETERMINE POKEMON NAME AND FORM
-      pokemon.name = MAIN.masterfile['pokemon'][nest.pokemon_id].name;
+      pokemon.name = MAIN.masterfile.pokemon[nest.pokemon_id].name;
       let form = 0;
 
       // GET STATIC MAP TILE
@@ -21,7 +21,7 @@ module.exports.run = async (MAIN, message, nest, server, embed_area, timezone) =
       pokemon.avg = nest.pokemon_avg;
 
       // GET POKEMON TYPE(S), EMOTE AND COLOR
-      MAIN.masterfile['pokemon'][nest.pokemon_id].types.forEach((type) => {
+      MAIN.masterfile.pokemon[nest.pokemon_id].types.forEach((type) => {
         pokemon.type += MAIN.emotes[type.toLowerCase()]+' '+type+' / ';
         pokemon.color = MAIN.Get_Color(type, pokemon.color);
       }); pokemon.type = pokemon.type.slice(0,-3);
