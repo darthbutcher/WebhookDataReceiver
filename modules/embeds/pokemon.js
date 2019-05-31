@@ -1,8 +1,7 @@
 const Discord = require('discord.js');
-const Embed_Config = require('../../config/embed_pokemon.js');
-const Embed_IVConfig = require('../../config/embed_pokemon_iv.js');
 
-module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id) => {
+module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed) => {
+  let Embed_Config = require('../../embeds/'+embed);
 
   // CHECK IF THE TARGET IS A USER
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
@@ -105,11 +104,11 @@ module.exports.run = async (MAIN, has_iv, target, sighting, internal_value, time
         } else {
           if(MAIN.config.DEBUG.Pokemon_Timers == 'ENABLED'){console.log('DESPAWN for '+pokemon.name+' is not verified');}
         }
-        pokemon_embed = Embed_IVConfig(pokemon);
+        pokemon_embed = Embed_Config(pokemon);
         send_embed(pokemon.mins);
       });
     } else {
-      pokemon_embed = Embed_IVConfig(pokemon);
+      pokemon_embed = Embed_Config(pokemon);
       send_embed(pokemon.mins);
     }
   }

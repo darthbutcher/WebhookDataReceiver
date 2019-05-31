@@ -13,6 +13,8 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
     if(users && users[0]){
       users.forEach((user,index) => {
 
+        let embed = 'raids.js';
+
         //FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
         let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
         switch(true){
@@ -47,9 +49,9 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
 
                     // CHECK IF THE AREA IS WITHIN THE USER'S GEOFENCES
                     if(sub.areas == 'No' || sub.areas == 'Gym Specified'){
-                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
+                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone, '', embed);
                     } else if(user.geofence == server.name || user_areas.indexOf(main_area) >= 0 || user_areas.indexOf(sub_area) >= 0){
-                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone);
+                      Send_Raid.run(MAIN, user, raid, 'Boss', main_area, sub_area, embed_area, server, timezone, '', embed);
                     } else{
                       if(MAIN.debug.Subscriptions == 'ENABLED'){ console.info('[DEBUG-Subscriptions] [raids.js] '+MAIN.masterfile.pokemon[raid.pokemon_id].name+' Did Not Pass '+user.user_name+'\'s Area Filter.'); }
                     }

@@ -17,6 +17,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     let geofences = pokemon_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(pokemon_channel[0]);
     let filter = MAIN.Filters.get(pokemon_channel[1].filter);
+    let role_id = '', embed = '';
 
     // CHECK IF FILTER EXISTS
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+pokemon_channel[0]+' does not appear to exist.'); return; }
@@ -30,8 +31,9 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
       } else {
         role_id = '<@&'+pokemon_channel[1].roleid+'>';
       }
-    } else { role_id = ''; }
+    }
 
+    if (pokemon_channel[1].embed) { embed = pokemon_channel[1].embed; }
 
     // CHECK FILTER GEOFENCES
     if(geofences.indexOf(server.name) >= 0 || geofences.indexOf(main_area) >= 0 || geofences.indexOf(sub_area) >= 0){
@@ -82,7 +84,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
 
         if(Object.keys(unique_cps) == 0) { return sightingFailed(MAIN, filter, "CP Range"); }
 
-        return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, unique_cps);
+        if (!embed) {embed = 'pvp.js'}
+        return Send_PvP.run(MAIN, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed, unique_cps);
 
       }
 
@@ -93,7 +96,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case sighting.cp > 0: break;
             case filter[MAIN.masterfile.pokemon[sighting.pokemon_id].name] == 'False': break;
             default:
-              Send_Pokemon.run(MAIN, false, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id); break;
+              if (!embed) {embed = 'pokemon.js'}
+              Send_Pokemon.run(MAIN, false, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed); break;
           }
         // CHECK IF SIGHTING HAS A CP
         case !sighting.cp > 0: break;
@@ -109,7 +113,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.min_level > sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.max_level < sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             default:
-              Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
+              if (!embed) {embed = 'pokemon_iv.js'}
+              Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed);
           } break;
 
         // CHECK IF FILTER HAS INDIVIDUAL VALUE REQUIREMENTS
@@ -132,7 +137,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.max_level < sighting.pokemon_level: sightingFailed(MAIN, filter, 'LEVEL'); break;
             case filter.size.toLowerCase() != size: sightingFailed(MAIN, filter, 'SIZE'); break;
             default:
-                Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
+                if (!embed) {embed = 'pokemon_iv.js'}
+                Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed);
 
           } break;
 
@@ -148,7 +154,8 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
             case filter.size.toLowerCase() != size: sightingFailed(MAIN, filter, 'SIZE'); break;
             default:
               if(filter.gender.toLowerCase() == 'all' || filter.gender.toLowerCase() == gender){
-                Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id);
+                if (!embed) {embed = 'pokemon_iv.js'}
+                Send_Pokemon.run(MAIN, true, channel, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, role_id, embed);
               }
           }
       }

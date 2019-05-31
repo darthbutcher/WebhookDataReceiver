@@ -1,13 +1,14 @@
 delete require.cache[require.resolve('../embeds/quests.js')];
 const Send_Quest = require('../embeds/quests.js');
 const Discord = require('discord.js');
-const Embed_Config = require('../../config/embed_quests.js');
+const Embed_Config = require('../../embeds/quests.js');
 const moment = require('moment');
 
 module.exports.run = async (MAIN, quest, main_area, sub_area, embed_area, server, timezone) => {
 
   // DETERMINE THE QUEST REWARD
-  let  quest_reward = '', simple_reward = '', form_name = '';
+  let quest_reward = '', simple_reward = '', form_name = '';
+  let embed = 'quests.js'
   switch(quest.rewards[0].type){
     // PLACEHOLDER
     case 1: return console.error('NO REWARD SET. REPORT THIS TO THE DISCORD ALONG WITH THE FOLLOWING:',quest);

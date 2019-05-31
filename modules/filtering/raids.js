@@ -20,13 +20,24 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
     let geofences = raid_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(raid_channel[0]);
     let filter = MAIN.Filters.get(raid_channel[1].filter);
+    let role_id = '', embed = '';
+
+    if (type == 'Egg'){
+      embed = 'raid_eggs.js';
+      if (raid_channel[1].embed_egg) { embed = raid_channel[1].embed_egg; }
+    } else {
+      embed = 'raids.js'
+      if (raid_channel[1].embed) { embed = raid_channel[1].embed; }
+    }
+
+
     if (raid_channel[1].roleid) {
       if (raid_channel[1].roleid == 'here' || raid_channel[1].roleid == 'everyone'){
         role_id = '@'+raid_channel[1].roleid;
       } else {
         role_id = '<@&'+raid_channel[1].roleid+'>';
       }
-    } else { role_id = ''; }
+    }
 
     // THROW ERRORS AND BREAK FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+raid_channel[0]+' does not appear to exist.'); }
@@ -41,11 +52,11 @@ module.exports.run = async (MAIN, raid, main_area, sub_area, embed_area, server,
         // CHECK FOR EX ELIGIBLE REQUIREMENT
         if(filter.Ex_Eligible_Only == undefined || filter.Ex_Eligible_Only != true){
           if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
-          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id);
+          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id, embed);
         }
         else if(filter.Ex_Eligible_Only == raid.ex_raid_eligible || filter.Ex_Eligible_Only == raid.sponsor_id){
           if(MAIN.debug.Raids == 'ENABLED'){ console.info('[DEBUG] [Modules] [raids.js] Raid Passed Filters for '+raid_channel[0]+'.'); }
-          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id);
+          Send_Raid.run(MAIN, channel, raid, type, main_area, sub_area, embed_area, server, timezone, role_id, embed);
         }
       }
       else{

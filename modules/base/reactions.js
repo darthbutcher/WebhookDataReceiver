@@ -1,6 +1,6 @@
 const Discord = require('discord.js');
-const Embed_Config = require('../../config/embed_raids.js');
-const Embed_EggConfig = require('../../config/embed_raid_eggs.js');
+const Embed_Config = require('../../embeds/raids.js');
+const Embed_EggConfig = require('../../embeds/raid_eggs.js');
 const moment = require('moment-timezone');
 
 const reactions = {
@@ -60,6 +60,9 @@ reactions.run = (MAIN, event) => {
                   // SET THE CHANNEL NAME
                   let gym = JSON.parse(record[0].embed);
                   let boss_name = gym.boss;
+                  if (boss_name == 'Egg') {
+                    boss_name += 'Level'+gym.level+'_'+boss_name;
+                  }
                   let channel_name = boss_name+'_'+record[0].gym_name
 
                 // CREATE THE CHANNEL
@@ -70,7 +73,7 @@ reactions.run = (MAIN, event) => {
                   new_channel.lockPermissions();
                   new_channel.setPosition(0);
 
-                    guild.createRole({name: channel_name}).then(new_role => {
+                    guild.createRole({name: record[0].gym_name}).then(new_role => {
 
                     new_channel.overwritePermissions(new_role,  {READ_MESSAGES: true, READ_MESSAGE_HISTORY: true, SEND_MESSAGES: true, EMBED_LINKS: true, ADD_REACTIONS: true, USE_EXTERNAL_EMOJIS: true, ATTACH_FILES: true});
 

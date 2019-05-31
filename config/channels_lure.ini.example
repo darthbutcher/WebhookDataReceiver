@@ -11,4 +11,5 @@
 [511303614032248843]
 geofences = Tallahassee
 filter = Lure.json
+embed = lure.js
 ; roleid = 530525516290326529

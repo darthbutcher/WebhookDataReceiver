@@ -11,6 +11,7 @@
 [511303614032248843]
 geofences = Tallahassee
 filter = Quest_Encounters.json
+embed = quests.js
 roleid = 530525516290326529
 
 [511701871304638505]

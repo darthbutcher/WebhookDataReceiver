@@ -1,7 +1,7 @@
 const Discord = require('discord.js');
-const Embed_Config = require('../../config/embed_quests.js');
 
-module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id) => {
+module.exports.run = async (MAIN, quest, channel, quest_reward, simple_reward, main_area, sub_area, embed_area, server, timezone, role_id, embed) => {
+  let Embed_Config = require('../../embeds/'+embed);
   let pokestop = {name: quest.pokestop_name, reward: quest_reward, area: embed_area};
   pokestop.lat = quest.latitude, pokestop.lon = quest.longitude;
 

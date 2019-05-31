@@ -12,6 +12,9 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
     if(users && users[0]){
       users.forEach((user,index) => {
 
+        let embed = '';
+        if (sighting.cp > 0) { embed = 'pokemon_iv.js'; } else { embed = 'pokemon.js'; }
+
         //FETCH THE GUILD MEMBER AND CHECK IF A ADMINISTRATOR/DONOR
         let member = MAIN.guilds.get(user.discord_id).members.get(user.user_id), proceed = true;
         switch(true){
@@ -70,7 +73,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                       case sub.size.toLowerCase() != size: break;
                       default:
                         if(sub.gender == 'all' || sub.gender == gender){
-                          Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
+                          Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, '', embed);
                         }
                     } break;
                   default:
@@ -84,7 +87,7 @@ module.exports.run = async (MAIN, sighting, main_area, sub_area, embed_area, ser
                       case sub.size.toLowerCase() != size: break;
                       default:
                         if(sub.gender == 'all' || sub.gender == gender){
-                          Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone);
+                          Send_Pokemon.run(MAIN, true, user, sighting, internal_value, time_now, main_area, sub_area, embed_area, server, timezone, '', embed);
                         }
                     }
                 }

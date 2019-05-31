@@ -24,13 +24,18 @@ module.exports.run = async (MAIN, lure, main_area, sub_area, embed_area, server,
     let geofences = lure_channel[1].geofences.split(',');
     let channel = MAIN.channels.get(lure_channel[0]);
     let filter = MAIN.Filters.get(lure_channel[1].filter);
+    let role_id = '', embed = 'lure.js';
+
     if (lure_channel[1].roleid) {
       if (lure_channel[1].roleid == 'here' || lure_channel[1].roleid == 'everyone'){
         role_id = '@'+lure_channel[1].roleid;
       } else {
         role_id = '<@&'+lure_channel[1].roleid+'>';
       }
-    } else { role_id = ''; }
+    }
+
+    if (lure_channel[1].embed) { embed = lure_channel[1].embed; }
+
 
     // THROW ERRORS AND BREAK FOR INVALID DATA
     if(!filter){ console.error('[Pokébot] ['+MAIN.Bot_Time(null,'stamp')+'] The filter defined for'+lure_channel[0]+' does not appear to exist.'); }
@@ -44,7 +49,7 @@ module.exports.run = async (MAIN, lure, main_area, sub_area, embed_area, server,
 
         if(filter.Lure_Type.indexOf(type) >= 0){
           if(MAIN.debug.Lure == 'ENABLED'){ console.info('[DEBUG] [Modules] [lure.js] Lure Passed Filters for '+lure_channel[0]+'.'); }
-          Send_Lure.run(MAIN, channel, lure, type, main_area, sub_area, embed_area, server, timezone, role_id);
+          Send_Lure.run(MAIN, channel, lure, type, main_area, sub_area, embed_area, server, timezone, role_id, embed);
         }
       }
       else{

@@ -11,10 +11,13 @@
 [458789990017662986]
 geofences = Tallahassee
 filter = Raids_Level5.json
+embed = raids.js
+embed_egg = raid_eggs.js
 roleid = 530525516290326529
 
 [458790935908843520]
 geofences = Tallahassee
+embed_egg = raid_eggs.js
 filter = Raids_Level5_Egg.json
 
 [458791546959953920]

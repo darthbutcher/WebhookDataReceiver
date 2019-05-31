@@ -31,11 +31,9 @@ async function pokemon_view(MAIN, message, nickname, pokemon, prefix, discord){
   message.reply('Searching... this may take a minute. Check your inbox if not in the channel.').then(m => m.delete(5000)).catch(console.error);
   let search = '';
   if (pokemon != 'ALL') {search = 'pokemon_id = ? AND '; }
-      MAIN.rdmdb.query(`SELECT * FROM pokemon WHERE `+search+`first_seen_timestamp >= UNIX_TIMESTAMP()-3600`, [pokemon], function (error, stats, fields) {
-        let pokemon_count = 0, role_id = '';
-        stats.forEach(function(stat) {
-          pokemon_count += 1;
-        });
+      MAIN.rdmdb.query(`SELECT count(*) as count FROM pokemon WHERE `+search+`first_seen_timestamp >= UNIX_TIMESTAMP()-3600`, [pokemon], function (error, stats, fields) {
+        let pokemon_count = stats[0].count, role_id = '';
+        console.log(pokemon_count);
         if (pokemon == 'ALL'){ pokemon_name = 'ALL'; }
         else { pokemon_name = MAIN.masterfile.pokemon[pokemon].name; }
         stat_message = 'There have been '+pokemon_count+' '+pokemon_name+' seen in the last hour.';

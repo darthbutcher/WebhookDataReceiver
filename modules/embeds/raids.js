@@ -1,8 +1,7 @@
 const Discord = require('discord.js');
-const Embed_Config = require('../../config/embed_raids.js');
-const Embed_EggConfig = require('../../config/embed_raid_eggs.js');
 
-module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, embed_area, server, timezone, role_id) => {
+module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, embed_area, server, timezone, role_id, embed) => {
+  let Embed_Config = require('../../embeds/'+embed);
 
   // CHECK IF THE TARGET IS A USER
   let member = MAIN.guilds.get(server.id).members.get(target.user_id);
@@ -74,7 +73,7 @@ module.exports.run = async (MAIN, target, raid, raid_type, main_area, sub_area, 
       }
 
       // CREATE THE EGG EMBED
-      raid_embed = await Embed_EggConfig(gym);
+      raid_embed = await Embed_Config(gym);
 
       // ADD FOOTER IF RAID LOBBIES ARE ENABLED
       if(raid.level >= server.min_raid_lobbies){ raid_embed.setFooter(gym.id); }

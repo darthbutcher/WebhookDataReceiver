@@ -11,7 +11,13 @@
 [507626057277505552]
 geofences = Tallahassee
 filter = Pokemon_100.json
+embed = pokemon_iv.js
 roleid = 530525516290326529
+
+[520598637009436672]
+geofences = Gainesville
+embed = pokemon.js
+filter = Pokemon_Candy.json
 
 [523329993988898816]
 geofences = Tallahassee
@@ -60,7 +66,3 @@ filter = Pokemon_Max_Level.json
 [520598612024098860]
 geofences = Gainesville
 filter = Pokemon_Uber.json
-
-[520598637009436672]
-geofences = Gainesville
-filter = Pokemon_Candy.json
